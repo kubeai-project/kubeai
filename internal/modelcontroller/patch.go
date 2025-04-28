@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	v1 "github.com/kubeai-project/kubeai/api/k8s/v1"
 	"github.com/kubeai-project/kubeai/internal/config"
 	jsonpatch "gopkg.in/evanphx/json-patch.v4"
 	corev1 "k8s.io/api/core/v1"
@@ -40,4 +41,20 @@ func applyJSONPatchToPod(patches []config.JSONPatch, pod *corev1.Pod) error {
 	}
 	*pod = *patchedPod
 	return nil
+}
+
+// convertJSONPatches converts from API version of JSONPatch to internal config version.
+func convertJSONPatches(patches []v1.JSONPatch) []config.JSONPatch {
+	if patches == nil {
+		return nil
+	}
+	result := make([]config.JSONPatch, len(patches))
+	for i, p := range patches {
+		result[i] = config.JSONPatch{
+			Op:    p.Op,
+			Path:  p.Path,
+			Value: p.Value,
+		}
+	}
+	return result
 }
