@@ -43,7 +43,7 @@ func (r *ModelReconciler) calculatePodPlan(allPods *corev1.PodList, model *kubea
 		return nil, err
 	}
 
-	if err := applyJSONPatchToPod(convertJSONPatches(model.Spec.JSONPatches), podForModel); err != nil {
+	if err := applyModelJSONPatchToPod(model.Spec.JSONPatches, podForModel); err != nil {
 		return nil, err
 	}
 

@@ -223,9 +223,9 @@ spec:
                         rule: self.startsWith('/')
                     value:
                       description: |-
-                        Value is the value to be used in the operation.
+                        Value is the value to be used in the operation, must be a valid JSON encoded value.
                         Required for "add", "replace", and "test" operations.
-                      type: object
+                      type: string
                   required:
                   - op
                   - path

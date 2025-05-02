@@ -33,7 +33,7 @@ func TestJSONPatch(t *testing.T) {
 		{
 			Op:    "add",
 			Path:  "/spec/priorityClassName",
-			Value: expectedPriorityClassName,
+			Value: `"` + expectedPriorityClassName + `"`,
 		},
 	}
 	// Create the Model object in the Kubernetes cluster.

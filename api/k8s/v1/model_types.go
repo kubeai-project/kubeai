@@ -255,12 +255,10 @@ type JSONPatch struct {
 	// +kubebuilder:validation:MaxLength=1024
 	From string `json:"from,omitempty"`
 
-	// Value is the value to be used in the operation.
+	// Value is the value to be used in the operation, must be a valid JSON encoded value.
 	// Required for "add", "replace", and "test" operations.
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Schemaless
-	// +kubebuilder:validation:Type=object
-	Value interface{} `json:"value,omitempty"`
+	Value string `json:"value,omitempty"`
 }
 
 // ModelStatus defines the observed state of Model.
