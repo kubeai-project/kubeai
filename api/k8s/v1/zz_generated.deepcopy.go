@@ -206,9 +206,7 @@ func (in *ModelSpec) DeepCopyInto(out *ModelSpec) {
 	if in.JSONPatches != nil {
 		in, out := &in.JSONPatches, &out.JSONPatches
 		*out = make([]JSONPatch, len(*in))
-		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
-		}
+		copy(*out, *in)
 	}
 }
 
