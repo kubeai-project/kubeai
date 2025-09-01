@@ -12,13 +12,14 @@ import (
 
 func TestParseRequest(t *testing.T) {
 	cases := []struct {
-		name       string
-		body       string
-		path       string
-		headers    http.Header
-		expModel   string
-		expAdapter string
-		expPrefix  string
+		name          string
+		body          string
+		path          string
+		headers       http.Header
+		expModel      string
+		expAdapter    string
+		expPrefix     string
+		expRoutingKey string
 	}{
 		{
 			name:     "model only",
@@ -59,6 +60,26 @@ func TestParseRequest(t *testing.T) {
 			expModel:  "test-model",
 			expPrefix: "test-prefi", // "test-prefix" (max 10) --> "test-prefi"
 		},
+		{
+			name:          "routing key header",
+			body:          `{"model": "test-model"}`,
+			path:          "/v1/chat/completions",
+			headers:       http.Header{"Routing-Key": []string{"my-routing-key"}},
+			expModel:      "test-model",
+			expRoutingKey: "my-routing-key",
+		},
+		{
+			name: "routing key header case insensitive",
+			body: `{"model": "test-model"}`,
+			path: "/v1/chat/completions",
+			headers: func() http.Header {
+				h := make(http.Header)
+				h.Set("routing-key", "case-insensitive-key")
+				return h
+			}(),
+			expModel:      "test-model",
+			expRoutingKey: "case-insensitive-key",
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -72,6 +93,7 @@ func TestParseRequest(t *testing.T) {
 			require.Equal(t, c.expModel, req.Model, "model")
 			require.Equal(t, c.expAdapter, req.Adapter, "adapter")
 			require.Equal(t, c.expPrefix, req.Prefix, "prefix")
+			require.Equal(t, c.expRoutingKey, req.RoutingKey, "routing key")
 		})
 	}
 

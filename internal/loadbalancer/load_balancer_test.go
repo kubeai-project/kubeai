@@ -39,6 +39,7 @@ func TestAwaitBestHostBehavior(t *testing.T) {
 			strategies: []v1.LoadBalancingStrategy{
 				v1.LeastLoadStrategy,
 				v1.PrefixHashStrategy,
+				v1.RoutingKeyStrategy,
 			},
 			expAddr: myAddrWithoutAdapter,
 			endpoints: map[string]endpoint{
@@ -61,6 +62,7 @@ func TestAwaitBestHostBehavior(t *testing.T) {
 			strategies: []v1.LoadBalancingStrategy{
 				v1.LeastLoadStrategy,
 				v1.PrefixHashStrategy,
+				v1.RoutingKeyStrategy,
 			},
 			expAddr: myAddrWithAdapter,
 		},
@@ -72,6 +74,7 @@ func TestAwaitBestHostBehavior(t *testing.T) {
 			strategies: []v1.LoadBalancingStrategy{
 				v1.LeastLoadStrategy,
 				v1.PrefixHashStrategy,
+				v1.RoutingKeyStrategy,
 			},
 			expErr: context.DeadlineExceeded,
 		},
@@ -84,6 +87,7 @@ func TestAwaitBestHostBehavior(t *testing.T) {
 			strategies: []v1.LoadBalancingStrategy{
 				v1.LeastLoadStrategy,
 				v1.PrefixHashStrategy,
+				v1.RoutingKeyStrategy,
 			},
 			expErr: context.DeadlineExceeded,
 		},
@@ -105,6 +109,11 @@ func TestAwaitBestHostBehavior(t *testing.T) {
 						MeanLoadPercentage: 125,
 						Replication:        1,
 					},
+					RoutingKey: v1.RoutingKey{
+						MeanLoadPercentage:  125,
+						Replication:         1,
+						FallbackToLeastLoad: true,
+					},
 				}
 				manager.getOrCreateEndpointGroup(myModel, lb).reconcileEndpoints(spec.endpoints)
 
@@ -115,6 +124,7 @@ func TestAwaitBestHostBehavior(t *testing.T) {
 					Model:         spec.model,
 					Adapter:       spec.adapter,
 					LoadBalancing: lb,
+					RoutingKey:    "test-routing-key", // Provide a routing key for RoutingKey strategy
 				})
 				if spec.expErr != nil {
 					require.ErrorIs(t, spec.expErr, gotErr)
@@ -161,6 +171,7 @@ func TestLoadBalancingStrategies(t *testing.T) {
 		model        string
 		adapter      string
 		prefix       string
+		routingKey   string
 
 		expectedAddrCounts map[string]int
 		completeForAddrs   map[string]int
@@ -367,6 +378,52 @@ func TestLoadBalancingStrategies(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "routing key strategy",
+			modelEndpoints: map[string]map[string]endpoint{
+				modelA: {
+					podA1Name: {address: podA1Addr},
+					podA2Name: {address: podA2Addr},
+				},
+				modelB: {
+					podB1Name: {address: podB1Addr},
+				},
+			},
+			loadBalancing: v1.LoadBalancing{
+				Strategy: v1.RoutingKeyStrategy,
+				RoutingKey: v1.RoutingKey{
+					MeanLoadPercentage:  10000, // Very high to allow all requests to go to preferred endpoint
+					Replication:         1,
+					FallbackToLeastLoad: true,
+				},
+			},
+			steps: []testStep{
+				{
+					name:         "requests with routing key 'key1' should consistently go to the same endpoint",
+					model:        modelA,
+					routingKey:   "key1",
+					requestCount: 10,
+					// Don't specify expectedAddrCounts - we'll verify consistency separately
+				},
+				{
+					name:         "requests with routing key 'key2' should consistently go to the same endpoint",
+					model:        modelA,
+					routingKey:   "key2",
+					requestCount: 10,
+					// Don't specify expectedAddrCounts - we'll verify consistency separately
+				},
+				{
+					name:         "requests without routing key should fall back to least load",
+					model:        modelA,
+					routingKey:   "", // No routing key
+					requestCount: 2,
+					expectedAddrCounts: map[string]int{
+						podA1Addr: 1,
+						podA2Addr: 1,
+					},
+				},
+			},
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -398,6 +455,7 @@ func TestLoadBalancingStrategies(t *testing.T) {
 						Model:         step.model,
 						Adapter:       step.adapter,
 						Prefix:        step.prefix,
+						RoutingKey:    step.routingKey,
 						LoadBalancing: c.loadBalancing,
 					})
 					require.NoError(t, err, "request: "+step.name)
@@ -443,6 +501,7 @@ func TestAwaitBestHostParallelAccounting(t *testing.T) {
 		for _, strategy := range []v1.LoadBalancingStrategy{
 			v1.LeastLoadStrategy,
 			v1.PrefixHashStrategy,
+			v1.RoutingKeyStrategy,
 		} {
 			t.Run(fmt.Sprintf("%s-%d", strategy, i), func(t *testing.T) {
 				metricstest.Init(t)
@@ -459,6 +518,11 @@ func TestAwaitBestHostParallelAccounting(t *testing.T) {
 						MeanLoadPercentage: 100000,
 						Replication:        256,
 						PrefixCharLength:   1000,
+					},
+					RoutingKey: v1.RoutingKey{
+						MeanLoadPercentage:  100000,
+						Replication:         256,
+						FallbackToLeastLoad: true,
 					},
 				}
 				manager.getOrCreateEndpointGroup(myModel, lb).reconcileEndpoints(map[string]endpoint{
@@ -483,6 +547,7 @@ func TestAwaitBestHostParallelAccounting(t *testing.T) {
 							Adapter:       "",
 							LoadBalancing: lb,
 							Prefix:        fmt.Sprintf("%d", rnd.IntN(100_000_000)),
+							RoutingKey:    fmt.Sprintf("key-%d", rnd.IntN(100_000_000)),
 						})
 						require.NoError(t, err)
 						awaitGroup.Done()

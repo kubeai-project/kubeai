@@ -11,10 +11,21 @@ import (
 )
 
 func newEndpointGroup(lb v1.LoadBalancing) *group {
+	// Use RoutingKey replication if RoutingKey strategy, otherwise use PrefixHash replication
+	replication := lb.PrefixHash.Replication
+	if lb.Strategy == v1.RoutingKeyStrategy {
+		replication = lb.RoutingKey.Replication
+	}
+
+	// Ensure we have a minimum replication of 1 for hash-based strategies
+	if (lb.Strategy == v1.PrefixHashStrategy || lb.Strategy == v1.RoutingKeyStrategy) && replication == 0 {
+		replication = 256 // Default replication value
+	}
+
 	g := &group{
 		endpoints:         make(map[string]endpoint),
 		totalInFlight:     &atomic.Int64{},
-		chwblReplication:  lb.PrefixHash.Replication,
+		chwblReplication:  replication,
 		chwblHashes:       map[uint64]string{},
 		chwblSortedHashes: []uint64{},
 		bcast:             make(chan struct{}),
@@ -68,6 +79,8 @@ func (g *group) getBestAddr(ctx context.Context, req *apiutils.Request, awaitCha
 	switch req.LoadBalancing.Strategy {
 	case v1.PrefixHashStrategy:
 		ep, found = g.chwblGetAddr(req.Adapter+req.Prefix, float64(req.LoadBalancing.PrefixHash.MeanLoadPercentage)/100, req.Adapter)
+	case v1.RoutingKeyStrategy:
+		ep, found = g.routingKeyGetAddr(req, float64(req.LoadBalancing.RoutingKey.MeanLoadPercentage)/100, req.Adapter)
 	case v1.LeastLoadStrategy:
 		ep, found = g.getAddrLeastLoad(req.Adapter)
 	default:

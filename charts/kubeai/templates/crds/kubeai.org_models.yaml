@@ -217,11 +217,41 @@ spec:
                         - message: replication is immutable.
                           rule: self == oldSelf
                     type: object
+                  routingKey:
+                    default: {}
+                    properties:
+                      fallbackToLeastLoad:
+                        default: true
+                        description: |-
+                          FallbackToLeastLoad controls behavior when the Routing-Key header is not present.
+                          If true (default), the request is routed using the LeastLoad strategy.
+                          If false, the request is rejected with a 400 error.
+                        type: boolean
+                      meanLoadPercentage:
+                        default: 125
+                        description: |-
+                          MeanLoadPercentage defines the maximum allowed load of any given endpoint
+                          as a percentage over the mean load of all endpoints in the hash ring.
+                          Defaults to 125%, which is a standard value for the Consistent Hashing with Bounded Loads algorithm.
+                        minimum: 100
+                        type: integer
+                      replication:
+                        default: 256
+                        description: |-
+                          Replication defines the number of virtual replicas of each endpoint on the hash ring.
+                          A higher value leads to better load distribution at the cost of slower lookup times.
+                          This field is immutable after creation.
+                        type: integer
+                        x-kubernetes-validations:
+                        - message: replication is immutable.
+                          rule: self == oldSelf
+                    type: object
                   strategy:
                     default: LeastLoad
                     enum:
                     - LeastLoad
                     - PrefixHash
+                    - RoutingKey
                     type: string
                 type: object
               maxReplicas:

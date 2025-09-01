@@ -54,6 +54,9 @@ type Request struct {
 
 	Prefix string
 
+	// RoutingKey is the value from the Routing-Key HTTP header (case-insensitive)
+	RoutingKey string
+
 	ContentLength int64
 }
 
@@ -67,6 +70,7 @@ func ParseRequest(ctx context.Context, client ModelClient, body io.Reader, path 
 	}
 
 	r.Selectors = headers.Values("X-Label-Selector")
+	r.RoutingKey = headers.Get("Routing-Key")
 
 	// Parse media type (with params - which are used for multipart form data)
 	var (

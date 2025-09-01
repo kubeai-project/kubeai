@@ -3,17 +3,33 @@ package loadbalancer
 import (
 	"context"
 	"fmt"
-	"sort"
 
-	"github.com/cespare/xxhash"
+	"github.com/substratusai/kubeai/internal/apiutils"
 	"github.com/substratusai/kubeai/internal/metrics"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 )
 
-func (g *group) chwblGetAddr(key string, loadFactor float64, adapter string) (endpoint, bool) {
-	if len(g.chwblHashes) == 0 || len(g.chwblSortedHashes) == 0 {
+func (g *group) routingKeyGetAddr(req *apiutils.Request, loadFactor float64, adapter string) (endpoint, bool) {
+	// If no routing key is provided, handle fallback behavior
+	if req.RoutingKey == "" {
+		if req.LoadBalancing.RoutingKey.FallbackToLeastLoad {
+			// Fall back to least load strategy
+			return g.getAddrLeastLoad(adapter)
+		}
+		// Return no endpoint found, which will cause the request to fail
 		return endpoint{}, false
+	}
+
+	// Use the routing key for consistent hashing
+	if len(g.chwblHashes) == 0 {
+		return endpoint{}, false
+	}
+
+	// Hash the routing key (with adapter if present for additional uniqueness)
+	key := req.RoutingKey
+	if adapter != "" {
+		key = adapter + req.RoutingKey
 	}
 
 	h := chwblHash(key)
@@ -81,86 +97,4 @@ func (g *group) chwblGetAddr(key string, loadFactor float64, adapter string) (en
 		return *defaultEndpoint, true
 	}
 	return endpoint{}, false
-}
-
-func (g *group) chwblAddEndpoint(name string) {
-	for i := 0; i < g.chwblReplication; i++ {
-		h := chwblHashEndpointReplica(name, i)
-		g.chwblHashes[h] = name
-		g.chwblSortedHashes = append(g.chwblSortedHashes, h)
-	}
-
-	// sort hashes in ascending order
-	sort.Slice(g.chwblSortedHashes, func(i int, j int) bool {
-		return g.chwblSortedHashes[i] < g.chwblSortedHashes[j]
-	})
-}
-
-func (g *group) chwblRemoveEndpoint(name string) {
-	for i := 0; i < g.chwblReplication; i++ {
-		h := chwblHashEndpointReplica(name, i)
-		delete(g.chwblHashes, h)
-		g.chwblDeleteSortedHash(h)
-	}
-}
-
-// search returns the hash values and its index.
-func (g *group) chwblSearch(key uint64) (uint64, int) {
-	if len(g.chwblSortedHashes) == 0 {
-		return 0, 0
-	}
-
-	idx := sort.Search(len(g.chwblSortedHashes), func(i int) bool {
-		return g.chwblSortedHashes[i] >= key
-	})
-
-	if idx >= len(g.chwblSortedHashes) {
-		idx = 0
-	}
-	return g.chwblSortedHashes[idx], idx
-}
-
-func (g *group) chwblDeleteSortedHash(val uint64) {
-	idx := -1
-	left := 0
-	right := len(g.chwblSortedHashes) - 1
-	for left <= right {
-		middle := (left + right) / 2
-		current := g.chwblSortedHashes[middle]
-		if current == val {
-			idx = middle
-			break
-		} else if current < val {
-			left = middle + 1
-		} else if current > val {
-			right = middle - 1
-		}
-	}
-	if idx != -1 {
-		g.chwblSortedHashes = append(g.chwblSortedHashes[:idx], g.chwblSortedHashes[idx+1:]...)
-	}
-}
-
-func chwblHash(s string) uint64 {
-	return xxhash.Sum64([]byte(s))
-}
-
-func chwblHashEndpointReplica(name string, replica int) uint64 {
-	return chwblHash(chwblEndpointReplicaHashInput(name, replica))
-}
-
-func chwblEndpointReplicaHashInput(name string, replica int) string {
-	return fmt.Sprintf("%s%d", name, replica)
-}
-
-func chwblLoadOK(load, totalLoad int64, n int, loadFactor float64) bool {
-	if totalLoad == 0 {
-		return true
-	}
-
-	// The "+1"s are to simulate the load of the new request.
-	avgLoad := float64(totalLoad+1) / float64(n)
-	threshold := avgLoad * loadFactor
-	ok := float64(load) <= threshold
-	return ok
 }

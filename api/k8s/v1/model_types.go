@@ -176,14 +176,18 @@ type LoadBalancing struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default={}
 	PrefixHash PrefixHash `json:"prefixHash,omitempty"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={}
+	RoutingKey RoutingKey `json:"routingKey,omitempty"`
 }
 
-// +kubebuilder:validation:Enum=LeastLoad;PrefixHash
+// +kubebuilder:validation:Enum=LeastLoad;PrefixHash;RoutingKey
 type LoadBalancingStrategy string
 
 const (
 	LeastLoadStrategy  LoadBalancingStrategy = "LeastLoad"
 	PrefixHashStrategy LoadBalancingStrategy = "PrefixHash"
+	RoutingKeyStrategy LoadBalancingStrategy = "RoutingKey"
 )
 
 type PrefixHash struct {
@@ -205,6 +209,29 @@ type PrefixHash struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=100
 	PrefixCharLength int `json:"prefixCharLength,omitempty"`
+}
+
+type RoutingKey struct {
+	// MeanLoadPercentage defines the maximum allowed load of any given endpoint
+	// as a percentage over the mean load of all endpoints in the hash ring.
+	// Defaults to 125%, which is a standard value for the Consistent Hashing with Bounded Loads algorithm.
+	// +kubebuilder:default=125
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=100
+	MeanLoadPercentage int `json:"meanLoadPercentage,omitempty"`
+	// Replication defines the number of virtual replicas of each endpoint on the hash ring.
+	// A higher value leads to better load distribution at the cost of slower lookup times.
+	// This field is immutable after creation.
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf", message="replication is immutable."
+	// +kubebuilder:default=256
+	// +kubebuilder:validation:Optional
+	Replication int `json:"replication,omitempty"`
+	// FallbackToLeastLoad controls behavior when the Routing-Key header is not present.
+	// If true (default), the request is routed using the LeastLoad strategy.
+	// If false, the request is rejected with a 400 error.
+	// +kubebuilder:default=true
+	// +kubebuilder:validation:Optional
+	FallbackToLeastLoad bool `json:"fallbackToLeastLoad,omitempty"`
 }
 
 // File represents a file to be mounted in the model pod.
