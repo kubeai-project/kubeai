@@ -462,7 +462,7 @@ func TestModelValidation(t *testing.T) {
 					},
 				},
 			},
-			expErrContain: "may not be longer than 100000",
+			expErrContain: "may not be more than 100000",
 		},
 	}
 	for _, c := range cases {

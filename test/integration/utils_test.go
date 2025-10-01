@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"k8s.io/utils/ptr"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -252,6 +253,9 @@ func requireUpdateJobAsCompleted(t *testing.T, job *batchv1.Job) {
 
 func setJobCompletedStatus(job *batchv1.Job) {
 	job.Status.Succeeded = *job.Spec.Completions
+	now := ptr.To(metav1.Now())
+	job.Status.StartTime = now
+	job.Status.CompletionTime = now
 	for i := range job.Status.Conditions {
 		if job.Status.Conditions[i].Type == batchv1.JobComplete {
 			job.Status.Conditions[i].Status = corev1.ConditionTrue
@@ -259,9 +263,18 @@ func setJobCompletedStatus(job *batchv1.Job) {
 		}
 	}
 	job.Status.Conditions = append(job.Status.Conditions, batchv1.JobCondition{
-		Type:   batchv1.JobComplete,
-		Status: corev1.ConditionTrue,
-	})
+		Type:               batchv1.JobComplete,
+		Status:             corev1.ConditionTrue,
+		LastProbeTime:      *now,
+		LastTransitionTime: *now,
+	},
+		batchv1.JobCondition{
+			Type:               batchv1.JobSuccessCriteriaMet,
+			Status:             corev1.ConditionTrue,
+			LastProbeTime:      *now,
+			LastTransitionTime: *now,
+		},
+	)
 }
 
 // logPods is useful for debugging why a test case is failing.
