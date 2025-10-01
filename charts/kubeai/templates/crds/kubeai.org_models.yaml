@@ -319,8 +319,6 @@ spec:
                 "s3://...", "gs://...", or "oss://..." at the moment.
               rule: '!has(self.cacheProfile) || self.url.startsWith("hf://") || self.url.startsWith("s3://")
                 || self.url.startsWith("gs://") || self.url.startsWith("oss://")'
-            - message: urls of format "gs://..." only supported when using a cacheProfile
-              rule: '!self.url.startsWith("gs://") || has(self.cacheProfile)'
             - message: urls of format "oss://..." only supported when using a cacheProfile
               rule: '!self.url.startsWith("oss://") || has(self.cacheProfile)'
             - message: minReplicas should be less than or equal to maxReplicas.
