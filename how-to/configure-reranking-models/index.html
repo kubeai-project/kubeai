@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://www.kubeai.org/how-to/serve-lora-adapters/">
+        <link rel="canonical" href="https://www.kubeai.org/how-to/configure-reranking-models/">
       
       
-        <link rel="prev" href="../observability-with-prometheus-stack/">
+        <link rel="prev" href="../configure-embedding-models/">
       
       
-        <link rel="next" href="../../concepts/autoscaling/">
+        <link rel="next" href="../configure-resource-profiles/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Serve LoRA adapters - KubeAI</title>
+        <title>Configure reranking models - KubeAI</title>
       
     
     
@@ -65,11 +65,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Serve LoRA adapters - KubeAI" >
+        <meta  property="og:title"  content="Configure reranking models - KubeAI" >
       
         <meta  property="og:description"  content="None" >
       
-        <meta  property="og:image"  content="https://www.kubeai.org/assets/images/social/how-to/serve-lora-adapters.png" >
+        <meta  property="og:image"  content="https://www.kubeai.org/assets/images/social/how-to/configure-reranking-models.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -77,15 +77,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://www.kubeai.org/how-to/serve-lora-adapters/" >
+        <meta  property="og:url"  content="https://www.kubeai.org/how-to/configure-reranking-models/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Serve LoRA adapters - KubeAI" >
+        <meta  name="twitter:title"  content="Configure reranking models - KubeAI" >
       
         <meta  name="twitter:description"  content="None" >
       
-        <meta  name="twitter:image"  content="https://www.kubeai.org/assets/images/social/how-to/serve-lora-adapters.png" >
+        <meta  name="twitter:image"  content="https://www.kubeai.org/assets/images/social/how-to/configure-reranking-models.png" >
       
     
     
@@ -106,7 +106,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#serve-lora-adapters" class="md-skip">
+        <a href="#configure-reranking-models" class="md-skip">
           Skip to content
         </a>
       
@@ -142,7 +142,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Serve LoRA adapters
+              Configure reranking models
             
           </span>
         </div>
@@ -619,10 +619,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../configure-reranking-models/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Configure reranking models
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -633,6 +655,35 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#install-baaibge-reranker-base-model-using-infinity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install BAAI/bge-reranker-base model using Infinity
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -780,32 +831,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Serve LoRA adapters
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../serve-lora-adapters/" class="md-nav__link">
         
   
   
@@ -816,53 +845,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#configuring-adapters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuring adapters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#requesting-an-adapter" class="md-nav__link">
-    <span class="md-ellipsis">
-      Requesting an adapter
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#listing-adapters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Listing adapters
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1753,27 +1735,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#configuring-adapters" class="md-nav__link">
+  <a href="#install-baaibge-reranker-base-model-using-infinity" class="md-nav__link">
     <span class="md-ellipsis">
-      Configuring adapters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#requesting-an-adapter" class="md-nav__link">
-    <span class="md-ellipsis">
-      Requesting an adapter
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#listing-adapters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Listing adapters
+      Install BAAI/bge-reranker-base model using Infinity
     </span>
   </a>
   
@@ -1798,52 +1762,37 @@
   
 
 
-<h1 id="serve-lora-adapters">Serve LoRA adapters<a class="headerlink" href="#serve-lora-adapters" title="Permanent link">&para;</a></h1>
-<p>In this guide you will configure KubeAI to serve LoRA adapters.</p>
-<h2 id="configuring-adapters">Configuring adapters<a class="headerlink" href="#configuring-adapters" title="Permanent link">&para;</a></h2>
-<p>LoRA adapters are configured on Model objects. For Example:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># model.yaml</span>
-<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubeai.org/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Model</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tinyllama-chat</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">TextGeneration</span><span class="p p-Indicator">]</span>
-<span class="w">  </span><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meta-llama</span>
-<span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hf://TinyLlama/TinyLlama-1.1B-Chat-v0.3</span>
-<span class="w">  </span><span class="nt">adapters</span><span class="p">:</span><span class="w"> </span><span class="c1"># &lt;--</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">colorist</span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hf://jashing/tinyllama-colorist-lora</span>
-<span class="w">  </span><span class="nt">engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VLLM</span>
-<span class="w">  </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nvidia-gpu-l4:1</span>
-<span class="w">  </span><span class="nt">minReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-</code></pre></div>
-<p><strong>Limitation:</strong> Currently LoRA adapters are only supported with <code>engine: VLLM</code> and <code>hf://</code> or <code>s3://</code> urls.</p>
-<p>You can install this Model using kubectl:</p>
-<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>./model.yaml
-</code></pre></div>
-<p>Or if you are managed models with the KubeAI <a href="https://github.com/substratusai/kubeai/tree/main/charts/models">models helm chart</a> you can add adapters to a given model via your helm values:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># helm-values.yaml</span>
-<span class="nt">catalog</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">llama-3.1-8b-instruct-fp8-l4</span><span class="p">:</span>
+<h1 id="configure-reranking-models">Configure reranking models<a class="headerlink" href="#configure-reranking-models" title="Permanent link">&para;</a></h1>
+<p>KubeAI supports reranking models via the Infinity and vLLM (Recommended for GPU) engine.</p>
+<h2 id="install-baaibge-reranker-base-model-using-infinity">Install BAAI/bge-reranker-base model using Infinity<a class="headerlink" href="#install-baaibge-reranker-base-model-using-infinity" title="Permanent link">&para;</a></h2>
+<p>Create a file named <code>kubeai-rerank-models.yaml</code> with the following content:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">catalog</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bge-rerank-base-cpu</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">    </span><span class="nt">adapters</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span>
-<span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hf://some-huggingface-user/some-huggingface-repo</span>
-<span class="w">    </span><span class="c1"># ...</span>
+<span class="w">    </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;Reranking&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">baai</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hf://BAAI/bge-reranker-base&quot;</span>
+<span class="w">    </span><span class="nt">engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Infinity</span>
+<span class="w">    </span><span class="c1">#engine: VLLM</span>
+<span class="w">    </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu:1</span>
+<span class="w">    </span><span class="c1"># resourceProfile: nvidia-gpu-l4:1</span>
+<span class="w">    </span><span class="nt">minReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 </code></pre></div>
-<h2 id="requesting-an-adapter">Requesting an adapter<a class="headerlink" href="#requesting-an-adapter" title="Permanent link">&para;</a></h2>
-<p>When using the OpenAI compatible REST API, model adapters are referenced using the <code>&lt;base-model&gt;_&lt;adapter&gt;</code> convention. Once a Model is installed with an adapter, you can request that adapter by name via appending <code>_&lt;adapter-name&gt;</code> to the model field. This will work with any OpenAI client library.</p>
-<p>If you installed a Model with <code>name: llama-3.2</code> and configured <code>.spec.adapters[]</code> to contain an adapter with <code>name: sql</code>, you can issue a completion request to that adapter using:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>http://<span class="nv">$KUBEAI_ENDPOINT</span>/openai/v1/completions<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;prompt&quot;: &quot;Hi&quot;, &quot;model&quot;: &quot;llama-3.2_sql&quot;}&#39;</span>
+<p>Apply the kubeai-models helm chart:</p>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>kubeai-models<span class="w"> </span>kubeai/models<span class="w"> </span>-f<span class="w"> </span>./kubeai-rerank-models.yaml.yaml
 </code></pre></div>
-<h2 id="listing-adapters">Listing adapters<a class="headerlink" href="#listing-adapters" title="Permanent link">&para;</a></h2>
-<p>Adapters will be returned by the <code>/models</code> endpoint:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>http://<span class="nv">$KUBEAI_ENDPOINT</span>/openai/v1/models
+<p>Once the pod is ready, you can call the rerank endpoint:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="s2">&quot;http://localhost:8000/vllm/v1/rerank&quot;</span><span class="p">,</span>
+    <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;bge-rerank-base-cpu&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="s2">&quot;Which document talks about apples?&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;documents&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;An apple a day keeps the doctor away&quot;</span><span class="p">,</span> <span class="s2">&quot;Oranges are tasty&quot;</span><span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 </code></pre></div>
-<p>Each adapter will be listed as a separate model object with the adapter name appended to the base Model name.</p>
 
 
 
