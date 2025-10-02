@@ -140,6 +140,12 @@ type ModelSpec struct {
 	// This is useful for implementing priority and preemption for models.
 	// +kubebuilder:validation:Optional
 	PriorityClassName string `json:"priorityClassName,omitempty"`
+
+	// JSONPatches is a list of patches to apply to the model pod template.
+	// This is a JSON Patch as defined in RFC 6902.
+	// https://datatracker.ietf.org/doc/html/rfc6902
+	// +kubebuilder:validation:Optional
+	JSONPatches []JSONPatch `json:"jsonPatches,omitempty"`
 }
 
 // +kubebuilder:validation:Enum=TextGeneration;TextEmbedding;Reranking;SpeechToText
@@ -222,6 +228,37 @@ type File struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MaxLength=100000
 	Content string `json:"content"`
+}
+
+// JSONPatch represents a single JSON Patch operation as defined in RFC 6902.
+// +kubebuilder:validation:XValidation:rule="(self.op == 'test' || self.op == 'add' || self.op == 'replace') ? has(self.value) : true", message="value is required for test, add, and replace operations"
+// +kubebuilder:validation:XValidation:rule="(self.op == 'move' || self.op == 'copy') ? has(self.from) : true", message="from is required for move and copy operations"
+// +kubebuilder:validation:XValidation:rule="self.op != 'remove' || (!has(self.value) && !has(self.from))", message="remove operation cannot have value or from"
+// +kubebuilder:validation:XValidation:rule="!has(self.value) || !has(self.from)", message="only one of value or from can be present"
+type JSONPatch struct {
+	// Op is the operation to perform. Must be one of: "add", "remove", "replace", "move", "copy", or "test".
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Enum=add;remove;replace;move;copy;test
+	Op string `json:"op"`
+
+	// Path is the JSON Pointer path to the target location.
+	// Must start with a forward slash (/).
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:XValidation:rule="self.startsWith('/')", message="path must start with a forward slash"
+	// +kubebuilder:validation:MaxLength=1024
+	Path string `json:"path"`
+
+	// From is the JSON Pointer path to the source location for "move" and "copy" operations.
+	// Must start with a forward slash (/).
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:XValidation:rule="self.startsWith('/')", message="from must start with a forward slash"
+	// +kubebuilder:validation:MaxLength=1024
+	From string `json:"from,omitempty"`
+
+	// Value is the value to be used in the operation, must be a valid JSON encoded value.
+	// Required for "add", "replace", and "test" operations.
+	// +kubebuilder:validation:Optional
+	Value string `json:"value,omitempty"`
 }
 
 // ModelStatus defines the observed state of Model.
