@@ -220,6 +220,15 @@ modelAutoscaling:
 messaging:
   errorMaxBackoff: 30s
   streams: []
+  # Possible values for streams
+  # Example configuration for Kafka messaging:
+  # - requestsURL: "kafka://my-group?topic=my-topic"
+  #   responsesURL: "kafka://my-topic"
+  #   maxHandlers: 5000
+  # Example configuration for GCP Pub/Sub messaging:
+  # - requestsURL: "gcppubsub://projects/my-gcp-project-id/subscriptions/kubeai-requests"
+  #   responsesURL: "gcppubsub://projects/my-gcp-project-id/topics/kubeai-responses"
+  #   maxHandlers: 5000
 
 # Configure the openwebui subchart.
 open-webui:
