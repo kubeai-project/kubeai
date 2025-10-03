@@ -205,6 +205,7 @@ func (r *ModelReconciler) patchServerAdapterLoader(podSpec *corev1.PodSpec, m *v
 		Image:           image,
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Env:             env,
+		SecurityContext: r.ModelServerPods.ModelContainerSecurityContext,
 		Command:         []string{"sleep", "infinity"},
 		VolumeMounts: []corev1.VolumeMount{
 			{

@@ -332,11 +332,13 @@ func (r *ModelReconciler) loadCacheJobForModel(m *kubeaiv1.Model, c ModelConfig)
 			Completions:             ptr.To[int32](1),
 			Template: corev1.PodTemplateSpec{
 				Spec: corev1.PodSpec{
-					RestartPolicy: corev1.RestartPolicyOnFailure,
+					RestartPolicy:   corev1.RestartPolicyOnFailure,
+					SecurityContext: r.ModelServerPods.ModelPodSecurityContext,
 					Containers: []corev1.Container{
 						{
-							Name: "loader",
-							Env:  env,
+							Name:            "loader",
+							Env:             env,
+							SecurityContext: r.ModelServerPods.ModelContainerSecurityContext,
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "model",
@@ -383,10 +385,12 @@ func (r *ModelReconciler) evictCacheJobForModel(m *kubeaiv1.Model, c ModelConfig
 			Completions:             ptr.To[int32](1),
 			Template: corev1.PodTemplateSpec{
 				Spec: corev1.PodSpec{
-					RestartPolicy: corev1.RestartPolicyOnFailure,
+					RestartPolicy:   corev1.RestartPolicyOnFailure,
+					SecurityContext: r.ModelServerPods.ModelPodSecurityContext,
 					Containers: []corev1.Container{
 						{
-							Name: "evictor",
+							Name:            "evictor",
+							SecurityContext: r.ModelServerPods.ModelContainerSecurityContext,
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "model",

@@ -42,16 +42,14 @@ modelServers:
       # The key is the image name (referenced from resourceProfiles) and the value is the image.
       # The "default" image should always be specified.
       # "default" is used when no imageName is specified or if a specific image is not found.
-      default: "vllm/vllm-openai:v0.8.3"
-      nvidia-gpu: "vllm/vllm-openai:v0.8.3"
-      cpu: "substratusai/vllm:v0.6.3.post1-cpu"
-      google-tpu: "substratusai/vllm:v0.6.4.post1-tpu"
-      # Source: https://github.com/substratusai/vllm-docker/blob/main/Dockerfile.cuda-arm
-      gh200: "substratusai/vllm-gh200:v0.8.3"
-      # upstream vLLM seems to have broken ROCm support, so we are using a fork from AMD.
-      # Source: https://hub.docker.com/r/rocm/vllm-dev
-      # Source: https://github.com/ROCm/vllm
-      amd-gpu: substratusai/vllm-rocm:nightly_main_20250120
+      default: "vllm/vllm-openai:v0.10.2"
+      nvidia-gpu: "vllm/vllm-openai:v0.10.2"
+      cpu: "public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:v0.10.2"
+      google-tpu: "vllm/vllm-tpu:23194d83e8f2a6783b0d8c275f5f8a22faab9aec"
+      # VLLM support arm
+      gh200: "vllm/vllm-openai:v0.10.2"
+      # AMD use last ROCM driver version
+      amd-gpu: "rocm/vllm/rocm6.4.1_vllm_0.10.1_20250909"
   OLlama:
     images:
       default: "ollama/ollama:latest"
@@ -70,7 +68,7 @@ modelServerPods:
   # Security Context for the model pods
   # Needed for OpenShift
   securityContext:
-    runAsUser: 0
+    # runAsUser: 0
     readOnlyRootFilesystem: false
     allowPrivilegeEscalation: false
     capabilities:
@@ -245,7 +243,7 @@ open-webui:
   # Security Context for the openwebui pod
   # Needed for OpenShift
   containerSecurityContext:
-    runAsUser: 0
+    # runAsUser: 0
     readOnlyRootFilesystem: false
     allowPrivilegeEscalation: false
     capabilities:
