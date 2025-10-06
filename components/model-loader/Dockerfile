@@ -1,4 +1,4 @@
-FROM alpine:3.20
+FROM alpine:3.22
 
 # Common
 # * unzip (full version) needed for installing ossutil
