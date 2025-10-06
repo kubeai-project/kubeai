@@ -52,17 +52,22 @@ modelServers:
       amd-gpu: "rocm/vllm/rocm6.4.1_vllm_0.10.1_20250909"
   OLlama:
     images:
-      default: "ollama/ollama:latest"
+      default: "ollama/ollama:0.11.11"
+      nvidia-gpu: "ollama/ollama:0.11.11"
+      amd-gpu: "ollama/ollama:0.11.11-rocm"
   FasterWhisper:
     images:
       default: "fedirz/faster-whisper-server:latest-cpu"
       nvidia-gpu: "fedirz/faster-whisper-server:latest-cuda"
   Infinity:
     images:
-      default: "michaelf34/infinity:latest"
+      default: "michaelf34/infinity:0.0.77"
+      cpu: "michaelf34/infinity:0.0.77-cpu"
+      amd-gpu: "michaelf34/infinity:0.0.77-rocm"
+      nvidia-gpu: "michaelf34/infinity:0.0.77"
 
 modelLoading:
-  image: "substratusai/kubeai-model-loader:v0.14.0"
+  image: "kubeai-project/kubeai-model-loader:v0.14.0"
 
 modelServerPods:
   # Security Context for the model pods
@@ -253,7 +258,7 @@ open-webui:
 replicaCount: 1
 
 image:
-  repository: substratusai/kubeai
+  repository: kubeai-project/kubeai
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""

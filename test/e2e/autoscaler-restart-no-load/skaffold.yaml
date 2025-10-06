@@ -4,7 +4,7 @@ metadata:
   name: kubeai-autoscaler-restart-test
 build:
   artifacts:
-    - image: substratusai/kubeai
+    - image: kubeai-project/kubeai
   local:
     push: false
 deploy:
