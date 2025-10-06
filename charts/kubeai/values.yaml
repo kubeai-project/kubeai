@@ -67,7 +67,7 @@ modelServers:
       nvidia-gpu: "michaelf34/infinity:0.0.77"
 
 modelLoading:
-  image: "kubeai-project/kubeai-model-loader:v0.14.0"
+  image: "ghcr.io/kubeai-project/kubeai-model-loader:v0.14.0"
 
 modelServerPods:
   # Security Context for the model pods
@@ -258,7 +258,7 @@ open-webui:
 replicaCount: 1
 
 image:
-  repository: kubeai-project/kubeai
+  repository: ghcr.io/kubeai-project/kubeai
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""

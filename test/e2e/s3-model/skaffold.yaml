@@ -4,7 +4,7 @@ metadata:
   name: kubeai-autoscaler-restart-test
 build:
   artifacts:
-    - image: kubeai-project/kubeai
+    - image: ghcr.io/kubeai-project/kubeai
   local:
     push: false
 deploy:
