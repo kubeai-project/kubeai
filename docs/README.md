@@ -1,3 +1,8 @@
+<p align="left">
+  <img src="https://img.shields.io/github/license/kubeai-project/kubeai"/>
+  <img src="https://img.shields.io/github/go-mod/go-version/kubeai-project/kubeai"/>
+</p>
+
 # KubeAI: AI Inferencing Operator
 
 Deploy and scale machine learning models on Kubernetes. Built for LLMs, embeddings, and speech-to-text.
