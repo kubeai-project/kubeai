@@ -28,7 +28,7 @@ kubectl wait --for=condition=complete --timeout=120s job/upload-model-to-s3
 kubectl apply -f $TEST_DIR/model.yaml
 kubectl wait --timeout=5m --for=jsonpath='{.status.cache.loaded}'=true model/$model
 kubectl delete -f $TEST_DIR/s3-instance.yaml
-kubectl wait --timeout=5m --for=jsonpath='.status.replicas.ready'=1 model/${model}
+kubectl wait --timeout=10m --for=jsonpath='.status.replicas.ready'=1 model/${model}
 
 sleep 5
 

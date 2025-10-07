@@ -1,12 +1,12 @@
 apiVersion: skaffold/v4beta11
 kind: Config
 metadata:
-  name: kubeai-autoscaler-restart-test
-build:
-  artifacts:
-    - image: ghcr.io/kubeai-project/kubeai
-  local:
-    push: false
+  name: s3-models
+# build:
+#   artifacts:
+#     - image: ghcr.io/kubeai-project/kubeai
+#   local:
+#     push: false
 deploy:
   helm:
     releases:

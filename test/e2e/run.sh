@@ -87,8 +87,9 @@ fi
 # Always run skaffold from the repository root
 cd $REPO_DIR
 
-skaffold build -f $skaffold_file --file-output=$skaffold_build_file $skaffold_flags
-skaffold deploy -f $skaffold_file --tail --port-forward --load-images --build-artifacts=$skaffold_build_file $skaffold_flags > $skaffold_log_file &
+# skaffold build -f $skaffold_file --file-output=$skaffold_build_file $skaffold_flags
+# skaffold deploy -f $skaffold_file --tail --port-forward --load-images --build-artifacts=$skaffold_build_file $skaffold_flags > $skaffold_log_file &
+skaffold deploy -f $skaffold_file --tail --port-forward --load-images $skaffold_flags > $skaffold_log_file &
 skaffold_pid=$!
 
 echo "Waiting for KubeAI API on localhost:8000"

@@ -195,7 +195,7 @@ type ResourceProfile struct {
 	NodeSelector     map[string]string   `json:"nodeSelector,omitempty"`
 	Affinity         *corev1.Affinity    `json:"affinity,omitempty"`
 	Tolerations      []corev1.Toleration `json:"tolerations,omitempty"`
-	SchedulerName	 string              `json:"schedulerName,omitempty"`
+	SchedulerName    string              `json:"schedulerName,omitempty"`
 	RuntimeClassName *string             `json:"runtimeClassName,omitempty"`
 }
 

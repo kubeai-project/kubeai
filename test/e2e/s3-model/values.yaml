@@ -9,3 +9,8 @@ cacheProfiles:
   e2e-test-kind-pv:
     sharedFilesystem:
       persistentVolumeName: "kind-hostpath"
+modelServers:
+  VLLM:
+    images:
+      default: "ghcr.io/kubeai-project/vllm-cpu-test-env:v0.10.2"
+      cpu: "ghcr.io/kubeai-project/vllm-cpu-test-env:v0.10.2"
