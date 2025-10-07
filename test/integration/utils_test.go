@@ -252,16 +252,24 @@ func requireUpdateJobAsCompleted(t *testing.T, job *batchv1.Job) {
 
 func setJobCompletedStatus(job *batchv1.Job) {
 	job.Status.Succeeded = *job.Spec.Completions
+	currentTime := time.Now()
+	job.Status.StartTime = &metav1.Time{Time: currentTime.Add(-time.Minute * 1)}
+	job.Status.CompletionTime = &metav1.Time{Time: currentTime}
 	for i := range job.Status.Conditions {
 		if job.Status.Conditions[i].Type == batchv1.JobComplete {
 			job.Status.Conditions[i].Status = corev1.ConditionTrue
 			return
 		}
 	}
-	job.Status.Conditions = append(job.Status.Conditions, batchv1.JobCondition{
-		Type:   batchv1.JobComplete,
-		Status: corev1.ConditionTrue,
-	})
+	job.Status.Conditions = append(job.Status.Conditions,
+		batchv1.JobCondition{
+			Type:   batchv1.JobSuccessCriteriaMet,
+			Status: corev1.ConditionTrue,
+		},
+		batchv1.JobCondition{
+			Type:   batchv1.JobComplete,
+			Status: corev1.ConditionTrue,
+		})
 }
 
 // logPods is useful for debugging why a test case is failing.
