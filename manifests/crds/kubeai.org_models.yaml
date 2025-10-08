@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.15.0
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: models.kubeai.org
 spec:
   group: kubeai.org
@@ -95,6 +95,7 @@ spec:
                   Secret or ConfigMap.
                 items:
                   description: EnvFromSource represents the source of a set of ConfigMaps
+                    or Secrets
                   properties:
                     configMapRef:
                       description: The ConfigMap to select from
@@ -106,9 +107,7 @@ spec:
                             This field is effectively required, but due to backwards compatibility is
                             allowed to be empty. Instances of this type with an empty value here are
                             almost certainly wrong.
-                            TODO: Add other useful fields. apiVersion, kind, uid?
                             More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                            TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
                           type: string
                         optional:
                           description: Specify whether the ConfigMap must be defined
@@ -116,8 +115,9 @@ spec:
                       type: object
                       x-kubernetes-map-type: atomic
                     prefix:
-                      description: An optional identifier to prepend to each key in
-                        the ConfigMap. Must be a C_IDENTIFIER.
+                      description: |-
+                        Optional text to prepend to the name of each environment variable.
+                        May consist of any printable ASCII characters except '='.
                       type: string
                     secretRef:
                       description: The Secret to select from
@@ -129,9 +129,7 @@ spec:
                             This field is effectively required, but due to backwards compatibility is
                             allowed to be empty. Instances of this type with an empty value here are
                             almost certainly wrong.
-                            TODO: Add other useful fields. apiVersion, kind, uid?
                             More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                            TODO: Drop `kubebuilder:default` when controller-gen doesn't need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.
                           type: string
                         optional:
                           description: Specify whether the Secret must be defined
@@ -148,6 +146,7 @@ spec:
                   enum:
                   - TextGeneration
                   - TextEmbedding
+                  - Reranking
                   - SpeechToText
                   type: string
                 type: array
@@ -283,9 +282,7 @@ spec:
                   URL of the model to be served.
                   Currently the following formats are supported:
 
-
                   For VLLM, FasterWhisper, Infinity engines:
-
 
                   "hf://<repo>/<model>"
                   "pvc://<pvcName>"
@@ -294,9 +291,7 @@ spec:
                   "oss://<bucket>/<path>" (only with cacheProfile)
                   "s3://<bucket>/<path>" (only with cacheProfile)
 
-
                   For OLlama engine:
-
 
                   "ollama://<model>"
                 type: string
