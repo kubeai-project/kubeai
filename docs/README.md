@@ -182,7 +182,7 @@ Read about concepts, guides, and API documentation on [kubeai.org](https://www.k
 
 🌟 Don't forget to drop us a star on GitHub and follow the repo to stay up to date!
 
-[![KubeAI Star history Chart](https://api.star-history.com/svg?repos=substratusai/kubeai&type=Date)](https://star-history.com/#substratusai/kubeai&Date)
+[![KubeAI Star history Chart](https://api.star-history.com/svg?repos=kubeai-project/kubeai&type=Date)](https://star-history.com/#kubeai-project/kubeai&Date)
 
 Let us know about features you are interested in seeing or reach out with questions. [Visit our Discord channel](https://discord.gg/JeXhcmjZVm) to join the discussion!
 
