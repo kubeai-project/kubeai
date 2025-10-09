@@ -7,13 +7,13 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.21.0
+version: 0.22.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "v0.21.0"
+appVersion: "v0.22.0"
 
 dependencies:
   # Open Web UI is an open source ChatGPT-like user interface.
@@ -21,7 +21,7 @@ dependencies:
   - name: open-webui
     condition: open-webui.enabled
     repository: https://helm.openwebui.com/
-    version: 6.4.0
+    version: 8.10.0
 
 keywords: ["LLM", "AI"]
 
@@ -34,3 +34,8 @@ maintainers:
 - name: samos123
   email: sammiestoel@gmail.com
   url: https://www.linkedin.com/in/samstoelinga/
+- name: ffais
+  url: https://github.com/ffais
+- name: m4oc
+  email: marco@cristofanilli.it
+  url: https://www.linkedin.com/in/marcocristofanilli/
