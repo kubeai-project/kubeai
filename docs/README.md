@@ -3,9 +3,14 @@
 <p align="left">
   <img src="https://img.shields.io/github/license/kubeai-project/kubeai"/>
   <img src="https://img.shields.io/github/go-mod/go-version/kubeai-project/kubeai"/>
+  <img src="https://img.shields.io/github/stars/kubeai-project/kubeai"/>
+  <img src="https://img.shields.io/github/contributors/kubeai-project/kubeai" />
+  <img src="https://img.shields.io/github/last-commit/kubeai-project/kubeai/main" />
 </p>
 
-Deploy and scale machine learning models on Kubernetes. Built for LLMs, embeddings, and speech-to-text.
+Deploy and scale machine learning models on Kubernetes. 
+
+Built for LLMs, embeddings, reranking and speech-to-text.
 
 ## Highlights
 
@@ -190,3 +195,8 @@ Or just reach out on LinkedIn if you want to connect:
 
 * [Nick Stogner](https://www.linkedin.com/in/nstogner/)
 * [Sam Stoelinga](https://www.linkedin.com/in/samstoelinga/)
+
+Maintainers:
+
+* [ffais](https://github.com/ffais/) 
+* [m4oc](https://github.com/m4oc)
