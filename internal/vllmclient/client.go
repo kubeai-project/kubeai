@@ -29,15 +29,15 @@ type LoadAdapterRequestOptions struct {
 // See: https://docs.vllm.ai/en/latest/models/lora.html#dynamically-serving-lora-adapters
 func (c *Client) LoadLoraAdapter(ctx context.Context, addr string, req LoadAdapterRequest) error {
 	if err := c.post(ctx, addr, "/v1/load_lora_adapter", req, nil, func(status int, resp errorResponse) error {
-		// example: {\"object\":\"error\",\"message\":\"The lora adapter 'foo' has already beenloaded.\",\"type\":\"InvalidUserInput\",\"param\":null,\"code\":400}
+		// example: {"error":{"message":"Call to add_lora method failed: Loading lora sql_adapter failed: No adapter found for /path/to/sql-lora-adapter","type":"NotFoundError","param":null,"code":404}}
 		if req.Options.IgnoreAlreadyLoaded {
-			if status == 400 && resp.Type == "InvalidUserInput" &&
-				strings.Contains(resp.Message, "already") &&
-				strings.Contains(resp.Message, "loaded") {
+			if status == 400 && resp.VllmError.Type == "InvalidUserInput" &&
+				strings.Contains(resp.VllmError.Message, "already") &&
+				strings.Contains(resp.VllmError.Message, "loaded") {
 				return nil
 			}
 		}
-		return fmt.Errorf("unexpected status code: %d: %s", status, resp.Message)
+		return fmt.Errorf("unexpected status code: %d: %s", status, resp.VllmError.Message)
 	}); err != nil {
 		return err
 	}
@@ -60,21 +60,25 @@ func (c *Client) UnloadLoraAdapter(ctx context.Context, addr string, req UnloadA
 	if err := c.post(ctx, addr, "/v1/unload_lora_adapter", req, nil, func(status int, resp errorResponse) error {
 		// example: {"object":"error","message":"The lora adapter 'xyzabc' cannot be found.","type":"InvalidUserInput","param":null,"code":400}
 		if req.Options.IgnoreNotFound {
-			if status == 400 && resp.Type == "InvalidUserInput" &&
-				strings.Contains(resp.Message, "cannot be found") {
+			if status == 400 && resp.VllmError.Type == "InvalidUserInput" &&
+				strings.Contains(resp.VllmError.Message, "cannot be found") {
 				return nil
 			}
 		}
-		return fmt.Errorf("unexpected status code: %d: %s", status, resp.Message)
+		return fmt.Errorf("unexpected status code: %d: %s", status, resp.VllmError.Message)
 	}); err != nil {
 		return err
 	}
 	return nil
 }
 
-type errorResponse struct {
+type vllmError struct {
 	Message string `json:"message"`
 	Type    string `json:"type"`
+}
+
+type errorResponse struct {
+	VllmError vllmError `json:"error"`
 }
 
 func (c *Client) post(ctx context.Context, addr string, path string, req, resp interface{}, errorHandler func(status int, resp errorResponse) error) error {
