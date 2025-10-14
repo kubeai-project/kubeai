@@ -94,10 +94,6 @@ jobs:
 
       - name: Start kind cluster
         run: kind create cluster
-      - name: Free Space before
-        run: |
-          echo "Free space:"
-          df -h
 
       - name: Load kubeai image in KinD
         run: |
@@ -105,11 +101,6 @@ jobs:
 
       - name: Run the e2e testcase
         run: make test-e2e TEST_CASE=${{ matrix.testcase }}
-
-      - name: Free Space after
-        run: |
-          echo "Free space:"
-          df -h
 
   e2e-engines:
     runs-on: ubuntu-latest
@@ -150,6 +141,10 @@ jobs:
 
       - name: Start kind cluster
         run: kind create cluster
+
+      - name: Load kubeai image in KinD
+        run: |
+          kind load docker-image ghcr.io/kubeai-project/kubeai:test
 
       - name: Run the e2e testcase
         run: make test-e2e TEST_CASE=engine-${{ matrix.engine }} CACHE_PROFILE=${{ matrix.cacheProfile }}

@@ -37,7 +37,7 @@ NEW_MODEL_NAME=${NEW_MODEL_URL#ollama://}
 kubectl patch model deepseek-r1-1.5b-cpu --type=merge -p "{\"spec\": {\"url\": \"$NEW_MODEL_URL\"}}"
 
 check_pod_gone() {
-  ! kubectl get pod $DEEPSEEK_POD | grep -q -E "Running|Terminating"
+  ! kubectl get pod $DEEPSEEK_POD | grep -q -E "Running|Terminating|Completed"
 }
 
 # Make a request to the model
