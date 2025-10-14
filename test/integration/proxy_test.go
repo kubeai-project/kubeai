@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kubeai-project/kubeai/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/kubeai-project/kubeai/internal/config"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )

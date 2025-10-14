@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kubeai-project/kubeai/internal/k8sutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/kubeai-project/kubeai/internal/k8sutils"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"

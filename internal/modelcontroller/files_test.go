@@ -3,8 +3,8 @@ package modelcontroller
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	kubeaiv1 "github.com/kubeai-project/kubeai/api/k8s/v1"
+	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

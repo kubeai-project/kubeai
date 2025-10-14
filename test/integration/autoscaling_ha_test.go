@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
 	"github.com/kubeai-project/kubeai/internal/config"
+	"github.com/stretchr/testify/require"
 	"k8s.io/utils/ptr"
 )
 

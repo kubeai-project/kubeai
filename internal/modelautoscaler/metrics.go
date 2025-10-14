@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/kubeai-project/kubeai/internal/metrics"
 	io_prometheus_client "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
-	"github.com/kubeai-project/kubeai/internal/metrics"
 )
 
 func aggregateAllMetrics(agg *metricsAggregation, addrs []string, path string) (err error) {

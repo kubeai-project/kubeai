@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
 	"github.com/kubeai-project/kubeai/internal/config"
 	"github.com/kubeai-project/kubeai/internal/manager"
+	"github.com/stretchr/testify/require"
 	"gocloud.dev/pubsub"
 	_ "gocloud.dev/pubsub/mempubsub"
 	corev1 "k8s.io/api/core/v1"

@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kubeai-project/kubeai/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/kubeai-project/kubeai/internal/config"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"

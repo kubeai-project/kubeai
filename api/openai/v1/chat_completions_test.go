@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/go-json-experiment/json"
-	"github.com/stretchr/testify/require"
 	v1 "github.com/kubeai-project/kubeai/api/openai/v1"
+	"github.com/stretchr/testify/require"
 )
 
 func TestChatCompletionRequestPrefix(t *testing.T) {

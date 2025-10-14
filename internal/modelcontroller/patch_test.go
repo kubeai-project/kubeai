@@ -3,9 +3,9 @@ package modelcontroller
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/kubeai-project/kubeai/internal/config"
 	"github.com/kubeai-project/kubeai/internal/k8sutils"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"

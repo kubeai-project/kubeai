@@ -3,8 +3,8 @@ package apiutils_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/kubeai-project/kubeai/internal/apiutils"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSplitModelAdapter(t *testing.T) {

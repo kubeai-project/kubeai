@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	v1 "github.com/kubeai-project/kubeai/api/k8s/v1"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseRequest(t *testing.T) {
