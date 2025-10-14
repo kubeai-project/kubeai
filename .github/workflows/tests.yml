@@ -7,6 +7,11 @@ on:
       - main
   pull_request:
 
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: kubeai-project/kubeai
+
 jobs:
   build-image:
     runs-on: ubuntu-latest
@@ -20,7 +25,7 @@ jobs:
       - name: Build and export
         uses: docker/build-push-action@v6
         with:
-          tags: substratusai/kubeai
+          tags: ghcr.io/kubeai-project/kubeai:test
           outputs: type=docker,dest=${{ runner.temp }}/kubeai.tar
 
       - name: Upload artifact
@@ -93,8 +98,14 @@ jobs:
         run: |
           echo "Free space:"
           df -h
+
+      - name: Load kubeai image in KinD
+        run: |
+          kind load docker-image ghcr.io/kubeai-project/kubeai:test
+
       - name: Run the e2e testcase
         run: make test-e2e TEST_CASE=${{ matrix.testcase }}
+
       - name: Free Space after
         run: |
           echo "Free space:"
