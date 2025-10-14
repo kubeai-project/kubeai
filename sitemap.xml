@@ -2,170 +2,170 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://www.kubeai.org/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/benchmarks/llama-3.2-11b-vision/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/benchmarks/prefix-aware-load-balancing/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/blog/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/blog/2025/02/26/llm-load-balancing-at-scale-chwbl/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/concepts/autoscaling/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/concepts/backend-servers/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/concepts/load-balancing/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/concepts/lora-adapters/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/concepts/resource-profiles/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/concepts/storage-caching/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/contributing/development-environment/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/contributing/development-guide/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/contributing/documentation/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/contributing/release-process/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/architect-for-multitenancy/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/authenticate-to-model-repos/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/build-models-into-containers/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/cache-models-with-aws-efs/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/cache-models-with-gcp-filestore/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/configure-autoscaling/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/configure-embedding-models/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/configure-reranking-models/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/configure-resource-profiles/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/configure-speech-to-text/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/configure-text-generation-models/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/install-models/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/load-models-from-pvc/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/observability-with-prometheus-stack/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/how-to/serve-lora-adapters/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/installation/aks/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/installation/any/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/installation/eks/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/installation/gke/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/reference/kubernetes-api/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/reference/openai-api-compatibility/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/tutorials/langchain/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/tutorials/langtrace/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/tutorials/private-deep-chat/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/tutorials/weaviate/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/blog/archive/2025/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
     <url>
          <loc>https://www.kubeai.org/blog/category/performance/</loc>
-         <lastmod>2025-10-13</lastmod>
+         <lastmod>2025-10-14</lastmod>
     </url>
 </urlset>
