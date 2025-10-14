@@ -1,0 +1,18 @@
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: qwen2.5-500m-cpu
+spec:
+  features: [TextGeneration]
+  owner: qwen
+  engine: VLLM
+  resourceProfile: cpu:1
+  minReplicas: 1
+  env:
+    VLLM_CPU_KVCACHE_SPACE: "1"
+  args:
+  - --max-lora-rank=256
+  url: hf://Qwen/Qwen2.5-0.5B
+  adapters:
+  - name: wiki
+    url: hf://trumancai/Revela-code-500M

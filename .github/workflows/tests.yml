@@ -60,6 +60,7 @@ jobs:
         - "engine-ollama-pvc"
         - "model-files"
         - "s3-model"
+        - "lora-adapter"
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
