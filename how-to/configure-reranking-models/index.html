@@ -1784,7 +1784,7 @@
 <p>Once the pod is ready, you can call the rerank endpoint:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
-    <span class="s2">&quot;http://localhost:8000/vllm/v1/rerank&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;http://localhost:8000/openai/v1/rerank&quot;</span><span class="p">,</span>
     <span class="n">json</span><span class="o">=</span><span class="p">{</span>
         <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;bge-rerank-base-cpu&quot;</span><span class="p">,</span>
         <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="s2">&quot;Which document talks about apples?&quot;</span><span class="p">,</span>
