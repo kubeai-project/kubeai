@@ -31,7 +31,7 @@ Once the pod is ready, you can call the rerank endpoint:
 ```python
 import requests
 resp = requests.post(
-    "http://localhost:8000/vllm/v1/rerank",
+    "http://localhost:8000/openai/v1/rerank",
     json={
         "model": "bge-rerank-base-cpu",
         "query": "Which document talks about apples?",

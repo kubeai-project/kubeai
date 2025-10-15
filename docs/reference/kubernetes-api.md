@@ -128,7 +128,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `url` _string_ | URL of the model to be served.<br />Currently the following formats are supported:<br /><br />For VLLM, FasterWhisper, Infinity engines:<br /><br />"hf://<repo>/<model>"<br />"pvc://<pvcName>"<br />"pvc://<pvcName>/<pvcSubpath>"<br />"gs://<bucket>/<path>" (only with cacheProfile)<br />"oss://<bucket>/<path>" (only with cacheProfile)<br />"s3://<bucket>/<path>" (only with cacheProfile)<br /><br />For OLlama engine:<br /><br />"ollama://<model>" |  | Required: \{\} <br /> |
+| `url` _string_ | URL of the model to be served.<br />Currently the following formats are supported:<br />For VLLM, FasterWhisper, Infinity engines:<br />"hf://<repo>/<model>"<br />"pvc://<pvcName>"<br />"pvc://<pvcName>/<pvcSubpath>"<br />"gs://<bucket>/<path>" (only with cacheProfile)<br />"oss://<bucket>/<path>" (only with cacheProfile)<br />"s3://<bucket>/<path>" (only with cacheProfile)<br />For OLlama engine:<br />"ollama://<model>" |  | Required: \{\} <br /> |
 | `adapters` _[Adapter](#adapter) array_ |  |  |  |
 | `features` _[ModelFeature](#modelfeature) array_ | Features that the model supports.<br />Dictates the APIs that are available for the model. |  | Enum: [TextGeneration TextEmbedding Reranking SpeechToText] <br /> |
 | `engine` _string_ | Engine to be used for the server process. |  | Enum: [OLlama VLLM FasterWhisper Infinity] <br />Required: \{\} <br /> |
