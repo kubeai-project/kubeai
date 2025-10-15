@@ -2,6 +2,36 @@ apiVersion: v1
 entries:
   kubeai:
   - apiVersion: v2
+    appVersion: v0.22.1
+    created: "2025-10-15T14:37:24.093251363Z"
+    dependencies:
+    - condition: open-webui.enabled
+      name: open-webui
+      repository: https://helm.openwebui.com/
+      version: 8.10.0
+    description: Private Open AI Platform for Kubernetes.
+    digest: c776408b3afda9fa90b64a6bbfd754a6c7e4cfe6adbbf7251375aae799e91194
+    home: https://www.substratus.ai
+    keywords:
+    - LLM
+    - AI
+    maintainers:
+    - name: nstogner
+      url: https://www.linkedin.com/in/nstogner/
+    - email: sammiestoel@gmail.com
+      name: samos123
+      url: https://www.linkedin.com/in/samstoelinga/
+    - name: ffais
+      url: https://github.com/ffais
+    - email: marco@cristofanilli.it
+      name: m4oc
+      url: https://www.linkedin.com/in/marcocristofanilli/
+    name: kubeai
+    type: application
+    urls:
+    - https://github.com/kubeai-project/kubeai/releases/download/helm-chart-kubeai-0.22.1/kubeai-0.22.1.tgz
+    version: 0.22.1
+  - apiVersion: v2
     appVersion: v0.22.0
     created: "2025-10-09T09:04:31.769553844Z"
     dependencies:
@@ -1192,4 +1222,4 @@ entries:
     urls:
     - https://github.com/substratusai/kubeai/releases/download/kubeai-helm-chart-0.4.1/models-0.4.1.tgz
     version: 0.4.1
-generated: "2025-10-09T09:04:31.769762373Z"
+generated: "2025-10-15T14:37:24.093522271Z"
