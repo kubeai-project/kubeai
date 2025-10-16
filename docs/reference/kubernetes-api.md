@@ -134,6 +134,7 @@ _Appears in:_
 | `engine` _string_ | Engine to be used for the server process. |  | Enum: [OLlama VLLM FasterWhisper Infinity] <br />Required: \{\} <br /> |
 | `resourceProfile` _string_ | ResourceProfile required to serve the model.<br />Use the format "<resource-profile-name>:<count>".<br />Example: "nvidia-gpu-l4:2" - 2x NVIDIA L4 GPUs.<br />Must be a valid ResourceProfile defined in the system config. |  |  |
 | `cacheProfile` _string_ | CacheProfile to be used for caching model artifacts.<br />Must be a valid CacheProfile defined in the system config. |  |  |
+| `cacheStorage` _string_ | Requested storage size for the cache PersistentVolumeClaim when using a shared filesystem cache profile.<br />Defaults to `10Gi` if omitted. |  |  |
 | `image` _string_ | Image to be used for the server process.<br />Will be set from ResourceProfile + Engine if not specified. |  |  |
 | `args` _string array_ | Args to be added to the server process. |  |  |
 | `env` _object (keys:string, values:string)_ | Env variables to be added to the server process. |  |  |

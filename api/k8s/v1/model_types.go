@@ -18,6 +18,7 @@ package v1
 
 import (
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -75,6 +76,11 @@ type ModelSpec struct {
 	// Must be a valid CacheProfile defined in the system config.
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf", message="cacheProfile is immutable."
 	CacheProfile string `json:"cacheProfile,omitempty"`
+
+	// CacheStorage defines the requested storage size for the cache PersistentVolumeClaim
+	// when using a cacheProfile backed by a shared filesystem.
+	// +kubebuilder:validation:Optional
+	CacheStorage *resource.Quantity `json:"cacheStorage,omitempty"`
 
 	// Image to be used for the server process.
 	// Will be set from ResourceProfile + Engine if not specified.

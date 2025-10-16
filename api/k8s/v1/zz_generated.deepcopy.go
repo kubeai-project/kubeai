@@ -22,6 +22,7 @@ package v1
 
 import (
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -187,6 +188,11 @@ func (in *ModelSpec) DeepCopyInto(out *ModelSpec) {
 		in, out := &in.Files, &out.Files
 		*out = make([]File, len(*in))
 		copy(*out, *in)
+	}
+	if in.CacheStorage != nil {
+		in, out := &in.CacheStorage, &out.CacheStorage
+		*out = new(resource.Quantity)
+		**out = **in
 	}
 }
 

@@ -12,6 +12,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -37,6 +38,8 @@ func TestCacheSharedFilesystem(t *testing.T) {
 	m := modelForTest(t)
 	m.Spec.MinReplicas = 1
 	m.Spec.CacheProfile = cacheProfileName
+cacheStorage := resource.MustParse("2Gi")
+	m.Spec.CacheStorage = &cacheStorage
 	require.NoError(t, testK8sClient.Create(testCtx, m))
 
 	// Assert that the expected PVC is created
@@ -49,6 +52,7 @@ func TestCacheSharedFilesystem(t *testing.T) {
 	}, 15*time.Second, time.Second/10, "PVC should be created")
 	require.Equal(t, ptr.To("my-storage-class"), pvc.Spec.StorageClassName)
 	require.Equal(t, "my-pv", pvc.Spec.VolumeName)
+require.Equal(t, resource.MustParse("2Gi"), pvc.Spec.Resources.Requests[corev1.ResourceStorage])
 
 	// Assert that the model loader Job is created
 	loaderJob := &batchv1.Job{}

@@ -78,6 +78,11 @@ spec:
                 x-kubernetes-validations:
                 - message: cacheProfile is immutable.
                   rule: self == oldSelf
+              cacheStorage:
+                description: |-
+                  Requested storage size for the cache PersistentVolumeClaim when using a
+                  shared filesystem cache profile. Defaults to 10Gi if omitted.
+                type: string
               engine:
                 description: Engine to be used for the server process.
                 enum:
