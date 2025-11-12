@@ -22,17 +22,25 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and export
+      - name: Build and export kubeai
         uses: docker/build-push-action@v6
         with:
           tags: ghcr.io/kubeai-project/kubeai:test
           outputs: type=docker,dest=${{ runner.temp }}/kubeai.tar
 
+      - name: Build and export model loader
+        uses: docker/build-push-action@v6
+        with:
+          context: ./components/model-loader
+          file: ./components/model-loader/Dockerfile
+          tags: ghcr.io/kubeai-project/kubeai-model-loader:test
+          outputs: type=docker,dest=${{ runner.temp }}/model-loader.tar
+
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
-          name: kubeai
-          path: ${{ runner.temp }}/kubeai.tar
+          name: docker-images
+          path: ${{ runner.temp }}/*.tar
 
   unit-and-integration:
     runs-on: ubuntu-latest
@@ -72,12 +80,13 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v6
         with:
-          name: kubeai
+          name: docker-images
           path: ${{ runner.temp }}
 
       - name: Load image
         run: |
           docker load --input ${{ runner.temp }}/kubeai.tar
+          docker load --input ${{ runner.temp }}/model-loader.tar
           docker image ls -a
 
       - name: Install kind
@@ -98,6 +107,7 @@ jobs:
       - name: Load kubeai image in KinD
         run: |
           kind load docker-image ghcr.io/kubeai-project/kubeai:test
+          kind load docker-image ghcr.io/kubeai-project/kubeai-model-loader:test
 
       - name: Run the e2e testcase
         run: make test-e2e TEST_CASE=${{ matrix.testcase }}

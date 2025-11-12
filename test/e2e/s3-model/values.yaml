@@ -14,3 +14,8 @@ modelServers:
     images:
       default: "ghcr.io/kubeai-project/vllm-cpu-test-env:v0.10.2"
       cpu: "ghcr.io/kubeai-project/vllm-cpu-test-env:v0.10.2"
+image:
+  tag: "test"
+  # pullPolicy: Never
+modelLoading:
+  image: "ghcr.io/kubeai-project/kubeai-model-loader:test"

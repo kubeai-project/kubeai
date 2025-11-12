@@ -21,7 +21,7 @@ fi
 case $src in
     "hf://"*)
         repo=${src#hf://}
-        huggingface-cli download --local-dir $dir $repo
+        hf download --local-dir $dir $repo
         rm -rf $dir/.cache
         ;;
     "s3://"*)
@@ -45,7 +45,7 @@ if [[ $dest_type == "url" ]]; then
     case $dest in
         "hf://"*)
             repo=${dest#hf://}
-            huggingface-cli upload $repo $dir
+            hf upload $repo $dir
             ;;
         "s3://"*)
             aws s3 sync $dir $dest

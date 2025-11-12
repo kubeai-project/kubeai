@@ -17,10 +17,10 @@ kind_container=$(docker ps --filter "name=kind-control-plane" --format "{{.ID}}"
 docker exec -i $kind_container bash -c "
   curl -LsSf https://astral.sh/uv/install.sh | sh
   export PATH=$PATH:/root/.local/bin/:/.venv/bin/
-  uv venv && uv pip install "huggingface_hub[cli]"
+  uv venv && uv pip install "huggingface_hub"
   mkdir -p ${PV_HOST_PATH}/models/facebook/opt-125m
-  huggingface-cli download facebook/opt-125m --local-dir ${PV_HOST_PATH}/models/facebook/opt-125m \
-    --exclude 'tf_model.h5' 'flax_model.msgpack'"
+  hf download facebook/opt-125m --local-dir ${PV_HOST_PATH}/models/facebook/opt-125m \
+    --exclude 'tf_model.h5' --exclude 'flax_model.msgpack'"
 
 kubectl create -f $TEST_DIR/upload-model-to-s3.yaml
 kubectl wait --for=condition=complete --timeout=120s job/upload-model-to-s3

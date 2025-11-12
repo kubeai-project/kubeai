@@ -3,3 +3,7 @@ modelAutoscaling:
   timeWindow: 30s
 open-webui:
   enabled: false
+modelLoading:
+  image: "ghcr.io/kubeai-project/kubeai-model-loader:test"
+image:
+  tag: "test"
