@@ -2,6 +2,36 @@ apiVersion: v1
 entries:
   kubeai:
   - apiVersion: v2
+    appVersion: v0.23.0
+    created: "2025-11-24T11:27:00.073458637Z"
+    dependencies:
+    - condition: open-webui.enabled
+      name: open-webui
+      repository: https://helm.openwebui.com/
+      version: 8.14.0
+    description: Private Open AI Platform for Kubernetes.
+    digest: d29f379e983545079c100c86531a1a9fb68c86816093a5ecff3c2e523d1dbbe6
+    home: https://www.substratus.ai
+    keywords:
+    - LLM
+    - AI
+    maintainers:
+    - name: nstogner
+      url: https://www.linkedin.com/in/nstogner/
+    - email: sammiestoel@gmail.com
+      name: samos123
+      url: https://www.linkedin.com/in/samstoelinga/
+    - name: ffais
+      url: https://github.com/ffais
+    - email: marco@cristofanilli.it
+      name: m4oc
+      url: https://www.linkedin.com/in/marcocristofanilli/
+    name: kubeai
+    type: application
+    urls:
+    - https://github.com/kubeai-project/kubeai/releases/download/helm-chart-kubeai-0.23.0/kubeai-0.23.0.tgz
+    version: 0.23.0
+  - apiVersion: v2
     appVersion: v0.22.1
     created: "2025-10-15T14:37:24.093251363Z"
     dependencies:
@@ -968,6 +998,22 @@ entries:
   models:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2025-11-24T11:27:00.241659603Z"
+    description: A Helm chart for Kubernetes
+    digest: 6a1175a48f558d90d3f1853bf57b0e702258a2092603ccbcf5756992b858e153
+    maintainers:
+    - name: nstogner
+      url: https://www.linkedin.com/in/nstogner/
+    - email: sammiestoel@gmail.com
+      name: samos123
+      url: https://www.linkedin.com/in/samstoelinga/
+    name: models
+    type: application
+    urls:
+    - https://github.com/kubeai-project/kubeai/releases/download/helm-chart-models-0.23.0/models-0.23.0.tgz
+    version: 0.23.0
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2025-05-25T06:49:08.434973564Z"
     description: A Helm chart for Kubernetes
     digest: 09c327bbf7c910f8b61af55bb97a7df18e11bc486c222aefa3618743c6531753
@@ -1222,4 +1268,4 @@ entries:
     urls:
     - https://github.com/substratusai/kubeai/releases/download/kubeai-helm-chart-0.4.1/models-0.4.1.tgz
     version: 0.4.1
-generated: "2025-10-15T14:37:24.093522271Z"
+generated: "2025-11-24T11:27:00.242058869Z"
