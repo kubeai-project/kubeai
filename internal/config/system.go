@@ -81,6 +81,15 @@ func (s *System) DefaultAndValidate() error {
 		s.CacheProfiles = map[string]CacheProfile{}
 	}
 
+	for name, profile := range s.CacheProfiles {
+		if profile.SharedFilesystem != nil {
+			if profile.SharedFilesystem.StorageSize == "" {
+				profile.SharedFilesystem.StorageSize = "10Gi"
+			}
+		}
+		s.CacheProfiles[name] = profile
+	}
+
 	return validator.New(validator.WithRequiredStructEnabled()).Struct(s)
 }
 
@@ -209,6 +218,9 @@ type CacheSharedFilesystem struct {
 	// PersistentVolumeName is the name of the PersistentVolume to use for the shared filesystem.
 	// This is usually used if you have an existing filesystem that you want to use.
 	PersistentVolumeName string `json:"persistentVolumeName,omitempty" validate:"required_without=StorageClassName"`
+	// StorageSize is the size of the PVC to request for the shared filesystem.
+	// Defaults to "10Gi" if not specified.
+	StorageSize string `json:"storageSize,omitempty"`
 }
 
 type MessageStream struct {

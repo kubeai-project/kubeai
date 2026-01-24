@@ -12,6 +12,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -167,4 +168,93 @@ func TestCacheSharedFilesystem(t *testing.T) {
 			assert.Len(t, jobPodList.Items, 0)
 		}
 	}, 5*time.Second, time.Second/10, "All Job Pods should be deleted")
+}
+
+func TestCacheSharedFilesystemCustomStorageSize(t *testing.T) {
+	// Configure cache profile with custom storage size
+	const (
+		cacheProfileName  = "custom-size-cache"
+		customStorageSize = "50Gi"
+	)
+	sysCfg := baseSysCfg(t)
+	sysCfg.CacheProfiles = map[string]config.CacheProfile{
+		cacheProfileName: {
+			SharedFilesystem: &config.CacheSharedFilesystem{
+				StorageClassName:     "my-storage-class",
+				PersistentVolumeName: "my-pv",
+				StorageSize:          customStorageSize,
+			},
+		},
+	}
+	initTest(t, sysCfg)
+
+	// Create a Model with cache profile
+	m := modelForTest(t)
+	m.Spec.MinReplicas = 1
+	m.Spec.CacheProfile = cacheProfileName
+	require.NoError(t, testK8sClient.Create(testCtx, m))
+
+	// Assert that the expected PVC is created with custom storage size
+	pvc := &corev1.PersistentVolumeClaim{}
+	require.EventuallyWithT(t, func(t *assert.CollectT) {
+		assert.NoError(t, testK8sClient.Get(testCtx, types.NamespacedName{
+			Namespace: m.Namespace,
+			Name:      fmt.Sprintf("shared-model-cache-%s", cacheProfileName),
+		}, pvc))
+	}, 15*time.Second, time.Second/10, "PVC should be created")
+
+	// Verify the storage size is set to the custom value (not the default 10Gi)
+	require.Equal(t, ptr.To("my-storage-class"), pvc.Spec.StorageClassName)
+	require.Equal(t, "my-pv", pvc.Spec.VolumeName)
+	expectedSize := resource.MustParse(customStorageSize)
+	actualSize := pvc.Spec.Resources.Requests[corev1.ResourceStorage]
+	require.True(t, expectedSize.Equal(actualSize),
+		"Expected storage size %s, got %s", expectedSize.String(), actualSize.String())
+
+	// Cleanup: Delete the Model
+	require.NoError(t, testK8sClient.Delete(testCtx, m), "Model deletion should succeed")
+}
+
+func TestCacheSharedFilesystemDefaultStorageSize(t *testing.T) {
+	// Configure cache profile with default storage size
+	const (
+		cacheProfileName = "default-size-cache"
+	)
+	sysCfg := baseSysCfg(t)
+	sysCfg.CacheProfiles = map[string]config.CacheProfile{
+		cacheProfileName: {
+			SharedFilesystem: &config.CacheSharedFilesystem{
+				StorageClassName:     "my-storage-class",
+				PersistentVolumeName: "my-pv",
+				// StorageSize is omitted, defaults to 10Gi
+			},
+		},
+	}
+	initTest(t, sysCfg)
+
+	// Create a Model with cache profile
+	m := modelForTest(t)
+	m.Spec.MinReplicas = 1
+	m.Spec.CacheProfile = cacheProfileName
+	require.NoError(t, testK8sClient.Create(testCtx, m))
+
+	// Assert that the expected PVC is created with default storage size
+	pvc := &corev1.PersistentVolumeClaim{}
+	require.EventuallyWithT(t, func(t *assert.CollectT) {
+		assert.NoError(t, testK8sClient.Get(testCtx, types.NamespacedName{
+			Namespace: m.Namespace,
+			Name:      fmt.Sprintf("shared-model-cache-%s", cacheProfileName),
+		}, pvc))
+	}, 15*time.Second, time.Second/10, "PVC should be created")
+
+	// Verify the storage size is set to the default 10Gi
+	require.Equal(t, ptr.To("my-storage-class"), pvc.Spec.StorageClassName)
+	require.Equal(t, "my-pv", pvc.Spec.VolumeName)
+	expectedSize := resource.MustParse("10Gi")
+	actualSize := pvc.Spec.Resources.Requests[corev1.ResourceStorage]
+	require.True(t, expectedSize.Equal(actualSize),
+		"Expected default storage size %s, got %s", expectedSize.String(), actualSize.String())
+
+	// Cleanup: Delete the Model
+	require.NoError(t, testK8sClient.Delete(testCtx, m), "Model deletion should succeed")
 }

@@ -55,3 +55,40 @@ func TestAutoscalingConfig(t *testing.T) {
 		})
 	}
 }
+
+func TestCacheSharedFilesystemStorageSize(t *testing.T) {
+	cases := []struct {
+		name                string
+		storageSize         string
+		expectedStorageSize string
+	}{
+		{
+			name:                "custom storage size",
+			storageSize:         "50Gi",
+			expectedStorageSize: "50Gi",
+		},
+		{
+			name:                "empty defaults to 10Gi",
+			storageSize:         "",
+			expectedStorageSize: "10Gi",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			sys := config.System{
+				CacheProfiles: map[string]config.CacheProfile{
+					"test": {
+						SharedFilesystem: &config.CacheSharedFilesystem{
+							StorageClassName: "test-storage-class",
+							StorageSize:      c.storageSize,
+						},
+					},
+				},
+			}
+			// Ignore validation error, we only check defaulting logic.
+			_ = sys.DefaultAndValidate()
+			require.Equal(t, c.expectedStorageSize, sys.CacheProfiles["test"].SharedFilesystem.StorageSize)
+		})
+	}
+}

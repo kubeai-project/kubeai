@@ -288,7 +288,7 @@ func (r *ModelReconciler) cachePVCForModel(m *kubeaiv1.Model, c ModelConfig) *co
 		pvc.Spec.VolumeName = c.CacheProfile.SharedFilesystem.PersistentVolumeName
 		pvc.Spec.Resources.Requests = corev1.ResourceList{
 			// https://discuss.huggingface.co/t/how-to-get-model-size/11038/7
-			corev1.ResourceStorage: resource.MustParse("10Gi"),
+			corev1.ResourceStorage: resource.MustParse(c.CacheProfile.SharedFilesystem.StorageSize),
 		}
 	default:
 		panic("unsupported cache profile, this point should not be reached")
