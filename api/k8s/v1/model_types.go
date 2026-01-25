@@ -71,6 +71,12 @@ type ModelSpec struct {
 	// Must be a valid ResourceProfile defined in the system config.
 	ResourceProfile string `json:"resourceProfile,omitempty"`
 
+	// ResourceClaimName is the name of a ResourceClaim to attach to model server Pods.
+	// This uses Kubernetes Dynamic Resource Allocation (DRA) and is referenced as
+	// a Pod resource claim named "gpu-claim" with request "gpu".
+	// +kubebuilder:validation:Optional
+	ResourceClaimName string `json:"resourceClaimName,omitempty"`
+
 	// CacheProfile to be used for caching model artifacts.
 	// Must be a valid CacheProfile defined in the system config.
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf", message="cacheProfile is immutable."

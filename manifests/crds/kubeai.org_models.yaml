@@ -255,6 +255,12 @@ spec:
                   is set to true.
                 format: int32
                 type: integer
+              resourceClaimName:
+                description: |-
+                  ResourceClaimName is the name of a ResourceClaim to attach to model server Pods.
+                  This uses Kubernetes Dynamic Resource Allocation (DRA) and is referenced as
+                  a Pod resource claim named "gpu-claim" with request "gpu".
+                type: string
               resourceProfile:
                 description: |-
                   ResourceProfile required to serve the model.
