@@ -76,15 +76,6 @@ func (r *ModelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res 
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	// Skip Pod reconciliation for external URLs (e.g., ollama://external-service:11434/model)
-	// These models point to existing services and don't need Pods managed by KubeAI
-	if r.isExternalURL(model.Spec.URL) {
-		log.Info("Model uses external URL, skipping Pod reconciliation", "url", model.Spec.URL)
-		// External models are registered via their service endpoints
-		// The LoadBalancer will discover them through Kubernetes Services
-		return ctrl.Result{}, nil
-	}
-
 	status0 := model.Status.DeepCopy()
 
 	defer func() {
@@ -204,22 +195,6 @@ func (r *ModelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res 
 	}
 
 	return ctrl.Result{}, nil
-}
-
-// isExternalURL checks if a model URL points to an external service
-// External URLs (ollama://, http://, https://) indicate pre-existing services
-// that don't need Pod management by KubeAI
-func (r *ModelReconciler) isExternalURL(urlStr string) bool {
-	if urlStr == "" {
-		return false
-	}
-	u, err := parseModelURL(urlStr)
-	if err != nil {
-		return false
-	}
-	// External URLs point to running services (not model files to download)
-	// ollama:// = external Ollama service, http(s):// = generic HTTP backend
-	return u.scheme == "ollama" || u.scheme == "http" || u.scheme == "https"
 }
 
 // SetupWithManager sets up the controller with the Manager.
