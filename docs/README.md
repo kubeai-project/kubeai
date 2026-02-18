@@ -192,7 +192,7 @@ Read about concepts, guides, and API documentation on [kubeai.org](https://www.k
 Let us know about features you are interested in seeing or reach out with questions.
 
 You can also reach the maintainers of this project at:
-* [Slack channel](https://join.slack.com/t/kubeai-project)
+* [Slack channel](https://join.slack.com/t/kubeai-project/shared_invite/zt-3qctram3n-9t1JRU_8PNro7HvBZzoqvg)
 * [Discord channel (archived)](https://discord.gg/JeXhcmjZVm)
 
 Or just reach out on LinkedIn if you want to connect:
