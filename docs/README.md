@@ -203,4 +203,5 @@ Or just reach out on LinkedIn if you want to connect:
 Maintainers:
 
 * [ffais](https://github.com/ffais/) 
-* [m4oc](https://github.com/m4oc)
+* [m4oc](https://github.com/m4oc/)
+* [Davide Rutigliano](https://github.com/DavideRutigliano/)
