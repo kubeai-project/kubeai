@@ -31,7 +31,7 @@ func modelLabelSelectorForTest(t *testing.T) string {
 func modelForTest(t *testing.T) *v1.Model {
 	m := &v1.Model{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      strings.ToLower(t.Name()),
+			Name:      strings.ToLower(truncateString(t.Name(), 39)),
 			Namespace: testNS,
 			Annotations: map[string]string{
 				"test-annotation": "test",
@@ -283,4 +283,13 @@ func logPods(t *testing.T) {
 		fmt.Println(string(yml))
 		fmt.Println("---")
 	}
+}
+
+// safely truncate strings that may contain Unicode characters
+func truncateString(s string, maxLen int) string {
+	runes := []rune(s)
+	if len(runes) <= maxLen {
+		return s
+	}
+	return string(runes[:maxLen])
 }
