@@ -287,9 +287,8 @@ func logPods(t *testing.T) {
 
 // safely truncate strings that may contain Unicode characters
 func truncateString(s string, maxLen int) string {
-	runes := []rune(s)
-	if len(runes) <= maxLen {
+	if len(s) <= maxLen {
 		return s
 	}
-	return string(runes[:maxLen])
+	return s[:maxLen]
 }
