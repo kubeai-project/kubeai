@@ -158,11 +158,11 @@ func (lp *lwsPlan) execute(ctx context.Context, k8sClient client.Client, scheme 
 
 // buildLeaderWorkerSet constructs a complete LeaderWorkerSet manifest for a multi-node model.
 func (r *ModelReconciler) buildLeaderWorkerSet(model *kubeaiv1.Model, cfg ModelConfig) (*lwsv1.LeaderWorkerSet, error) {
-	if model.Spec.Engine != kubeaiv1.VLLMEngine {
-		return nil, fmt.Errorf("multi-node serving only supported with VLLM engine, got %q", model.Spec.Engine)
+	if cfg.PodBuilder == nil {
+		return nil, fmt.Errorf("no pod builder configured for engine %q", model.Spec.Engine)
 	}
 
-	podForModel := r.vLLMPodForModel(model, cfg)
+	podForModel := cfg.PodBuilder(model, cfg)
 	if err := applyJSONPatchToPod(r.ModelServerPods.JSONPatches, podForModel); err != nil {
 		return nil, err
 	}

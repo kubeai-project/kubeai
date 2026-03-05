@@ -63,6 +63,7 @@ func testLWSModelConfig(t *testing.T, r *ModelReconciler) ModelConfig {
 			TensorParallelSize:   2,
 			PipelineParallelSize: 3,
 		},
+		PodBuilder: r.vLLMPodForModel,
 	}
 }
 
@@ -282,15 +283,15 @@ func TestBuildLeaderWorkerSet(t *testing.T) {
 	}
 }
 
-func TestBuildLeaderWorkerSet_NonVLLMEngine(t *testing.T) {
+func TestBuildLeaderWorkerSet_NilPodBuilder(t *testing.T) {
 	r := testLWSReconciler(t)
 	model := testLWSModel(t)
-	model.Spec.Engine = kubeaiv1.OLlamaEngine
 	cfg := testLWSModelConfig(t, r)
+	cfg.PodBuilder = nil // explicitly nil
 
 	_, err := r.buildLeaderWorkerSet(model, cfg)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "VLLM")
+	assert.Contains(t, err.Error(), "no pod builder")
 }
 
 func TestLWSPlan_Execute(t *testing.T) {
