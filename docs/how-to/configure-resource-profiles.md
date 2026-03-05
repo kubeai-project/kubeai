@@ -55,4 +55,5 @@ modelServers:
 
 # Next
 
-See the guide on [how to install models](./install-models.md) which includes how to configure the resource profile to use for a given model.
+- See the guide on [how to install models](./install-models.md) which includes how to configure the resource profile to use for a given model.
+- For models that span multiple nodes, see [how to serve multi-node models](./serve-multi-node-models.md).
