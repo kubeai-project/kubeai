@@ -34,6 +34,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	lwsv1 "sigs.k8s.io/lws/api/leaderworkerset/v1"
 
 	kubeaiv1 "github.com/kubeai-project/kubeai/api/k8s/v1"
 	"github.com/kubeai-project/kubeai/internal/config"
@@ -110,13 +111,22 @@ func (r *ModelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res 
 	}
 
 	if model.DeletionTimestamp != nil {
-		// Get rid of all Pods for the Model.
-		// This should help avoid any issues with cache cleanup.
-		if err := r.DeleteAllOf(ctx, &corev1.Pod{}, client.InNamespace(model.Namespace), client.MatchingLabels{
-			kubeaiv1.PodModelLabel: model.Name,
-		}); err != nil {
-			if !apierrors.IsNotFound(err) {
-				return ctrl.Result{}, fmt.Errorf("deleting all pods: %w", err)
+		if modelConfig.LWSConfig != nil {
+			// Delete all LeaderWorkerSets for the Model.
+			if err := r.DeleteAllOf(ctx, &lwsv1.LeaderWorkerSet{}, client.InNamespace(model.Namespace), client.MatchingLabels{
+				kubeaiv1.PodModelLabel: model.Name,
+			}); err != nil && !apierrors.IsNotFound(err) {
+				return ctrl.Result{}, fmt.Errorf("deleting all LWS: %w", err)
+			}
+		} else {
+			// Get rid of all Pods for the Model.
+			// This should help avoid any issues with cache cleanup.
+			if err := r.DeleteAllOf(ctx, &corev1.Pod{}, client.InNamespace(model.Namespace), client.MatchingLabels{
+				kubeaiv1.PodModelLabel: model.Name,
+			}); err != nil {
+				if !apierrors.IsNotFound(err) {
+					return ctrl.Result{}, fmt.Errorf("deleting all pods: %w", err)
+				}
 			}
 		}
 		if model.Spec.CacheProfile != "" {
@@ -149,18 +159,8 @@ func (r *ModelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res 
 	if err := r.List(ctx, allPods, client.InNamespace(model.Namespace), client.MatchingLabels{
 		kubeaiv1.PodModelLabel: model.Name,
 	}); err != nil {
-		return ctrl.Result{}, fmt.Errorf("listing all node pools: %w", err)
+		return ctrl.Result{}, fmt.Errorf("listing all pods: %w", err)
 	}
-
-	// Summarize all pods.
-	var readyPods int32
-	for _, pod := range allPods.Items {
-		if k8sutils.PodIsReady(&pod) {
-			readyPods++
-		}
-	}
-	model.Status.Replicas.All = int32(len(allPods.Items))
-	model.Status.Replicas.Ready = readyPods
 
 	scaled := false
 	defer func() {
@@ -168,30 +168,36 @@ func (r *ModelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res 
 			// Slow things down to wait for caches to sync.
 			// This is important because the pod plan has some calculations that
 			// assume the cache is up to date.
-			// TODO: Use "epectations" instead of a wait - see the ReplicaSet controller.
+			// TODO: Use "expectations" instead of a wait - see the ReplicaSet controller.
 			time.Sleep(3 * time.Second)
 		}
 	}()
 
-	plan, err := r.calculatePodPlan(allPods, model, modelConfig)
+	// Select the appropriate plan based on whether this is a multi-node (LWS) model.
+	var plan executablePlan
+	if modelConfig.LWSConfig != nil {
+		plan, err = r.calculateLWSPlan(ctx, model, modelConfig)
+	} else {
+		plan, err = r.calculatePodPlan(allPods, model, modelConfig)
+	}
 	if err != nil {
-		log.Error(err, "Failed to calculate pod plan")
+		log.Error(err, "calculating plan")
 		return ctrl.Result{}, nil
 	}
 
-	if plan.containsActions() {
-		var err error
-		scaled, err = plan.execute(ctx, r.Client, r.Scheme)
-		if err != nil {
-			return ctrl.Result{}, fmt.Errorf("executing pod plan: %w", err)
-		}
+	scaled, err = plan.execute(ctx, r.Client, r.Scheme)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("executing plan: %w", err)
 	}
 
-	if err := r.reconcileAdapters(ctx, plan.toRemain, model.Spec.Adapters); err != nil {
-		if errors.Is(err, errReturnEarly) {
-			return ctrl.Result{}, nil
+	// Adapter reconciliation only applies to single-node (pod-based) models.
+	if pp, ok := plan.(*podPlan); ok {
+		if err := r.reconcileAdapters(ctx, pp.toRemain, model.Spec.Adapters); err != nil {
+			if errors.Is(err, errReturnEarly) {
+				return ctrl.Result{}, nil
+			}
+			return ctrl.Result{}, fmt.Errorf("reconciling adapters: %w", err)
 		}
-		return ctrl.Result{}, fmt.Errorf("reconciling adapters: %w", err)
 	}
 
 	return ctrl.Result{}, nil
@@ -205,6 +211,7 @@ func (r *ModelReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.Pod{}).
 		Owns(&corev1.PersistentVolumeClaim{}).
 		Owns(&batchv1.Job{}).
+		Owns(&lwsv1.LeaderWorkerSet{}).
 		Complete(r)
 }
 
@@ -250,8 +257,15 @@ func (r *ModelReconciler) annotationsForModel(m *kubeaiv1.Model) map[string]stri
 type ModelConfig struct {
 	config.CacheProfile
 	config.ResourceProfile
-	Image  string
-	Source modelSource
+	Image     string
+	Source    modelSource
+	LWSConfig *LWSConfig
+}
+
+// LWSConfig holds multi-node group configuration for LeaderWorkerSet.
+type LWSConfig struct {
+	TensorParallelSize   int
+	PipelineParallelSize int // Also used as LWS group size
 }
 
 func (r *ModelReconciler) getModelConfig(model *kubeaiv1.Model) (ModelConfig, error) {
@@ -272,13 +286,26 @@ func (r *ModelReconciler) getModelConfig(model *kubeaiv1.Model) (ModelConfig, er
 	}
 
 	split := strings.Split(model.Spec.ResourceProfile, ":")
-	if len(split) != 2 {
-		return result, fmt.Errorf("invalid resource profile: %q, should match <name>:<multiple>, example: nvidia-gpu-l4:2", model.Spec.ResourceProfile)
+	if len(split) != 2 && len(split) != 3 {
+		return result, fmt.Errorf("invalid resource profile: %q, should match <name>:<count> or <name>:<tp>:<pp>, example: nvidia-gpu-l4:2 or nvidia-gpu-l4:2:3", model.Spec.ResourceProfile)
 	}
 	name := split[0]
 	multiple, err := strconv.Atoi(split[1])
 	if err != nil {
-		return result, fmt.Errorf("invalid multiple in resource profile multiple: %q: %w", split[1], err)
+		return result, fmt.Errorf("invalid multiple in resource profile: %q: %w", split[1], err)
+	}
+	if len(split) == 3 {
+		ppSize, err := strconv.Atoi(split[2])
+		if err != nil {
+			return result, fmt.Errorf("invalid pipeline-parallel size in resource profile: %q: %w", split[2], err)
+		}
+		if model.Spec.Engine != kubeaiv1.VLLMEngine {
+			return result, fmt.Errorf("multi-node (LWS) resource profiles only supported with VLLM engine, got %q", model.Spec.Engine)
+		}
+		result.LWSConfig = &LWSConfig{
+			TensorParallelSize:   multiple,
+			PipelineParallelSize: ppSize,
+		}
 	}
 
 	profile, ok := r.ResourceProfiles[name]

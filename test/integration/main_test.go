@@ -81,7 +81,7 @@ func TestMain(m *testing.M) {
 
 	// Setup Kubernetes environment.
 	testEnv = &envtest.Environment{
-		CRDDirectoryPaths:     []string{"../../manifests/crds"},
+		CRDDirectoryPaths:     []string{"../../manifests/crds", "external/crds"},
 		ErrorIfCRDPathMissing: true,
 	}
 	var err error

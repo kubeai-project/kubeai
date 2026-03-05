@@ -18,6 +18,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
+// executablePlan is the interface both podPlan and lwsPlan implement.
+// execute returns true if a scaling action was taken.
+type executablePlan interface {
+	execute(ctx context.Context, client client.Client, scheme *runtime.Scheme) (scaled bool, err error)
+}
+
 // calculatePodPlan calculates the Pod plan for the given Model.
 // It assumes the list of Pods represents an accurate snapshot of the current state.
 // It returns a Pod plan that contains Pods to create and delete.
@@ -72,6 +78,10 @@ func (r *ModelReconciler) calculatePodPlan(allPods *corev1.PodList, model *kubea
 			outOfDate = append(outOfDate, p)
 		}
 	}
+
+	// Set model status from observed pods.
+	model.Status.Replicas.All = int32(len(allPods.Items))
+	model.Status.Replicas.Ready = int32(readyAll)
 
 	var (
 		details  []string
