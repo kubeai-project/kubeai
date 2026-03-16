@@ -113,7 +113,6 @@ func (lp *lwsPlan) execute(ctx context.Context, k8sClient client.Client, scheme 
 
 	var scaled bool
 
-	// Delete
 	if lp.toDelete != nil {
 		logger.Info("Deleting LeaderWorkerSet", "name", lp.toDelete.Name)
 		if err := k8sClient.Delete(ctx, lp.toDelete); err != nil {
@@ -125,7 +124,6 @@ func (lp *lwsPlan) execute(ctx context.Context, k8sClient client.Client, scheme 
 		scaled = true
 	}
 
-	// Create
 	if lp.toCreate != nil {
 		logger.Info("Creating LeaderWorkerSet", "name", lp.toCreate.Name)
 		if err := ctrl.SetControllerReference(lp.model, lp.toCreate, scheme); err != nil {
@@ -141,7 +139,6 @@ func (lp *lwsPlan) execute(ctx context.Context, k8sClient client.Client, scheme 
 		scaled = true
 	}
 
-	// Scale via the scale sub-resource
 	if lp.toScale != nil {
 		logger.Info("Scaling LeaderWorkerSet", "name", lp.toScale.Name, "replicas", *lp.toScale.Spec.Replicas)
 		scale := &autoscalingv1.Scale{
@@ -177,19 +174,16 @@ func (r *ModelReconciler) buildLeaderWorkerSet(model *kubeaiv1.Model, cfg ModelC
 	headPod := podForModel.DeepCopy()
 	headPod.ObjectMeta.Labels[LabelGroupRole] = GroupRoleHead
 
-	// Add Ray head port for inter-node communication.
 	headPod.Spec.Containers[0].Ports = append(headPod.Spec.Containers[0].Ports, corev1.ContainerPort{
 		Name:          rayPortName,
 		ContainerPort: int32(rayPort),
 		Protocol:      corev1.ProtocolTCP,
 	})
 
-	// Add multi-node env vars.
 	headPod.Spec.Containers[0].Env = append(headPod.Spec.Containers[0].Env,
 		corev1.EnvVar{Name: "LWS_GROUP_SIZE", Value: strconv.Itoa(cfg.LWSConfig.PipelineParallelSize)},
 	)
 
-	// Add tensor-parallel and pipeline-parallel args to vLLM command.
 	headPod.Spec.Containers[0].Args = append(headPod.Spec.Containers[0].Args,
 		fmt.Sprintf("--tensor-parallel-size=%d", cfg.LWSConfig.TensorParallelSize),
 		fmt.Sprintf("--pipeline-parallel-size=%d", cfg.LWSConfig.PipelineParallelSize),
@@ -212,7 +206,6 @@ func (r *ModelReconciler) buildLeaderWorkerSet(model *kubeaiv1.Model, cfg ModelC
 	}
 	workerPod.Spec.Containers[0].Args = nil
 
-	// Worker env vars for connecting to the leader.
 	workerPod.Spec.Containers[0].Env = append(workerPod.Spec.Containers[0].Env,
 		corev1.EnvVar{
 			Name: "LWS_LEADER_ADDRESS",
@@ -224,14 +217,12 @@ func (r *ModelReconciler) buildLeaderWorkerSet(model *kubeaiv1.Model, cfg ModelC
 		},
 	)
 
-	// Worker ports: only Ray.
 	workerPod.Spec.Containers[0].Ports = []corev1.ContainerPort{{
 		Name:          rayPortName,
 		ContainerPort: int32(rayPort),
 		Protocol:      corev1.ProtocolTCP,
 	}}
 
-	// Worker health probes: check Ray process is running.
 	rayProbe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			Exec: &corev1.ExecAction{
@@ -252,14 +243,12 @@ func (r *ModelReconciler) buildLeaderWorkerSet(model *kubeaiv1.Model, cfg ModelC
 		InitialDelaySeconds: 10,
 		PeriodSeconds:       5,
 		TimeoutSeconds:      5,
-		// Give 30 minutes (~360 * 5s) for the worker to join the Ray cluster.
-		FailureThreshold: 360,
+		FailureThreshold:    20,
 	}
 	workerPod.Spec.Containers[0].LivenessProbe = rayProbe
 	workerPod.Spec.Containers[0].ReadinessProbe = rayProbe
 	workerPod.Spec.Containers[0].StartupProbe = workerStartupProbe
 
-	// --- LeaderWorkerSet ---
 	lws := &lwsv1.LeaderWorkerSet{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "leaderworkerset.x-k8s.io/v1",
