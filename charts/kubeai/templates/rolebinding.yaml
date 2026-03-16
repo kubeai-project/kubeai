@@ -10,4 +10,6 @@ roleRef:
   name: {{ include "kubeai.fullname" . }}
 subjects:
 - kind: ServiceAccount
+  apiGroup: ""
   name: {{ include "kubeai.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
