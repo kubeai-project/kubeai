@@ -52,6 +52,7 @@ type ModelSpec struct {
 	//
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:XValidation:rule="self.startsWith(\"hf://\") || self.startsWith(\"pvc://\") || self.startsWith(\"ollama://\") || self.startsWith(\"s3://\") || self.startsWith(\"gs://\") || self.startsWith(\"oss://\")", message="url must start with \"hf://\", \"pvc://\", \"ollama://\", \"s3://\", \"gs://\", or \"oss://\" and not be empty."
+	// +kubebuilder:validation:Pattern=`^([a-z0-9]+):\/\/([a-zA-Z0-9._:/-]+)(\?.*)?$`
 	URL string `json:"url"`
 
 	Adapters []Adapter `json:"adapters,omitempty"`

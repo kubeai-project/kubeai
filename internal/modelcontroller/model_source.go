@@ -226,7 +226,8 @@ func (r *ModelReconciler) pvcPodAdditions(url modelURL) *modelSourcePodAdditions
 	}
 }
 
-var modelURLRegex = regexp.MustCompile(`^([a-z0-9]+):\/\/([^?]+)(\?.*)?$`)
+var modelURLRegex = regexp.MustCompile(`^([a-z0-9]+):\/\/([a-zA-Z0-9._:/-]+)(\?.*)?$`)
+var safeQueryParamModelRef = regexp.MustCompile(`^[a-zA-Z0-9._:/-]+$`)
 
 func parseModelURL(urlStr string) (modelURL, error) {
 	matches := modelURLRegex.FindStringSubmatch(urlStr)
@@ -242,19 +243,24 @@ func parseModelURL(urlStr string) (modelURL, error) {
 	if len(matches) == 4 { // check for query parameters
 		queryParams := strings.TrimPrefix(matches[3], "?")
 		urlParser, err := url.ParseQuery(queryParams)
-		if err == nil {
-			modelname := urlParser.Get("model") // e.g. pvc://my-pvc?model=qwen2:0.5b
-			if modelname != "" {
+		if err != nil {
+			return modelURL{}, fmt.Errorf("invalid query parameters in model URL: %s", urlStr)
+		}
+		modelname := urlParser.Get("model") // e.g. pvc://my-pvc?model=qwen2:0.5b
+		if modelname != "" {
+			if safeQueryParamModelRef.MatchString(modelname) {
 				modelParam = modelname
+			} else {
+				return modelURL{}, fmt.Errorf("invalid model parameter in URL: %s", modelname)
 			}
-			insecureVal := urlParser.Get("insecure") // e.g. ollama://my-registry/model?insecure=true
-			if strings.ToLower(insecureVal) == "true" {
-				insecure = true
-			}
-			pullVal := urlParser.Get("pull") // e.g. ollama://my-registry/model?pull=false
-			if strings.ToLower(pullVal) == "false" {
-				pull = false
-			}
+		}
+		insecureVal := urlParser.Get("insecure") // e.g. ollama://my-registry/model?insecure=true
+		if strings.ToLower(insecureVal) == "true" {
+			insecure = true
+		}
+		pullVal := urlParser.Get("pull") // e.g. ollama://my-registry/model?pull=false
+		if strings.ToLower(pullVal) == "false" {
+			pull = false
 		}
 	}
 

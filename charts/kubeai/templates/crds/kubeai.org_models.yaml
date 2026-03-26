@@ -295,6 +295,7 @@ spec:
                   For OLlama engine:
 
                   "ollama://<model>"
+                pattern: ^([a-z0-9]+):\/\/([a-zA-Z0-9._:/-]+)(\?.*)?$
                 type: string
                 x-kubernetes-validations:
                 - message: url must start with "hf://", "pvc://", "ollama://", "s3://",
