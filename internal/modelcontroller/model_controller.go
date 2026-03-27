@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"reflect"
 	"strconv"
 	"strings"
@@ -216,13 +217,17 @@ const (
 
 func labelsForModel(m *kubeaiv1.Model) map[string]string {
 	engineLowerCase := strings.ToLower(m.Spec.Engine)
-	return map[string]string{
+	podlbmap := map[string]string{
 		"app":                          "model",
 		"model":                        m.Name,
 		appKubernetesIOName:            engineLowerCase,
 		"app.kubernetes.io/instance":   engineLowerCase + "-" + m.Name,
 		"app.kubernetes.io/managed-by": "kubeai",
 	}
+	if m.Labels != nil {
+		maps.Copy(podlbmap, m.Labels)
+	}
+	return podlbmap
 }
 
 func (r *ModelReconciler) annotationsForModel(m *kubeaiv1.Model) map[string]string {
