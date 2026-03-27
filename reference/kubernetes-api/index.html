@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -2549,7 +2549,7 @@
 <td><code>url</code> <em>string</em></td>
 <td>URL of the model to be served.<br />Currently the following formats are supported:<br />For VLLM, FasterWhisper, Infinity engines:<br />"hf://<repo>/<model>"<br />"pvc://<pvcName>"<br />"pvc://<pvcName>/<pvcSubpath>"<br />"gs://<bucket>/<path>" (only with cacheProfile)<br />"oss://<bucket>/<path>" (only with cacheProfile)<br />"s3://<bucket>/<path>" (only with cacheProfile)<br />For OLlama engine:<br />"ollama://<model>"</td>
 <td></td>
-<td>Required: {} <br /></td>
+<td>Pattern: <code>^([a-z0-9]+):\/\/([a-zA-Z0-9._:/-]+)(\?.*)?$</code> <br />Required: {} <br /></td>
 </tr>
 <tr>
 <td><code>adapters</code> <em><a href="#adapter">Adapter</a> array</em></td>
