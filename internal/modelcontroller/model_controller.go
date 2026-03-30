@@ -20,7 +20,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"maps"
 	"reflect"
 	"strconv"
 	"strings"
@@ -225,10 +224,10 @@ func labelsForModel(m *kubeaiv1.Model) map[string]string {
 		"app.kubernetes.io/managed-by": "kubeai",
 	}
 	for k, v := range m.Labels {
-        if _, exists := podlbmap[k]; !exists {
-            podlbmap[k] = v
-        }
-    }
+		if _, exists := podlbmap[k]; !exists {
+			podlbmap[k] = v
+		}
+	}
 	return podlbmap
 }
 
