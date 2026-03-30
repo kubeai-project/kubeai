@@ -224,9 +224,11 @@ func labelsForModel(m *kubeaiv1.Model) map[string]string {
 		"app.kubernetes.io/instance":   engineLowerCase + "-" + m.Name,
 		"app.kubernetes.io/managed-by": "kubeai",
 	}
-	if m.Labels != nil {
-		maps.Copy(podlbmap, m.Labels)
-	}
+	for k, v := range m.Labels {
+        if _, exists := podlbmap[k]; !exists {
+            podlbmap[k] = v
+        }
+    }
 	return podlbmap
 }
 
