@@ -151,6 +151,21 @@ func Test_calculatePodPlan(t *testing.T) {
 			wantNCreations: 0,
 			wantDeletions:  []string{"ready-out-of-date-3"},
 		},
+		{
+			name: "terminating pods excluded from plan calculation",
+			pods: []corev1.Pod{
+				testPod("ready-new-1", expectedHash, ready),
+				testPod("ready-new-2", expectedHash, ready),
+				func() corev1.Pod {
+					p := testPod("terminating-old", "old-hash", unready)
+					now := metav1.Now()
+					p.DeletionTimestamp = &now
+					return p
+				}(),
+			},
+			wantNCreations: 1,   // still needs 1 more pod to reach replicas=3
+			wantDeletions:  nil, // terminating pod should NOT be re-deleted
+		},
 	}
 
 	for _, c := range cases {

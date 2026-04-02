@@ -57,6 +57,15 @@ func (r *ModelReconciler) calculatePodPlan(allPods *corev1.PodList, model *kubea
 		return p.Namespace + "/" + p.Name
 	}
 
+	// Skip terminating pods to avoid inflating observedReplicas during rollouts.
+	nonTerminating := allPods.Items[:0]
+	for _, p := range allPods.Items {
+		if p.DeletionTimestamp == nil {
+			nonTerminating = append(nonTerminating, p)
+		}
+	}
+	allPods.Items = nonTerminating
+
 	sortPodsByDeletionOrder(allPods.Items, expectedHash)
 
 	for _, p := range allPods.Items {
