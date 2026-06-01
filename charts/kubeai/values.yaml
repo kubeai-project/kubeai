@@ -35,6 +35,9 @@ secrets:
     # If not set, and create is true, the name is generated using the fullname template.
     # The token value is pulled from the key, "token".
     name: ""
+  oci:
+    # The name of the secret to use to authenticate to OCI registries.
+    name: ""
 
 modelServers:
   VLLM:

@@ -36,6 +36,8 @@ func (r *ModelReconciler) parseModelSource(urlStr string) (modelSource, error) {
 		src.modelSourcePodAdditions = r.authForHuggingfaceHub()
 	case u.scheme == "pvc":
 		src.modelSourcePodAdditions = r.pvcPodAdditions(u)
+	case u.scheme == "oci":
+		src.modelSourcePodAdditions = r.ociPodAdditions(u)
 	default:
 		src.modelSourcePodAdditions = &modelSourcePodAdditions{}
 	}
@@ -43,10 +45,11 @@ func (r *ModelReconciler) parseModelSource(urlStr string) (modelSource, error) {
 }
 
 type modelSourcePodAdditions struct {
-	envFrom      []corev1.EnvFromSource
-	env          []corev1.EnvVar
-	volumes      []corev1.Volume
-	volumeMounts []corev1.VolumeMount
+	envFrom          []corev1.EnvFromSource
+	env              []corev1.EnvVar
+	volumes          []corev1.Volume
+	volumeMounts     []corev1.VolumeMount
+	imagePullSecrets []corev1.LocalObjectReference
 }
 
 func (c *modelSourcePodAdditions) append(other *modelSourcePodAdditions) {
@@ -54,6 +57,7 @@ func (c *modelSourcePodAdditions) append(other *modelSourcePodAdditions) {
 	c.env = append(c.env, other.env...)
 	c.volumes = append(c.volumes, other.volumes...)
 	c.volumeMounts = append(c.volumeMounts, other.volumeMounts...)
+	c.imagePullSecrets = append(c.imagePullSecrets, other.imagePullSecrets...)
 }
 
 func (c *modelSourcePodAdditions) applyToPodSpec(spec *corev1.PodSpec, containerIndex int) {
@@ -61,6 +65,7 @@ func (c *modelSourcePodAdditions) applyToPodSpec(spec *corev1.PodSpec, container
 	spec.Containers[containerIndex].Env = append(spec.Containers[containerIndex].Env, c.env...)
 	spec.Volumes = append(spec.Volumes, c.volumes...)
 	spec.Containers[containerIndex].VolumeMounts = append(spec.Containers[containerIndex].VolumeMounts, c.volumeMounts...)
+	spec.ImagePullSecrets = append(spec.ImagePullSecrets, c.imagePullSecrets...)
 }
 
 func (r *ModelReconciler) modelAuthCredentialsForAllSources() *modelSourcePodAdditions {
@@ -221,6 +226,34 @@ func (r *ModelReconciler) pvcPodAdditions(url modelURL) *modelSourcePodAdditions
 				Name:      volumeName,
 				MountPath: "/model",
 				SubPath:   path,
+			},
+		},
+	}
+}
+
+func (r *ModelReconciler) ociPodAdditions(url modelURL) *modelSourcePodAdditions {
+	volumeName := "model"
+	return &modelSourcePodAdditions{
+		volumes: []corev1.Volume{
+			{
+				Name: volumeName,
+				VolumeSource: corev1.VolumeSource{
+					Image: &corev1.ImageVolumeSource{
+						Reference:  url.name + "/" + url.path,
+						PullPolicy: corev1.PullIfNotPresent,
+					},
+				},
+			},
+		},
+		volumeMounts: []corev1.VolumeMount{
+			{
+				Name:      volumeName,
+				MountPath: "/model",
+			},
+		},
+		imagePullSecrets: []corev1.LocalObjectReference{
+			{
+				Name: r.SecretNames.OCI,
 			},
 		},
 	}

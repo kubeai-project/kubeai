@@ -1,0 +1,23 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: oci-models
+# build:
+#   artifacts:
+#     - image: ghcr.io/kubeai-project/kubeai
+#   local:
+#     push: false
+deploy:
+  helm:
+    releases:
+      - name: kubeai
+        chartPath: ./charts/kubeai
+        valuesFiles:
+          - ./test/e2e/oci-model/values.yaml
+        skipBuildDependencies: true
+portForward:
+  - resourceType: service
+    resourceName: kubeai
+    namespace: default
+    port: 80
+    localPort: 8000

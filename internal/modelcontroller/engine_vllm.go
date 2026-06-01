@@ -27,7 +27,7 @@ func (r *ModelReconciler) vLLMPodForModel(m *kubeaiv1.Model, c ModelConfig) *cor
 	}
 	// The vllmModelFlag can be safely overridden because validation logic ensures
 	// that a model with PVC source and cacheProfile won't be admitted.
-	if c.Source.url.scheme == "pvc" {
+	if c.Source.url.scheme == "pvc" || c.Source.url.scheme == "oci" {
 		vllmModelFlag = "/model"
 	}
 

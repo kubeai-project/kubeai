@@ -1,0 +1,11 @@
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: opt-125m-cpu
+spec:
+  features: [TextGeneration]
+  owner: facebook
+  url: oci://ghcr.io/kubeai-project/facebook-opt-125m:oci-image
+  engine: VLLM
+  resourceProfile: cpu:1
+  minReplicas: 1

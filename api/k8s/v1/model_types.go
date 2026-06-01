@@ -42,6 +42,7 @@ type ModelSpec struct {
 	// "hf://<repo>/<model>"
 	// "pvc://<pvcName>"
 	// "pvc://<pvcName>/<pvcSubpath>"
+	// "oci://<registry>/<repository>:<tag>"
 	// "gs://<bucket>/<path>" (only with cacheProfile)
 	// "oss://<bucket>/<path>" (only with cacheProfile)
 	// "s3://<bucket>/<path>" (only with cacheProfile)
@@ -51,7 +52,7 @@ type ModelSpec struct {
 	// "ollama://<model>"
 	//
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:XValidation:rule="self.startsWith(\"hf://\") || self.startsWith(\"pvc://\") || self.startsWith(\"ollama://\") || self.startsWith(\"s3://\") || self.startsWith(\"gs://\") || self.startsWith(\"oss://\")", message="url must start with \"hf://\", \"pvc://\", \"ollama://\", \"s3://\", \"gs://\", or \"oss://\" and not be empty."
+	// +kubebuilder:validation:XValidation:rule="self.startsWith(\"oci://\") || self.startsWith(\"hf://\") || self.startsWith(\"pvc://\") || self.startsWith(\"ollama://\") || self.startsWith(\"s3://\") || self.startsWith(\"gs://\") || self.startsWith(\"oss://\")", message="url must start with \"hf://\", \"pvc://\", \"ollama://\", \"s3://\", \"gs://\", or \"oss://\" and not be empty."
 	// +kubebuilder:validation:Pattern=`^([a-z0-9]+):\/\/([a-zA-Z0-9._:/-]+)(\?.*)?$`
 	URL string `json:"url"`
 

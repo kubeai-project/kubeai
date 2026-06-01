@@ -159,6 +159,7 @@ type SecretNames struct {
 	AWS         string `json:"aws" required:"true"`
 	GCP         string `json:"gcp" required:"true"`
 	Huggingface string `json:"huggingface" required:"true"`
+	OCI         string `json:"oci" required:"false"`
 }
 
 type Messaging struct {
