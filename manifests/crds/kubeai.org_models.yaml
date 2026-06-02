@@ -298,8 +298,8 @@ spec:
                 pattern: ^([a-z0-9]+):\/\/([a-zA-Z0-9._:/-]+)(\?.*)?$
                 type: string
                 x-kubernetes-validations:
-                - message: url must start with "hf://", "pvc://", "ollama://", "s3://",
-                    "gs://", or "oss://" and not be empty.
+                - message: url must start with "oci://", "hf://", "pvc://", "ollama://",
+                    "s3://", "gs://", or "oss://" and not be empty.
                   rule: self.startsWith("oci://") || self.startsWith("hf://") || self.startsWith("pvc://")
                     || self.startsWith("ollama://") || self.startsWith("s3://") ||
                     self.startsWith("gs://") || self.startsWith("oss://")
