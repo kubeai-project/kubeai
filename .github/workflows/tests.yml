@@ -74,6 +74,7 @@ jobs:
         - "model-files"
         - "s3-model"
         - "lora-adapter"
+        - "oci-model"
     steps:
       - name: Aggressive cleanup
         if: matrix.testcase == 's3-model'
