@@ -5,6 +5,11 @@ metadata:
 deploy:
   helm:
     releases:
+      - name: lws
+        remoteChart: oci://registry.k8s.io/lws/charts/lws
+        version: 0.8.0
+        namespace: default # lws-system
+        createNamespace: true
       - name: kubeai
         chartPath: ./charts/kubeai
         valuesFiles:

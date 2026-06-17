@@ -2,9 +2,6 @@
 
 source $REPO_DIR/test/e2e/common.sh
 
-LWS_VERSION=v0.8.0
-kubectl apply --server-side -f https://github.com/kubernetes-sigs/lws/releases/download/$LWS_VERSION/manifests.yaml
-
 PV_HOST_PATH=/tmp/model
 
 model="distributed-qwen-500m-cpu"
