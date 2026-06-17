@@ -57,6 +57,7 @@ type ModelReconciler struct {
 	Scheme                  *runtime.Scheme
 	VLLMClient              *vllmclient.Client
 	Namespace               string
+	DistributedInference    bool
 	AllowPodAddressOverride bool
 	SecretNames             config.SecretNames
 	ResourceProfiles        map[string]config.ResourceProfile
@@ -205,13 +206,17 @@ func (r *ModelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res 
 // SetupWithManager sets up the controller with the Manager.
 func (r *ModelReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// TODO: Set Model concurrency. Pod rollouts can be slow.
-	return ctrl.NewControllerManagedBy(mgr).
+	c := ctrl.NewControllerManagedBy(mgr).
 		For(&kubeaiv1.Model{}).
 		Owns(&corev1.Pod{}).
 		Owns(&corev1.PersistentVolumeClaim{}).
-		Owns(&batchv1.Job{}).
-		Owns(&lwsv1.LeaderWorkerSet{}).
-		Complete(r)
+		Owns(&batchv1.Job{})
+
+	if r.DistributedInference {
+		c = c.Owns(&lwsv1.LeaderWorkerSet{})
+	}
+
+	return c.Complete(r)
 }
 
 var errReturnEarly = fmt.Errorf("return early")

@@ -31,6 +31,7 @@ rules:
   - patch
   - update
   - watch
+{{- if .Values.distributedInference }}
 - apiGroups:
   - leaderworkerset.x-k8s.io
   resources:
@@ -58,6 +59,7 @@ rules:
   - get
   - patch
   - update
+{{- end }}
 - apiGroups:
   - ""
   resources:

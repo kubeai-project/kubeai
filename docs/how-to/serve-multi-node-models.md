@@ -18,6 +18,18 @@ Only head pods receive inference traffic; worker pods are excluded from load bal
 - KubeAI installed (see [installation guides](../installation/any.md))
 - [LeaderWorkerSet (LWS)](https://github.com/kubernetes-sigs/lws) controller installed in your cluster
 - Multiple GPU nodes available
+- `distributedInference` enabled in KubeAI system configuration (Helm value: `distributedInference: true`)
+
+> [!WARNING]
+> The prebuilt `vllm/vllm-openai` image does not include Ray integration required for multi-node serving.
+> Build and use your own image with Ray installed.
+>
+> Example Dockerfile:
+>
+> ```dockerfile
+> FROM vllm/vllm-openai
+> RUN pip install "ray[cgraph]"
+> ```
 
 Install the LWS controller:
 ```bash

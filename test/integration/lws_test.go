@@ -15,6 +15,7 @@ import (
 
 func TestLWSMultiNode(t *testing.T) {
 	sysCfg := baseSysCfg(t)
+	sysCfg.DistributedInference = true
 	initTest(t, sysCfg)
 
 	m := modelForTest(t)

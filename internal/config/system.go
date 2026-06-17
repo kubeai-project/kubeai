@@ -39,6 +39,8 @@ type System struct {
 
 	LeaderElection LeaderElection `json:"leaderElection"`
 
+	DistributedInference bool `json:"distributedInference"`
+
 	// AllowPodAddressOverride will allow the pod address to be overridden by the Model objects. Useful for development purposes.
 	AllowPodAddressOverride bool `json:"allowPodAddressOverride"`
 

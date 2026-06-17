@@ -47,3 +47,4 @@ data:
       stateConfigMapName: {{ include "models.autoscalerStateConfigMapName" . }}
     messaging:
       {{- .Values.messaging | toYaml | nindent 6 }}
+    distributedInference: {{ .Values.distributedInference }}

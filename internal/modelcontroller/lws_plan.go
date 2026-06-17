@@ -35,12 +35,23 @@ const (
 
 // calculateLWSPlan looks up the existing LeaderWorkerSet for the model and
 // returns a plan to create, scale, or leave it unchanged.
-func (r *ModelReconciler) calculateLWSPlan(ctx context.Context, model *kubeaiv1.Model, cfg ModelConfig) (executablePlan, error) {
+func (r *ModelReconciler) calculateLWSPlan(ctx context.Context, model *kubeaiv1.Model, cfg ModelConfig) (*lwsPlan, error) {
 	if cfg.LWSConfig.PipelineParallelSize < 2 {
 		return nil, errors.New("LWS group size (pipeline-parallel) must be at least 2")
 	}
 
 	plan := &lwsPlan{model: model}
+
+	newLWS, err := r.buildLeaderWorkerSet(model, cfg)
+	if err != nil {
+		return nil, fmt.Errorf("building LeaderWorkerSet: %w", err)
+	}
+
+	leaderExpededHash := k8sutils.PodHash(newLWS.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec)
+	k8sutils.SetLabel(newLWS, kubeaiv1.LeaderHashLabel, leaderExpededHash)
+
+	workerExpededHash := k8sutils.PodHash(newLWS.Spec.LeaderWorkerTemplate.WorkerTemplate.Spec)
+	k8sutils.SetLabel(newLWS, kubeaiv1.WorkerHashLabel, workerExpededHash)
 
 	lws := new(lwsv1.LeaderWorkerSet)
 	lwsKey := apitypes.NamespacedName{Name: lwsName(model), Namespace: model.Namespace}
@@ -48,16 +59,23 @@ func (r *ModelReconciler) calculateLWSPlan(ctx context.Context, model *kubeaiv1.
 		if !apierrors.IsNotFound(err) {
 			return nil, fmt.Errorf("getting LeaderWorkerSet: %w", err)
 		}
-		// LWS does not exist yet — build one.
-		newLWS, err := r.buildLeaderWorkerSet(model, cfg)
-		if err != nil {
-			return nil, fmt.Errorf("building LeaderWorkerSet: %w", err)
-		}
 		plan.toCreate = newLWS
 		// Status is zero since nothing is running yet.
 		model.Status.Replicas.All = 0
 		model.Status.Replicas.Ready = 0
 		return plan, nil
+	}
+
+	if k8sutils.GetLabel(lws, kubeaiv1.LeaderHashLabel) != leaderExpededHash ||
+		k8sutils.GetLabel(lws, kubeaiv1.WorkerHashLabel) != workerExpededHash {
+		upgrade := lws.DeepCopy()
+		upgrade.Spec = newLWS.Spec
+		k8sutils.SetLabel(upgrade, kubeaiv1.LeaderHashLabel, leaderExpededHash)
+		k8sutils.SetLabel(upgrade, kubeaiv1.WorkerHashLabel, workerExpededHash)
+		plan.toUpgrade = upgrade
+		plan.details = append(plan.details, "LWS spec changed, rolling update required")
+	} else {
+		plan.details = append(plan.details, "No changes to LWS spec, no rollout needed")
 	}
 
 	// LWS exists — update model status from LWS status.
@@ -98,11 +116,12 @@ func lwsName(model *kubeaiv1.Model) string {
 
 // lwsPlan implements executablePlan for multi-node (LeaderWorkerSet) models.
 type lwsPlan struct {
-	model    *kubeaiv1.Model
-	toCreate *lwsv1.LeaderWorkerSet // nil if no creation needed
-	toScale  *lwsv1.LeaderWorkerSet // nil if no scaling needed
-	toDelete *lwsv1.LeaderWorkerSet // nil if no deletion needed
-	details  []string
+	model     *kubeaiv1.Model
+	toCreate  *lwsv1.LeaderWorkerSet // nil if no creation needed
+	toUpgrade *lwsv1.LeaderWorkerSet // nil if no upgrade needed
+	toScale   *lwsv1.LeaderWorkerSet // nil if no scaling needed
+	toDelete  *lwsv1.LeaderWorkerSet // nil if no deletion needed
+	details   []string
 }
 
 func (lp *lwsPlan) execute(ctx context.Context, k8sClient client.Client, scheme *runtime.Scheme) (bool, error) {
@@ -135,6 +154,17 @@ func (lp *lwsPlan) execute(ctx context.Context, k8sClient client.Client, scheme 
 			} else {
 				return false, fmt.Errorf("creating LeaderWorkerSet: %w", err)
 			}
+		}
+		scaled = true
+	}
+
+	if lp.toUpgrade != nil {
+		logger.Info("Upgrading LeaderWorkerSet", "name", lp.toUpgrade.Name)
+		if err := ctrl.SetControllerReference(lp.model, lp.toUpgrade, scheme); err != nil {
+			return false, fmt.Errorf("setting controller reference for LeaderWorkerSet: %w", err)
+		}
+		if err := k8sClient.Update(ctx, lp.toUpgrade, k8sutils.DefaultUpdateOptions()); err != nil {
+			return false, fmt.Errorf("upgrading LeaderWorkerSet: %w", err)
 		}
 		scaled = true
 	}
@@ -184,9 +214,17 @@ func (r *ModelReconciler) buildLeaderWorkerSet(model *kubeaiv1.Model, cfg ModelC
 		corev1.EnvVar{Name: "LWS_GROUP_SIZE", Value: strconv.Itoa(cfg.LWSConfig.PipelineParallelSize)},
 	)
 
+	const rayLeaderBootstrap = "bash /vllm-workspace/examples/online_serving/multi-node-serving.sh leader --ray_cluster_size=$(LWS_GROUP_SIZE)"
+	vllmEntrypoint := strings.Join(headPod.Spec.Containers[0].Command, " ")
+	headPod.Spec.Containers[0].Command = []string{
+		"bash", "-c",
+		fmt.Sprintf("%s && %s \"$@\"", rayLeaderBootstrap, vllmEntrypoint),
+	}
+
 	headPod.Spec.Containers[0].Args = append(headPod.Spec.Containers[0].Args,
 		fmt.Sprintf("--tensor-parallel-size=%d", cfg.LWSConfig.TensorParallelSize),
 		fmt.Sprintf("--pipeline-parallel-size=%d", cfg.LWSConfig.PipelineParallelSize),
+		"--distributed-executor-backend=ray",
 	)
 
 	// Head uses HTTP health probes on the vLLM server (already set by vLLMPodForModel).
@@ -202,7 +240,7 @@ func (r *ModelReconciler) buildLeaderWorkerSet(model *kubeaiv1.Model, cfg ModelC
 	// Replace the vLLM command with a ray worker start.
 	workerPod.Spec.Containers[0].Command = []string{
 		"bash", "-c",
-		"ray start --address=$(LWS_LEADER_ADDRESS):6379 --block",
+		"bash /vllm-workspace/examples/online_serving/multi-node-serving.sh worker --ray_address=$(LWS_LEADER_ADDRESS)",
 	}
 	workerPod.Spec.Containers[0].Args = nil
 

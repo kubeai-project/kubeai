@@ -1,0 +1,14 @@
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: distributed-qwen-500m-cpu
+spec:
+  features: [TextGeneration]
+  args:
+    - --enforce-eager
+    - --device cpu
+  owner: qwen
+  url: hf://Qwen/Qwen2-0.5B
+  engine: VLLM
+  resourceProfile: cpu:1:2
+  minReplicas: 1

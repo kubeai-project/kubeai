@@ -93,6 +93,10 @@ modelRollouts:
   # The number of replicas to add when rolling out a new model.
   surge: 1
 
+# Enable distributed inference support (LeaderWorkerSet-based multi-node serving).
+# When false, 3-part resource profiles (<name>:<tensor-parallel>:<pipeline-parallel>) are rejected.
+distributedInference: false
+
 metrics:
   prometheusOperator:
     vLLMPodMonitor:

@@ -6,12 +6,14 @@ import (
 
 	kubeaiv1 "github.com/kubeai-project/kubeai/api/k8s/v1"
 	"github.com/kubeai-project/kubeai/internal/config"
+	"github.com/kubeai-project/kubeai/internal/k8sutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	apitypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -21,8 +23,9 @@ import (
 func testLWSReconciler(t *testing.T) *ModelReconciler {
 	t.Helper()
 	return &ModelReconciler{
-		ModelRollouts: config.ModelRollouts{Surge: 1},
-		ModelServers:  config.ModelServers{VLLM: config.ModelServer{Images: map[string]string{"default": "vllm/vllm:test"}}},
+		DistributedInference: true,
+		ModelRollouts:        config.ModelRollouts{Surge: 1},
+		ModelServers:         config.ModelServers{VLLM: config.ModelServer{Images: map[string]string{"default": "vllm/vllm:test"}}},
 	}
 }
 
@@ -83,6 +86,7 @@ func TestCalculateLWSPlan(t *testing.T) {
 		ppSize            int
 		expectCreate      bool
 		expectScale       bool
+		expectUpgrade     bool
 		expectErr         bool
 		expectStatusAll   int32
 		expectStatusReady int32
@@ -134,12 +138,78 @@ func TestCalculateLWSPlan(t *testing.T) {
 			ppSize:    1,
 			expectErr: true,
 		},
+		"Update LWS when model spec changes": {
+			existingLWS: &lwsv1.LeaderWorkerSet{
+				ObjectMeta: metav1.ObjectMeta{Name: "test-model", Namespace: "default"},
+				Spec: lwsv1.LeaderWorkerSetSpec{
+					Replicas: ptr.To[int32](2),
+					LeaderWorkerTemplate: lwsv1.LeaderWorkerTemplate{
+						LeaderTemplate: &corev1.PodTemplateSpec{
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{{
+									Name:  "model-server",
+									Image: "vllm/vllm:test",
+								}},
+							},
+						},
+						WorkerTemplate: corev1.PodTemplateSpec{
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{{
+									Name:  "model-server",
+									Image: "vllm/vllm:test",
+								}},
+							},
+						},
+					}},
+				Status: lwsv1.LeaderWorkerSetStatus{Replicas: 2, ReadyReplicas: 2},
+			},
+			replicas:          2,
+			ppSize:            2,
+			expectStatusAll:   2,
+			expectStatusReady: 2,
+			expectUpgrade:     true,
+		},
 	}
 
 	for name, tt := range specs {
 		t.Run(name, func(t *testing.T) {
 			r := testLWSReconciler(t)
 			scheme := testScheme(t)
+			r.Scheme = scheme
+
+			model := testLWSModel(t)
+			model.Spec.Replicas = ptr.To(tt.replicas)
+
+			cfg := testLWSModelConfig(t, r)
+			cfg.LWSConfig.PipelineParallelSize = tt.ppSize
+
+			if tt.existingLWS != nil {
+				desiredLWS, err := r.buildLeaderWorkerSet(model, cfg)
+				require.NoError(t, err)
+
+				leaderExpededHash := k8sutils.PodHash(desiredLWS.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec)
+				workerExpededHash := k8sutils.PodHash(desiredLWS.Spec.LeaderWorkerTemplate.WorkerTemplate.Spec)
+
+				if tt.existingLWS.Labels == nil {
+					tt.existingLWS.Labels = map[string]string{}
+				}
+
+				if _, ok := tt.existingLWS.Labels[kubeaiv1.LeaderHashLabel]; !ok {
+					if tt.expectUpgrade {
+						tt.existingLWS.Labels[kubeaiv1.LeaderHashLabel] = "stale-leader-hash"
+					} else {
+						tt.existingLWS.Labels[kubeaiv1.LeaderHashLabel] = leaderExpededHash
+					}
+				}
+
+				if _, ok := tt.existingLWS.Labels[kubeaiv1.WorkerHashLabel]; !ok {
+					if tt.expectUpgrade {
+						tt.existingLWS.Labels[kubeaiv1.WorkerHashLabel] = "stale-worker-hash"
+					} else {
+						tt.existingLWS.Labels[kubeaiv1.WorkerHashLabel] = workerExpededHash
+					}
+				}
+			}
 
 			var objs []client.Object
 			if tt.existingLWS != nil {
@@ -150,13 +220,6 @@ func TestCalculateLWSPlan(t *testing.T) {
 				WithObjects(objs...).
 				Build()
 			r.Client = fakeClient
-			r.Scheme = scheme
-
-			model := testLWSModel(t)
-			model.Spec.Replicas = ptr.To(tt.replicas)
-
-			cfg := testLWSModelConfig(t, r)
-			cfg.LWSConfig.PipelineParallelSize = tt.ppSize
 
 			plan, err := r.calculateLWSPlan(context.Background(), model, cfg)
 
@@ -166,8 +229,7 @@ func TestCalculateLWSPlan(t *testing.T) {
 			}
 			require.NoError(t, err)
 
-			lp, ok := plan.(*lwsPlan)
-			require.True(t, ok, "expected *lwsPlan")
+			lp := plan
 
 			if tt.expectCreate {
 				assert.NotNil(t, lp.toCreate, "expected LWS creation")
@@ -179,6 +241,12 @@ func TestCalculateLWSPlan(t *testing.T) {
 				assert.NotNil(t, lp.toScale, "expected LWS scaling")
 			} else {
 				assert.Nil(t, lp.toScale, "unexpected LWS scaling")
+			}
+
+			if tt.expectUpgrade {
+				assert.NotNil(t, lp.toUpgrade, "expected LWS upgrade")
+			} else {
+				assert.Nil(t, lp.toUpgrade, "unexpected LWS upgrade")
 			}
 
 			assert.Equal(t, tt.expectStatusAll, model.Status.Replicas.All)
@@ -259,7 +327,7 @@ func TestBuildLeaderWorkerSet(t *testing.T) {
 			check: func(t *testing.T) {
 				workerCmd := lws.Spec.LeaderWorkerTemplate.WorkerTemplate.Spec.Containers[0].Command
 				require.Len(t, workerCmd, 3)
-				assert.Contains(t, workerCmd[2], "ray start")
+				assert.Contains(t, workerCmd[2], "worker")
 				assert.Contains(t, workerCmd[2], "$(LWS_LEADER_ADDRESS)")
 			},
 		},
@@ -301,6 +369,8 @@ func TestLWSPlan_Execute(t *testing.T) {
 		plan          *lwsPlan
 		clientObjects []client.Object
 		expectScaled  bool
+		expectUpgrade bool
+		expectImage   string
 		expectErr     bool
 	}{
 		"No-op plan": {
@@ -340,6 +410,32 @@ func TestLWSPlan_Execute(t *testing.T) {
 			},
 			expectScaled: true,
 		},
+		"Upgrade existing LWS": {
+			plan: &lwsPlan{
+				model: &kubeaiv1.Model{
+					ObjectMeta: metav1.ObjectMeta{Name: "m1", Namespace: "default", UID: "uid-1"},
+				},
+				toUpgrade: &lwsv1.LeaderWorkerSet{
+					ObjectMeta: metav1.ObjectMeta{Name: "m1", Namespace: "default", ResourceVersion: "1"},
+					Spec: lwsv1.LeaderWorkerSetSpec{Replicas: ptr.To[int32](1), LeaderWorkerTemplate: lwsv1.LeaderWorkerTemplate{
+						LeaderTemplate: &corev1.PodTemplateSpec{Spec: corev1.PodSpec{Containers: []corev1.Container{{Name: "model-server", Image: "vllm/vllm:new"}}}},
+						WorkerTemplate: corev1.PodTemplateSpec{Spec: corev1.PodSpec{Containers: []corev1.Container{{Name: "model-server", Image: "vllm/vllm:new"}}}},
+					}},
+				},
+			},
+			clientObjects: []client.Object{
+				&lwsv1.LeaderWorkerSet{
+					ObjectMeta: metav1.ObjectMeta{Name: "m1", Namespace: "default", ResourceVersion: "1"},
+					Spec: lwsv1.LeaderWorkerSetSpec{Replicas: ptr.To[int32](1), LeaderWorkerTemplate: lwsv1.LeaderWorkerTemplate{
+						LeaderTemplate: &corev1.PodTemplateSpec{Spec: corev1.PodSpec{Containers: []corev1.Container{{Name: "model-server", Image: "vllm/vllm:old"}}}},
+						WorkerTemplate: corev1.PodTemplateSpec{Spec: corev1.PodSpec{Containers: []corev1.Container{{Name: "model-server", Image: "vllm/vllm:old"}}}},
+					}},
+				},
+			},
+			expectScaled:  true,
+			expectUpgrade: true,
+			expectImage:   "vllm/vllm:new",
+		},
 	}
 
 	for name, tt := range specs {
@@ -361,12 +457,22 @@ func TestLWSPlan_Execute(t *testing.T) {
 				assert.NoError(t, err)
 			}
 			assert.Equal(t, tt.expectScaled, scaled)
+
+			if tt.expectUpgrade {
+				upgraded := &lwsv1.LeaderWorkerSet{}
+				err := fakeClient.Get(context.Background(), apitypes.NamespacedName{Name: tt.plan.toUpgrade.Name, Namespace: tt.plan.toUpgrade.Namespace}, upgraded)
+				require.NoError(t, err)
+				require.NotNil(t, upgraded.Spec.LeaderWorkerTemplate.LeaderTemplate)
+				require.NotEmpty(t, upgraded.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec.Containers)
+				assert.Equal(t, tt.expectImage, upgraded.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec.Containers[0].Image)
+			}
 		})
 	}
 }
 
 func TestGetModelConfig_MultiNode(t *testing.T) {
 	r := &ModelReconciler{
+		DistributedInference: true,
 		ResourceProfiles: map[string]config.ResourceProfile{
 			"nvidia-gpu": {
 				Requests: corev1.ResourceList{"nvidia.com/gpu": resource.MustParse("1")},
@@ -443,4 +549,33 @@ func TestGetModelConfig_MultiNode(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetModelConfig_MultiNode_DistributedInferenceDisabled(t *testing.T) {
+	r := &ModelReconciler{
+		DistributedInference: false,
+		ResourceProfiles: map[string]config.ResourceProfile{
+			"nvidia-gpu": {
+				Requests: corev1.ResourceList{"nvidia.com/gpu": resource.MustParse("1")},
+				Limits:   corev1.ResourceList{"nvidia.com/gpu": resource.MustParse("1")},
+			},
+		},
+		ModelServers: config.ModelServers{
+			VLLM: config.ModelServer{Images: map[string]string{"default": "vllm:test"}},
+		},
+	}
+
+	model := &kubeaiv1.Model{
+		Spec: kubeaiv1.ModelSpec{
+			Engine:                kubeaiv1.VLLMEngine,
+			URL:                   "hf://test/model",
+			ResourceProfile:       "nvidia-gpu:2:3",
+			TargetRequests:        ptr.To[int32](100),
+			ScaleDownDelaySeconds: ptr.To[int64](30),
+		},
+	}
+
+	_, err := r.getModelConfig(model)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "distributed inference is disabled")
 }

@@ -68,7 +68,6 @@ func init() {
 	// AddToScheme in init() to allow tests to use the same Scheme before calling Run().
 	utilruntime.Must(clientgoscheme.AddToScheme(Scheme))
 	utilruntime.Must(kubeaiv1.AddToScheme(Scheme))
-	utilruntime.Must(lwsv1.AddToScheme(Scheme))
 }
 
 // Run starts all components of the system and blocks until they complete.
@@ -81,6 +80,9 @@ func Run(ctx context.Context, k8sCfg *rest.Config, cfg config.System) error {
 	}()
 	if err := cfg.DefaultAndValidate(); err != nil {
 		return fmt.Errorf("invalid config: %w", err)
+	}
+	if cfg.DistributedInference {
+		utilruntime.Must(lwsv1.AddToScheme(Scheme))
 	}
 
 	// Set up OpenTelemetry.
@@ -219,6 +221,7 @@ func Run(ctx context.Context, k8sCfg *rest.Config, cfg config.System) error {
 		PodRESTClient:           podRESTClient,
 		Scheme:                  mgr.GetScheme(),
 		Namespace:               namespace,
+		DistributedInference:    cfg.DistributedInference,
 		AllowPodAddressOverride: cfg.AllowPodAddressOverride,
 		SecretNames:             cfg.SecretNames,
 		ResourceProfiles:        cfg.ResourceProfiles,

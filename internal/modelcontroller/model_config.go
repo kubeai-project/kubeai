@@ -100,6 +100,9 @@ func (r *ModelReconciler) getModelConfig(model *kubeaiv1.Model) (ModelConfig, er
 	}
 
 	if profileRef.LWSConfig != nil {
+		if !r.DistributedInference {
+			return result, fmt.Errorf("distributed inference is disabled: set distributedInference=true")
+		}
 		if model.Spec.Engine != kubeaiv1.VLLMEngine {
 			return result, fmt.Errorf("multi-node (LWS) resource profiles only supported with VLLM engine, got %q", model.Spec.Engine)
 		}
