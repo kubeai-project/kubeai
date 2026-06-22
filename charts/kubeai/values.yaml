@@ -242,6 +242,9 @@ open-webui:
     enabled: false
   pipelines:
     enabled: false
+  # added to keep same behaviour
+  websocket:
+    enabled: false
   openaiBaseApiUrl: "http://kubeai/openai/v1"
   extraEnvVars:
   - name: WEBUI_AUTH
