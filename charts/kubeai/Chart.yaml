@@ -21,7 +21,7 @@ dependencies:
   - name: open-webui
     condition: open-webui.enabled
     repository: https://helm.openwebui.com/
-    version: 8.19.0
+    version: 14.8.0
 
 keywords: ["LLM", "AI"]
 
