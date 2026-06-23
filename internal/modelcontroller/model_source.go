@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	v1 "github.com/kubeai-project/kubeai/api/k8s/v1"
+	"github.com/kubeai-project/kubeai/internal/config"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
 )
@@ -27,15 +28,15 @@ func (r *ModelReconciler) parseModelSource(urlStr string) (modelSource, error) {
 
 	switch {
 	case u.scheme == "gs":
-		src.modelSourcePodAdditions = r.authForGCS()
+		src.modelSourcePodAdditions = authForGCS(r.SecretNames.GCP)
 	case u.scheme == "oss":
-		src.modelSourcePodAdditions = r.authForOSS()
+		src.modelSourcePodAdditions = authForOSS(r.SecretNames.Alibaba)
 	case u.scheme == "s3":
-		src.modelSourcePodAdditions = r.authForS3()
+		src.modelSourcePodAdditions = authForS3(r.SecretNames.AWS)
 	case u.scheme == "hf":
-		src.modelSourcePodAdditions = r.authForHuggingfaceHub()
+		src.modelSourcePodAdditions = authForHuggingfaceHub(r.SecretNames.Huggingface)
 	case u.scheme == "pvc":
-		src.modelSourcePodAdditions = r.pvcPodAdditions(u)
+		src.modelSourcePodAdditions = pvcPodAdditions(u)
 	default:
 		src.modelSourcePodAdditions = &modelSourcePodAdditions{}
 	}
@@ -63,23 +64,23 @@ func (c *modelSourcePodAdditions) applyToPodSpec(spec *corev1.PodSpec, container
 	spec.Containers[containerIndex].VolumeMounts = append(spec.Containers[containerIndex].VolumeMounts, c.volumeMounts...)
 }
 
-func (r *ModelReconciler) modelAuthCredentialsForAllSources() *modelSourcePodAdditions {
+func modelAuthCredentialsForAllSources(secretNames config.SecretNames) *modelSourcePodAdditions {
 	c := &modelSourcePodAdditions{}
-	c.append(r.authForHuggingfaceHub())
-	c.append(r.authForGCS())
-	c.append(r.authForOSS())
-	c.append(r.authForS3())
+	c.append(authForHuggingfaceHub(secretNames.Huggingface))
+	c.append(authForGCS(secretNames.GCP))
+	c.append(authForOSS(secretNames.Alibaba))
+	c.append(authForS3(secretNames.AWS))
 	return c
 }
 
-func (r *ModelReconciler) modelEnvFrom(m *v1.Model) *modelSourcePodAdditions {
+func modelEnvFrom(m *v1.Model) *modelSourcePodAdditions {
 	if m.Spec.EnvFrom == nil {
 		return &modelSourcePodAdditions{}
 	}
 	return &modelSourcePodAdditions{envFrom: m.Spec.EnvFrom}
 }
 
-func (r *ModelReconciler) authForS3() *modelSourcePodAdditions {
+func authForS3(secretName string) *modelSourcePodAdditions {
 	return &modelSourcePodAdditions{
 		env: []corev1.EnvVar{
 			{
@@ -87,7 +88,7 @@ func (r *ModelReconciler) authForS3() *modelSourcePodAdditions {
 				ValueFrom: &corev1.EnvVarSource{
 					SecretKeyRef: &corev1.SecretKeySelector{
 						LocalObjectReference: corev1.LocalObjectReference{
-							Name: r.SecretNames.AWS,
+							Name: secretName,
 						},
 						Key:      "accessKeyID",
 						Optional: ptr.To(true),
@@ -99,7 +100,7 @@ func (r *ModelReconciler) authForS3() *modelSourcePodAdditions {
 				ValueFrom: &corev1.EnvVarSource{
 					SecretKeyRef: &corev1.SecretKeySelector{
 						LocalObjectReference: corev1.LocalObjectReference{
-							Name: r.SecretNames.AWS,
+							Name: secretName,
 						},
 						Key:      "secretAccessKey",
 						Optional: ptr.To(true),
@@ -110,7 +111,7 @@ func (r *ModelReconciler) authForS3() *modelSourcePodAdditions {
 	}
 }
 
-func (r *ModelReconciler) authForHuggingfaceHub() *modelSourcePodAdditions {
+func authForHuggingfaceHub(secretName string) *modelSourcePodAdditions {
 	return &modelSourcePodAdditions{
 		env: []corev1.EnvVar{
 			{
@@ -118,7 +119,7 @@ func (r *ModelReconciler) authForHuggingfaceHub() *modelSourcePodAdditions {
 				ValueFrom: &corev1.EnvVarSource{
 					SecretKeyRef: &corev1.SecretKeySelector{
 						LocalObjectReference: corev1.LocalObjectReference{
-							Name: r.SecretNames.Huggingface,
+							Name: secretName,
 						},
 						Key:      "token",
 						Optional: ptr.To(true),
@@ -129,7 +130,7 @@ func (r *ModelReconciler) authForHuggingfaceHub() *modelSourcePodAdditions {
 	}
 }
 
-func (r *ModelReconciler) authForGCS() *modelSourcePodAdditions {
+func authForGCS(secretName string) *modelSourcePodAdditions {
 	const (
 		credentialsDir      = "/secrets/gcp-credentials"
 		credentialsFilename = "credentials.json"
@@ -148,7 +149,7 @@ func (r *ModelReconciler) authForGCS() *modelSourcePodAdditions {
 				Name: volumeName,
 				VolumeSource: corev1.VolumeSource{
 					Secret: &corev1.SecretVolumeSource{
-						SecretName: r.SecretNames.GCP,
+						SecretName: secretName,
 						Items: []corev1.KeyToPath{
 							{
 								Key:  "jsonKeyfile",
@@ -169,7 +170,7 @@ func (r *ModelReconciler) authForGCS() *modelSourcePodAdditions {
 	}
 }
 
-func (r *ModelReconciler) authForOSS() *modelSourcePodAdditions {
+func authForOSS(secretName string) *modelSourcePodAdditions {
 	return &modelSourcePodAdditions{
 		env: []corev1.EnvVar{
 			{
@@ -177,7 +178,7 @@ func (r *ModelReconciler) authForOSS() *modelSourcePodAdditions {
 				ValueFrom: &corev1.EnvVarSource{
 					SecretKeyRef: &corev1.SecretKeySelector{
 						LocalObjectReference: corev1.LocalObjectReference{
-							Name: r.SecretNames.Alibaba,
+							Name: secretName,
 						},
 						Key:      "accessKeyID",
 						Optional: ptr.To(true),
@@ -189,7 +190,7 @@ func (r *ModelReconciler) authForOSS() *modelSourcePodAdditions {
 				ValueFrom: &corev1.EnvVarSource{
 					SecretKeyRef: &corev1.SecretKeySelector{
 						LocalObjectReference: corev1.LocalObjectReference{
-							Name: r.SecretNames.Alibaba,
+							Name: secretName,
 						},
 						Key:      "accessKeySecret",
 						Optional: ptr.To(true),
@@ -200,7 +201,7 @@ func (r *ModelReconciler) authForOSS() *modelSourcePodAdditions {
 	}
 }
 
-func (r *ModelReconciler) pvcPodAdditions(url modelURL) *modelSourcePodAdditions {
+func pvcPodAdditions(url modelURL) *modelSourcePodAdditions {
 	volumeName := "model"
 	// Kubernetes does not support an subPath with a leading slash. SubPath needs to be
 	// a relative path or empty string to mount the entire volume.

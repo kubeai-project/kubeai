@@ -9,9 +9,13 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func (r *ModelReconciler) infinityPodForModel(m *kubeaiv1.Model, c ModelConfig) *corev1.Pod {
+type InfinityEngine struct {
+	cfg EngineConfig
+}
+
+func (e *InfinityEngine) PodForModel(m *kubeaiv1.Model, c ModelConfig) *corev1.Pod {
 	lbs := labelsForModel(m)
-	ann := r.annotationsForModel(m)
+	ann := annotationsForModel(m, e.cfg.AllowPodAddressOverride)
 
 	args := []string{
 		"v2",
@@ -78,9 +82,9 @@ func (r *ModelReconciler) infinityPodForModel(m *kubeaiv1.Model, c ModelConfig) 
 			SchedulerName:      c.SchedulerName,
 			RuntimeClassName:   c.RuntimeClassName,
 			PriorityClassName:  m.Spec.PriorityClassName,
-			ServiceAccountName: r.ModelServerPods.ModelServiceAccountName,
-			SecurityContext:    r.ModelServerPods.ModelPodSecurityContext,
-			ImagePullSecrets:   r.ModelServerPods.ImagePullSecrets,
+			ServiceAccountName: e.cfg.ModelServerPods.ModelServiceAccountName,
+			SecurityContext:    e.cfg.ModelServerPods.ModelPodSecurityContext,
+			ImagePullSecrets:   e.cfg.ModelServerPods.ImagePullSecrets,
 			Containers: []corev1.Container{
 				{
 					Name:  serverContainerName,

@@ -26,18 +26,11 @@ import (
 // - Recreates any out-of-date Pod that is not Ready immediately
 // - Waits for all Pods to be Ready before recreating any out-of-date Pods that are Ready
 func (r *ModelReconciler) calculatePodPlan(allPods *corev1.PodList, model *kubeaiv1.Model, modelConfig ModelConfig) (*podPlan, error) {
-	var podForModel *corev1.Pod
-
-	switch model.Spec.Engine {
-	case kubeaiv1.OLlamaEngine:
-		podForModel = r.oLlamaPodForModel(model, modelConfig)
-	case kubeaiv1.FasterWhisperEngine:
-		podForModel = r.fasterWhisperPodForModel(model, modelConfig)
-	case kubeaiv1.InfinityEngine:
-		podForModel = r.infinityPodForModel(model, modelConfig)
-	default:
-		podForModel = r.vLLMPodForModel(model, modelConfig)
+	engine, err := r.EngineRegistry.Get(model.Spec.Engine)
+	if err != nil {
+		return nil, err
 	}
+	podForModel := engine.PodForModel(model, modelConfig)
 
 	if err := applyJSONPatchToPod(r.ModelServerPods.JSONPatches, podForModel); err != nil {
 		return nil, err
