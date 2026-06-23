@@ -69,6 +69,8 @@ type ModelReconciler struct {
 	ModelServerPods         config.ModelServerPods
 	ModelLoaders            config.ModelLoading
 	ModelRollouts           config.ModelRollouts
+	EngineRegistry          *EngineRegistry
+	SourceRegistry          *SourceRegistry
 }
 
 func (r *ModelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.Result, resErr error) {
@@ -212,6 +214,13 @@ func (r *ModelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res 
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *ModelReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	r.SourceRegistry = NewSourceRegistry(r.SecretNames)
+	r.EngineRegistry = NewEngineRegistry(EngineConfig{
+		AllowPodAddressOverride: r.AllowPodAddressOverride,
+		ModelServerPods:         r.ModelServerPods,
+		ModelLoaders:            r.ModelLoaders,
+		SecretNames:             r.SecretNames,
+	})
 	// TODO: Set Model concurrency. Pod rollouts can be slow.
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&kubeaiv1.Model{}).
@@ -306,12 +315,12 @@ func labelsForModel(m *kubeaiv1.Model) map[string]string {
 	return podlbmap
 }
 
-func (r *ModelReconciler) annotationsForModel(m *kubeaiv1.Model) map[string]string {
+func annotationsForModel(m *kubeaiv1.Model, allowOverride bool) map[string]string {
 	ann := map[string]string{}
 
 	if modelAnn := m.GetAnnotations(); modelAnn != nil {
 		var keys []string
-		if r.AllowPodAddressOverride {
+		if allowOverride {
 			keys = append(keys,
 				kubeaiv1.ModelPodIPAnnotation,
 				kubeaiv1.ModelPodPortAnnotation,
@@ -338,7 +347,7 @@ type ModelConfig struct {
 func (r *ModelReconciler) getModelConfig(model *kubeaiv1.Model) (ModelConfig, error) {
 	var result ModelConfig
 
-	src, err := r.parseModelSource(model.Spec.URL)
+	src, err := parseModelSource(model.Spec.URL, r.SourceRegistry)
 	if err != nil {
 		return result, fmt.Errorf("parsing model source: %w", err)
 	}

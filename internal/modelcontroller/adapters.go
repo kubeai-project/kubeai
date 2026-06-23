@@ -168,7 +168,7 @@ func adapterDir(a v1.Adapter) string {
 	return fmt.Sprintf("%s/%s", adaptersRootDir, a.Name)
 }
 
-func (r *ModelReconciler) patchServerAdapterLoader(podSpec *corev1.PodSpec, m *v1.Model, image string) {
+func patchServerAdapterLoader(podSpec *corev1.PodSpec, m *v1.Model, cfg EngineConfig) {
 	if m.Spec.Adapters == nil {
 		return
 	}
@@ -202,10 +202,10 @@ func (r *ModelReconciler) patchServerAdapterLoader(podSpec *corev1.PodSpec, m *v
 
 	loaderContainer := corev1.Container{
 		Name:            loaderContainerName,
-		Image:           image,
+		Image:           cfg.ModelLoaders.Image,
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Env:             env,
-		SecurityContext: r.ModelServerPods.ModelContainerSecurityContext,
+		SecurityContext: cfg.ModelServerPods.ModelContainerSecurityContext,
 		Command:         []string{"sleep", "infinity"},
 		VolumeMounts: []corev1.VolumeMount{
 			{
@@ -215,8 +215,8 @@ func (r *ModelReconciler) patchServerAdapterLoader(podSpec *corev1.PodSpec, m *v
 		},
 	}
 	podSpec.Containers = append(podSpec.Containers, loaderContainer)
-	r.modelAuthCredentialsForAllSources().applyToPodSpec(podSpec, len(podSpec.Containers)-1)
-	r.modelEnvFrom(m).applyToPodSpec(podSpec, len(podSpec.Containers)-1)
+	modelAuthCredentialsForAllSources(cfg.SecretNames).applyToPodSpec(podSpec, len(podSpec.Containers)-1)
+	modelEnvFrom(m).applyToPodSpec(podSpec, len(podSpec.Containers)-1)
 }
 
 func getLabelledAdapters(pod *corev1.Pod) map[string]struct{} {

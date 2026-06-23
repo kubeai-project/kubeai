@@ -9,9 +9,13 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func (r *ModelReconciler) vLLMPodForModel(m *kubeaiv1.Model, c ModelConfig) *corev1.Pod {
+type VLLMEngine struct {
+	cfg EngineConfig
+}
+
+func (e *VLLMEngine) PodForModel(m *kubeaiv1.Model, c ModelConfig) *corev1.Pod {
 	lbs := labelsForModel(m)
-	ann := r.annotationsForModel(m)
+	ann := annotationsForModel(m, e.cfg.AllowPodAddressOverride)
 	if _, ok := ann[kubeaiv1.ModelPodPortAnnotation]; !ok {
 		// Set port to 8000 (vLLM) if not overwritten.
 		ann[kubeaiv1.ModelPodPortAnnotation] = "8000"
@@ -76,9 +80,9 @@ func (r *ModelReconciler) vLLMPodForModel(m *kubeaiv1.Model, c ModelConfig) *cor
 			SchedulerName:      c.SchedulerName,
 			RuntimeClassName:   c.RuntimeClassName,
 			PriorityClassName:  m.Spec.PriorityClassName,
-			ServiceAccountName: r.ModelServerPods.ModelServiceAccountName,
-			SecurityContext:    r.ModelServerPods.ModelPodSecurityContext,
-			ImagePullSecrets:   r.ModelServerPods.ImagePullSecrets,
+			ServiceAccountName: e.cfg.ModelServerPods.ModelServiceAccountName,
+			SecurityContext:    e.cfg.ModelServerPods.ModelPodSecurityContext,
+			ImagePullSecrets:   e.cfg.ModelServerPods.ImagePullSecrets,
 			Containers: []corev1.Container{
 				{
 					Name:            serverContainerName,
@@ -86,7 +90,7 @@ func (r *ModelReconciler) vLLMPodForModel(m *kubeaiv1.Model, c ModelConfig) *cor
 					Command:         []string{"python3", "-m", "vllm.entrypoints.openai.api_server"},
 					Args:            args,
 					Env:             env,
-					SecurityContext: r.ModelServerPods.ModelContainerSecurityContext,
+					SecurityContext: e.cfg.ModelServerPods.ModelContainerSecurityContext,
 					Resources: corev1.ResourceRequirements{
 						Requests: c.Requests,
 						Limits:   c.Limits,
@@ -159,7 +163,7 @@ func (r *ModelReconciler) vLLMPodForModel(m *kubeaiv1.Model, c ModelConfig) *cor
 	}
 
 	patchFileVolumes(&pod.Spec, m)
-	r.patchServerAdapterLoader(&pod.Spec, m, r.ModelLoaders.Image)
+	patchServerAdapterLoader(&pod.Spec, m, e.cfg)
 	patchServerCacheVolumes(&pod.Spec, m, c)
 	c.Source.modelSourcePodAdditions.applyToPodSpec(&pod.Spec, 0)
 

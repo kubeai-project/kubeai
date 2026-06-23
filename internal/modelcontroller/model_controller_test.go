@@ -20,6 +20,7 @@ import (
 
 func Test_getModelConfig(t *testing.T) {
 	r := ModelReconciler{
+		SourceRegistry: NewSourceRegistry(config.SecretNames{}),
 		ResourceProfiles: map[string]config.ResourceProfile{
 			"none": {},
 			"my-gpu": {

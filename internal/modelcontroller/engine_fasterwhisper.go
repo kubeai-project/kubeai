@@ -9,9 +9,13 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func (r *ModelReconciler) fasterWhisperPodForModel(m *kubeaiv1.Model, c ModelConfig) *corev1.Pod {
+type FasterWhisperEngine struct {
+	cfg EngineConfig
+}
+
+func (e *FasterWhisperEngine) PodForModel(m *kubeaiv1.Model, c ModelConfig) *corev1.Pod {
 	lbs := labelsForModel(m)
-	ann := r.annotationsForModel(m)
+	ann := annotationsForModel(m, e.cfg.AllowPodAddressOverride)
 	if _, ok := ann[kubeaiv1.ModelPodPortAnnotation]; !ok {
 		ann[kubeaiv1.ModelPodPortAnnotation] = "8000"
 	}
@@ -60,16 +64,16 @@ func (r *ModelReconciler) fasterWhisperPodForModel(m *kubeaiv1.Model, c ModelCon
 			SchedulerName:      c.SchedulerName,
 			RuntimeClassName:   c.RuntimeClassName,
 			PriorityClassName:  m.Spec.PriorityClassName,
-			ServiceAccountName: r.ModelServerPods.ModelServiceAccountName,
-			SecurityContext:    r.ModelServerPods.ModelPodSecurityContext,
-			ImagePullSecrets:   r.ModelServerPods.ImagePullSecrets,
+			ServiceAccountName: e.cfg.ModelServerPods.ModelServiceAccountName,
+			SecurityContext:    e.cfg.ModelServerPods.ModelPodSecurityContext,
+			ImagePullSecrets:   e.cfg.ModelServerPods.ImagePullSecrets,
 			Containers: []corev1.Container{
 				{
 					Name:            serverContainerName,
 					Image:           c.Image,
 					Args:            args,
 					Env:             env,
-					SecurityContext: r.ModelServerPods.ModelContainerSecurityContext,
+					SecurityContext: e.cfg.ModelServerPods.ModelContainerSecurityContext,
 					Resources: corev1.ResourceRequirements{
 						Requests: c.Requests,
 						Limits:   c.Limits,

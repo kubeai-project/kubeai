@@ -31,6 +31,7 @@ func Test_calculatePodPlan(t *testing.T) {
 			Surge: 1,
 		},
 	}
+	r.EngineRegistry = NewEngineRegistry(EngineConfig{})
 
 	model := &v1.Model{
 		ObjectMeta: metav1.ObjectMeta{
@@ -44,7 +45,7 @@ func Test_calculatePodPlan(t *testing.T) {
 		},
 	}
 
-	src, err := r.parseModelSource(model.Spec.URL)
+	src, err := parseModelSource(model.Spec.URL, NewSourceRegistry(config.SecretNames{}))
 	require.NoError(t, err)
 	modelConfig := ModelConfig{
 		ResourceProfile: config.ResourceProfile{
@@ -59,7 +60,7 @@ func Test_calculatePodPlan(t *testing.T) {
 		Source: src,
 	}
 
-	expectedHash := k8sutils.PodHash(r.vLLMPodForModel(model, modelConfig).Spec)
+	expectedHash := k8sutils.PodHash((&VLLMEngine{}).PodForModel(model, modelConfig).Spec)
 
 	type readiness bool
 	const ready = readiness(true)
