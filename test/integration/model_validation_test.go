@@ -240,6 +240,29 @@ func TestModelValidation(t *testing.T) {
 		},
 		{
 			model: v1.Model{
+				ObjectMeta: metadata("gs-url-without-cache-profile-valid"),
+				Spec: v1.ModelSpec{
+					URL:      "gs://test-bucket/test-path",
+					Engine:   "VLLM",
+					Features: []v1.ModelFeature{},
+				},
+			},
+			expValid: true,
+		},
+		{
+			model: v1.Model{
+				ObjectMeta: metadata("cache-profile-with-gs-url-valid"),
+				Spec: v1.ModelSpec{
+					URL:          "gs://test-bucket/test-path",
+					Engine:       "VLLM",
+					Features:     []v1.ModelFeature{},
+					CacheProfile: "some-cache-profile",
+				},
+			},
+			expValid: true,
+		},
+		{
+			model: v1.Model{
 				ObjectMeta: metadata("s3-url-without-cache-profile-valid"),
 				Spec: v1.ModelSpec{
 					URL:      "s3://test-bucket/test-path",
@@ -263,6 +286,7 @@ func TestModelValidation(t *testing.T) {
 				"cacheProfile is only supported with urls of format",
 				"hf://",
 				"s3://",
+				"gs://",
 			},
 		},
 		{
@@ -334,6 +358,21 @@ func TestModelValidation(t *testing.T) {
 			},
 			update: func(m *v1.Model) {
 				m.Spec.URL = "hf://test-repo/updated-model"
+			},
+			expErrContain: "url is immutable when using cacheProfile",
+		},
+		{
+			model: v1.Model{
+				ObjectMeta: metadata("url-immutable-with-gs-cache-profile-invalid"),
+				Spec: v1.ModelSpec{
+					URL:          "gs://test-bucket/test-model",
+					Engine:       "VLLM",
+					Features:     []v1.ModelFeature{},
+					CacheProfile: "some-cache-profile",
+				},
+			},
+			update: func(m *v1.Model) {
+				m.Spec.URL = "gs://test-bucket/updated-model"
 			},
 			expErrContain: "url is immutable when using cacheProfile",
 		},
