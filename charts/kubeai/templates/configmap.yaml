@@ -12,6 +12,8 @@ data:
       gcp: {{ include "kubeai.gcpSecretName" . }}
       huggingface: {{ include "kubeai.huggingfaceSecretName" . }}
       oci: {{ .Values.secrets.oci.name }}
+    proxy:
+      mode: {{ .Values.proxy.mode }}
     resourceProfiles:
       {{- .Values.resourceProfiles | toYaml | nindent 6 }}
     cacheProfiles:

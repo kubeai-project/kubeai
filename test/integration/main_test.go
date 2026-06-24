@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -130,6 +129,7 @@ func installCommonResources() error {
 // and shuts it down when the test is done.
 // SHOULD BE CALLED AT THE BEGINNING OF EACH TEST CASE.
 func initTest(t *testing.T, cfg config.System) {
+	t.Helper()
 	autoscalerStateConfigMap := corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cfg.ModelAutoscaling.StateConfigMapName,
@@ -138,22 +138,24 @@ func initTest(t *testing.T, cfg config.System) {
 	}
 	require.NoError(t, testK8sClient.Create(testCtx, &autoscalerStateConfigMap))
 
-	var wg sync.WaitGroup
 	ctx, cancel := context.WithCancel(testCtx)
+	errCh := make(chan error, 1)
+
+	go func() {
+		defer close(errCh)
+		if err := manager.Run(ctx, testK8sConfig, cfg); err != nil && !errors.Is(err, context.Canceled) {
+			errCh <- err
+		}
+	}()
+
 	t.Cleanup(func() {
 		cancel()
 		t.Logf("Waiting for manager to stop")
-		wg.Wait()
+		if err := <-errCh; err != nil {
+			t.Errorf("manager exited with error: %v", err)
+		}
 		t.Logf("Manager stopped")
 	})
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if err := manager.Run(ctx, testK8sConfig, cfg); err != nil && !errors.Is(err, context.Canceled) {
-			log.Fatal(err)
-		}
-	}()
 }
 
 // baseSysCfg returns the System configuration for testing.
@@ -162,7 +164,7 @@ func initTest(t *testing.T, cfg config.System) {
 func baseSysCfg(t *testing.T) config.System {
 	return config.System{
 		MetricsAddr:   "127.0.0.1:8080",
-		HealthAddress: "127.0.0.1:8081",
+		HealthAddress: "127.0.0.1:0",
 		SecretNames: config.SecretNames{
 			Huggingface: "huggingface",
 			AWS:         "aws",

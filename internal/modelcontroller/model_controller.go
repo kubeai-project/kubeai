@@ -29,10 +29,13 @@ import (
 	"k8s.io/client-go/rest"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	kubeaiv1 "github.com/kubeai-project/kubeai/api/k8s/v1"
@@ -52,6 +55,7 @@ const (
 // ModelReconciler reconciles a Model object
 type ModelReconciler struct {
 	client.Client
+	ProxyMode               config.ProxyMode
 	RESTConfig              *rest.Config
 	PodRESTClient           rest.Interface
 	Scheme                  *runtime.Scheme
@@ -102,6 +106,7 @@ func (r *ModelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res 
 		if err := r.Update(ctx, model, k8sutils.DefaultUpdateOptions()); err != nil {
 			return ctrl.Result{}, fmt.Errorf("updating model: %w", err)
 		}
+		return ctrl.Result{}, nil
 	}
 
 	modelConfig, err := r.getModelConfig(model)
@@ -140,9 +145,17 @@ func (r *ModelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res 
 			}
 			return cacheRes, fmt.Errorf("reconciling cache: %w", err)
 		}
-		if !res.IsZero() {
+		if !cacheRes.IsZero() {
 			return cacheRes, nil
 		}
+	}
+
+	if r.ProxyMode == config.ProxyModeExternal && model.Spec.MinReplicas == 0 {
+		log.Info("Warning: Model has minReplicas=0 in external mode, scale-from-zero must be handled by external infrastructure")
+	}
+
+	if err := r.reconcileHeadlessService(ctx, model, modelConfig); err != nil {
+		return ctrl.Result{}, fmt.Errorf("reconciling headless service: %w", err)
 	}
 
 	allPods := &corev1.PodList{}
@@ -203,9 +216,69 @@ func (r *ModelReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&kubeaiv1.Model{}).
 		Owns(&corev1.Pod{}).
+		Owns(&corev1.Service{}).
 		Owns(&corev1.PersistentVolumeClaim{}).
 		Owns(&batchv1.Job{}).
 		Complete(r)
+}
+
+func (r *ModelReconciler) reconcileHeadlessService(ctx context.Context, model *kubeaiv1.Model, modelConfig ModelConfig) error {
+	svcName := fmt.Sprintf("%s-%s", model.Name, string(model.UID)[:6])
+	svc := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      svcName,
+			Namespace: model.Namespace,
+		},
+	}
+
+	if r.ProxyMode != config.ProxyModeExternal {
+		// Ensure it does not exist in internal mode.
+		if err := r.Client.Delete(ctx, svc); client.IgnoreNotFound(err) != nil {
+			return fmt.Errorf("deleting headless service in internal mode: %w", err)
+		}
+		return nil
+	}
+
+	enginePort := int32(8000)
+
+	op, err := ctrl.CreateOrUpdate(ctx, r.Client, svc, func() error {
+		if err := ctrl.SetControllerReference(model, svc, r.Scheme); err != nil {
+			return err
+		}
+		if svc.Labels == nil {
+			svc.Labels = make(map[string]string)
+		}
+		svc.Labels["kubeai.org/model"] = model.Name
+
+		// Headless service
+		svc.Spec.ClusterIP = corev1.ClusterIPNone
+
+		if svc.Spec.Selector == nil {
+			svc.Spec.Selector = make(map[string]string)
+		}
+		svc.Spec.Selector["kubeai.org/model"] = model.Name
+		svc.Spec.Selector["kubeai.org/model-uid"] = string(model.UID)
+
+		if len(svc.Spec.Ports) == 0 {
+			svc.Spec.Ports = []corev1.ServicePort{{}}
+		}
+		svc.Spec.Ports[0].Name = "inference"
+		svc.Spec.Ports[0].Port = enginePort
+		svc.Spec.Ports[0].Protocol = corev1.ProtocolTCP
+		svc.Spec.Ports[0].TargetPort = intstr.FromInt32(enginePort)
+
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("creating or updating headless service %s: %w", svcName, err)
+	}
+
+	if op != controllerutil.OperationResultNone {
+		log.FromContext(ctx).Info("reconciled headless service", "operation", op, "name", svcName)
+	}
+
+	return nil
 }
 
 var errReturnEarly = fmt.Errorf("return early")
@@ -219,6 +292,8 @@ func labelsForModel(m *kubeaiv1.Model) map[string]string {
 	podlbmap := map[string]string{
 		"app":                          "model",
 		"model":                        m.Name,
+		"kubeai.org/model":             m.Name,
+		"kubeai.org/model-uid":         string(m.UID),
 		appKubernetesIOName:            engineLowerCase,
 		"app.kubernetes.io/instance":   engineLowerCase + "-" + m.Name,
 		"app.kubernetes.io/managed-by": "kubeai",

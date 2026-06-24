@@ -207,13 +207,17 @@ func Run(ctx context.Context, k8sCfg *rest.Config, cfg config.System) error {
 		cfg.LeaderElection.RetryPeriod.Duration,
 	)
 
-	loadBalancer, err := loadbalancer.New(mgr)
-	if err != nil {
-		return fmt.Errorf("unable to setup model resolver: %w", err)
+	var loadBalancer *loadbalancer.LoadBalancer
+	if cfg.Proxy.Mode != config.ProxyModeExternal {
+		loadBalancer, err = loadbalancer.New(mgr)
+		if err != nil {
+			return fmt.Errorf("unable to setup model resolver: %w", err)
+		}
 	}
 
 	modelReconciler := &modelcontroller.ModelReconciler{
 		Client:                  mgr.GetClient(),
+		ProxyMode:               cfg.Proxy.Mode,
 		RESTConfig:              mgr.GetConfig(),
 		PodRESTClient:           podRESTClient,
 		Scheme:                  mgr.GetScheme(),
@@ -249,31 +253,6 @@ func Run(ctx context.Context, k8sCfg *rest.Config, cfg config.System) error {
 		return fmt.Errorf("unable to parse metrics port: %w", err)
 	}
 
-	modelAutoscaler, err := modelautoscaler.New(
-		ctx,
-		k8sClient,
-		leaderElection,
-		modelClient,
-		loadBalancer,
-		cfg.ModelAutoscaling,
-		metricsPort,
-		types.NamespacedName{Name: cfg.ModelAutoscaling.StateConfigMapName, Namespace: namespace},
-		cfg.FixedSelfMetricAddrs,
-	)
-	if err != nil {
-		return fmt.Errorf("unable to create model autoscaler: %w", err)
-	}
-
-	modelProxy := modelproxy.NewHandler(modelClient, loadBalancer, 3, nil)
-	openaiHandler := openaiserver.NewHandler(mgr.GetClient(), modelProxy)
-	mux := http.NewServeMux()
-	mux.Handle("/openai/", openaiHandler)
-	apiServer := &http.Server{
-		BaseContext: func(_ net.Listener) context.Context { return ctx },
-		Addr:        ":8000",
-		Handler:     mux,
-	}
-
 	metricsMux := http.NewServeMux()
 	metricsServer := &http.Server{
 		Addr:    cfg.MetricsAddr,
@@ -284,50 +263,84 @@ func Run(ctx context.Context, k8sCfg *rest.Config, cfg config.System) error {
 	httpClient := &http.Client{}
 
 	var msgrs []*messenger.Messenger
-	for i, stream := range cfg.Messaging.Streams {
-		msgr, err := messenger.NewMessenger(
+	var modelAutoscaler *modelautoscaler.Autoscaler
+	var apiServer *http.Server
+
+	if cfg.Proxy.Mode != config.ProxyModeExternal {
+		modelAutoscaler, err = modelautoscaler.New(
 			ctx,
-			stream.RequestsURL,
-			stream.ResponsesURL,
-			stream.MaxHandlers,
-			cfg.Messaging.ErrorMaxBackoff.Duration,
+			k8sClient,
+			leaderElection,
 			modelClient,
 			loadBalancer,
-			httpClient,
+			cfg.ModelAutoscaling,
+			metricsPort,
+			types.NamespacedName{Name: cfg.ModelAutoscaling.StateConfigMapName, Namespace: namespace},
+			cfg.FixedSelfMetricAddrs,
 		)
 		if err != nil {
-			return fmt.Errorf("unable to create messenger[%v]: %w", i, err)
+			return fmt.Errorf("unable to create model autoscaler: %w", err)
 		}
-		msgrs = append(msgrs, msgr)
+
+		modelProxy := modelproxy.NewHandler(modelClient, loadBalancer, 3, nil)
+		openaiHandler := openaiserver.NewHandler(mgr.GetClient(), modelProxy)
+		mux := http.NewServeMux()
+		mux.Handle("/openai/", openaiHandler)
+		apiServer = &http.Server{
+			BaseContext: func(_ net.Listener) context.Context { return ctx },
+			Addr:        ":8000",
+			Handler:     mux,
+		}
+
+		for i, stream := range cfg.Messaging.Streams {
+			msgr, err := messenger.NewMessenger(
+				ctx,
+				stream.RequestsURL,
+				stream.ResponsesURL,
+				stream.MaxHandlers,
+				cfg.Messaging.ErrorMaxBackoff.Duration,
+				modelClient,
+				loadBalancer,
+				httpClient,
+			)
+			if err != nil {
+				return fmt.Errorf("unable to create messenger[%v]: %w", i, err)
+			}
+			msgrs = append(msgrs, msgr)
+		}
 	}
 
 	var wg sync.WaitGroup
 
-	wg.Add(1)
-	go func() {
-		defer func() {
-			Log.Info("autoscaler stopped")
-			wg.Done()
+	if modelAutoscaler != nil {
+		wg.Add(1)
+		go func() {
+			defer func() {
+				Log.Info("autoscaler stopped")
+				wg.Done()
+			}()
+			modelAutoscaler.Start(ctx)
 		}()
-		modelAutoscaler.Start(ctx)
-	}()
+	}
 
-	wg.Add(1)
-	go func() {
-		defer func() {
-			Log.Info("api server stopped")
-			wg.Done()
-		}()
-		Log.Info("starting api server", "addr", apiServer.Addr)
-		if err := apiServer.ListenAndServe(); err != nil {
-			if errors.Is(err, http.ErrServerClosed) {
-				Log.Info("api server closed")
-			} else {
-				Log.Error(err, "error serving api server")
-				os.Exit(1)
+	if apiServer != nil {
+		wg.Add(1)
+		go func() {
+			defer func() {
+				Log.Info("api server stopped")
+				wg.Done()
+			}()
+			Log.Info("starting api server", "addr", apiServer.Addr)
+			if err := apiServer.ListenAndServe(); err != nil {
+				if errors.Is(err, http.ErrServerClosed) {
+					Log.Info("api server closed")
+				} else {
+					Log.Error(err, "error serving api server")
+					os.Exit(1)
+				}
 			}
-		}
-	}()
+		}()
+	}
 	wg.Add(1)
 	go func() {
 		defer func() {
@@ -394,7 +407,9 @@ func Run(ctx context.Context, k8sCfg *rest.Config, cfg config.System) error {
 				os.Exit(1)
 			}
 		}
-		apiServer.Shutdown(context.Background())
+		if apiServer != nil {
+			apiServer.Shutdown(context.Background())
+		}
 		metricsServer.Shutdown(context.Background())
 	}()
 

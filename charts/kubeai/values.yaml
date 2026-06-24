@@ -96,6 +96,12 @@ modelRollouts:
   # The number of replicas to add when rolling out a new model.
   surge: 1
 
+proxy:
+  # Mode controls how the KubeAI proxy handles model endpoints.
+  # "internal" uses pod IPs directly; "external" defers to an external load balancer.
+  # Valid values: internal, external
+  mode: "internal"
+
 metrics:
   prometheusOperator:
     vLLMPodMonitor:
@@ -238,6 +244,9 @@ open-webui:
   ollama:
     enabled: false
   pipelines:
+    enabled: false
+  # added to keep same behaviour
+  websocket:
     enabled: false
   openaiBaseApiUrl: "http://kubeai/openai/v1"
   extraEnvVars:

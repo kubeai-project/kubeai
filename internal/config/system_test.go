@@ -92,3 +92,77 @@ func TestCacheSharedFilesystemStorageSize(t *testing.T) {
 		})
 	}
 }
+
+func TestProxyMode(t *testing.T) {
+	cases := []struct {
+		name        string
+		proxyMode   config.ProxyMode
+		expectError bool
+		expected    config.ProxyMode
+	}{
+		{
+			name:        "default",
+			proxyMode:   "",
+			expectError: false,
+			expected:    config.ProxyModeInternal,
+		},
+		{
+			name:        "internal",
+			proxyMode:   config.ProxyModeInternal,
+			expectError: false,
+			expected:    config.ProxyModeInternal,
+		},
+		{
+			name:        "external",
+			proxyMode:   config.ProxyModeExternal,
+			expectError: false,
+			expected:    config.ProxyModeExternal,
+		},
+		{
+			name:        "invalid",
+			proxyMode:   "invalid",
+			expectError: true,
+			expected:    "invalid", // keeps it as invalid if it fails validation
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			sys := config.System{
+				MetricsAddr:   ":8080",
+				HealthAddress: ":8081",
+				SecretNames: config.SecretNames{
+					Alibaba:     "alibaba",
+					AWS:         "aws",
+					GCP:         "gcp",
+					Huggingface: "hf",
+				},
+				ModelServers: config.ModelServers{
+					VLLM: config.ModelServer{
+						Images: map[string]string{
+							"default": "vllm:latest",
+						},
+					},
+				},
+				ModelLoading: config.ModelLoading{Image: "loader:latest"},
+				ResourceProfiles: map[string]config.ResourceProfile{
+					"cpu": {},
+				},
+				ModelAutoscaling: config.ModelAutoscaling{
+					StateConfigMapName: "test-state",
+				},
+				Proxy: config.Proxy{
+					Mode: c.proxyMode,
+				},
+			}
+
+			err := sys.DefaultAndValidate()
+			if c.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, c.expected, sys.Proxy.Mode)
+			}
+		})
+	}
+}
