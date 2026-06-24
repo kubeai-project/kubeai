@@ -66,7 +66,7 @@ func (r *ModelReconciler) calculateLWSPlan(ctx context.Context, model *kubeaiv1.
 		return plan, nil
 	}
 
-	if k8sutils.GetLabel(lws, kubeaiv1.LeaderHashLabel) != leaderExpededHash ||
+	if k8sutils.GetLabel(lws, kubeaiv1.LeaderHashLabel) != leaderExpectedHash ||
 		k8sutils.GetLabel(lws, kubeaiv1.WorkerHashLabel) != workerExpededHash {
 		upgrade := lws.DeepCopy()
 		upgrade.Spec = newLWS.Spec
