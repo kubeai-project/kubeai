@@ -51,7 +51,7 @@ func (r *ModelReconciler) calculateLWSPlan(ctx context.Context, model *kubeaiv1.
 	k8sutils.SetLabel(newLWS, kubeaiv1.LeaderHashLabel, leaderExpededHash)
 
 	workerExpectdedHash := k8sutils.PodHash(newLWS.Spec.LeaderWorkerTemplate.WorkerTemplate.Spec)
-	k8sutils.SetLabel(newLWS, kubeaiv1.WorkerHashLabel, workerExpededHash)
+	k8sutils.SetLabel(newLWS, kubeaiv1.WorkerHashLabel, workerExpectdedHash)
 
 	lws := new(lwsv1.LeaderWorkerSet)
 	lwsKey := apitypes.NamespacedName{Name: lwsName(model), Namespace: model.Namespace}
