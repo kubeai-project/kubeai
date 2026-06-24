@@ -59,3 +59,35 @@ func TestLWSMultiNode(t *testing.T) {
 	assert.Contains(t, headArgs, "--tensor-parallel-size=1")
 	assert.Contains(t, headArgs, "--pipeline-parallel-size=2")
 }
+
+func TestLWSMultiNodeUpdateRollout(t *testing.T) {
+	sysCfg := baseSysCfg(t)
+	sysCfg.DistributedInference = true
+	initTest(t, sysCfg)
+
+	m := modelForTest(t)
+	// 3-part resource profile triggers LWS mode: <name>:<tp>:<pp>
+	m.Spec.ResourceProfile = resourceProfileCPU + ":1:2"
+	m.Spec.MinReplicas = 1
+	require.NoError(t, testK8sClient.Create(testCtx, m))
+
+	// Update the Model object.
+	const newArg = "--my-new-arg-added-in-testcase"
+	updateModel(t, m, func() { m.Spec.Args = []string{newArg} }, "Adding a new arg to the Model")
+
+	// The model controller should create a LeaderWorkerSet.
+	// In envtest, the LWS controller is NOT running so no pods will be created,
+	// but we can verify the LWS object itself.
+	var lws lwsv1.LeaderWorkerSet
+	require.EventuallyWithT(t, func(ct *assert.CollectT) {
+		lwsName := strings.ReplaceAll(m.Name, ".", "-")
+		err := testK8sClient.Get(testCtx, client.ObjectKey{
+			Name:      lwsName,
+			Namespace: testNS,
+		}, &lws)
+		assert.NoError(ct, err, "LeaderWorkerSet should be created by model controller")
+	}, 10*time.Second, 200*time.Millisecond, "waiting for LWS creation")
+
+	assert.Containsf(t, lws.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec.Containers[0].Args, newArg, "head should have the new arg")
+	assert.NotContainsf(t, lws.Spec.LeaderWorkerTemplate.WorkerTemplate.Spec.Containers[0].Args, newArg, "worker should NOT have the new arg")
+}

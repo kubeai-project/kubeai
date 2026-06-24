@@ -50,8 +50,8 @@ func (r *ModelReconciler) calculateLWSPlan(ctx context.Context, model *kubeaiv1.
 	leaderExpectedHash := k8sutils.PodHash(newLWS.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec)
 	k8sutils.SetLabel(newLWS, kubeaiv1.LeaderHashLabel, leaderExpectedHash)
 
-	workerExpectdedHash := k8sutils.PodHash(newLWS.Spec.LeaderWorkerTemplate.WorkerTemplate.Spec)
-	k8sutils.SetLabel(newLWS, kubeaiv1.WorkerHashLabel, workerExpectdedHash)
+	workerExpectedHash := k8sutils.PodHash(newLWS.Spec.LeaderWorkerTemplate.WorkerTemplate.Spec)
+	k8sutils.SetLabel(newLWS, kubeaiv1.WorkerHashLabel, workerExpectedHash)
 
 	lws := new(lwsv1.LeaderWorkerSet)
 	lwsKey := apitypes.NamespacedName{Name: lwsName(model), Namespace: model.Namespace}
@@ -67,11 +67,11 @@ func (r *ModelReconciler) calculateLWSPlan(ctx context.Context, model *kubeaiv1.
 	}
 
 	if k8sutils.GetLabel(lws, kubeaiv1.LeaderHashLabel) != leaderExpectedHash ||
-		k8sutils.GetLabel(lws, kubeaiv1.WorkerHashLabel) != workerExpectdedHash {
+		k8sutils.GetLabel(lws, kubeaiv1.WorkerHashLabel) != workerExpectedHash {
 		upgrade := lws.DeepCopy()
 		upgrade.Spec = newLWS.Spec
 		k8sutils.SetLabel(upgrade, kubeaiv1.LeaderHashLabel, leaderExpectedHash)
-		k8sutils.SetLabel(upgrade, kubeaiv1.WorkerHashLabel, workerExpctdedHash)
+		k8sutils.SetLabel(upgrade, kubeaiv1.WorkerHashLabel, workerExpectedHash)
 		plan.toUpgrade = upgrade
 		plan.details = append(plan.details, "LWS spec changed, rolling update required")
 	} else {
