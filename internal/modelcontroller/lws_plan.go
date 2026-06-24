@@ -47,7 +47,7 @@ func (r *ModelReconciler) calculateLWSPlan(ctx context.Context, model *kubeaiv1.
 		return nil, fmt.Errorf("building LeaderWorkerSet: %w", err)
 	}
 
-	leaderExpededHash := k8sutils.PodHash(newLWS.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec)
+	leaderExpectedHash := k8sutils.PodHash(newLWS.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec)
 	k8sutils.SetLabel(newLWS, kubeaiv1.LeaderHashLabel, leaderExpededHash)
 
 	workerExpectdedHash := k8sutils.PodHash(newLWS.Spec.LeaderWorkerTemplate.WorkerTemplate.Spec)
