@@ -70,7 +70,7 @@ func (r *ModelReconciler) calculateLWSPlan(ctx context.Context, model *kubeaiv1.
 		k8sutils.GetLabel(lws, kubeaiv1.WorkerHashLabel) != workerExpededHash {
 		upgrade := lws.DeepCopy()
 		upgrade.Spec = newLWS.Spec
-		k8sutils.SetLabel(upgrade, kubeaiv1.LeaderHashLabel, leaderExpededHash)
+		k8sutils.SetLabel(upgrade, kubeaiv1.LeaderHashLabel, leaderExpectedHash)
 		k8sutils.SetLabel(upgrade, kubeaiv1.WorkerHashLabel, workerExpededHash)
 		plan.toUpgrade = upgrade
 		plan.details = append(plan.details, "LWS spec changed, rolling update required")
