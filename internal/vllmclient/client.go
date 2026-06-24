@@ -26,7 +26,7 @@ type LoadAdapterRequestOptions struct {
 }
 
 // Load a LoRa adapter into the VLLM model server.
-// See: https://docs.vllm.ai/en/latest/models/lora.html#dynamically-serving-lora-adapters
+// See: https://docs.vllm.ai/en/latest/features/lora/#dynamically-serving-lora-adapters
 func (c *Client) LoadLoraAdapter(ctx context.Context, addr string, req LoadAdapterRequest) error {
 	if err := c.post(ctx, addr, "/v1/load_lora_adapter", req, nil, func(status int, resp errorResponse) error {
 		// example: {"error":{"message":"Call to add_lora method failed: Loading lora sql_adapter failed: No adapter found for /path/to/sql-lora-adapter","type":"NotFoundError","param":null,"code":404}}
@@ -55,7 +55,7 @@ type UnloadAdapterRequestOptions struct {
 }
 
 // Unload a LoRa adapter from the VLLM model server.
-// See: https://docs.vllm.ai/en/latest/models/lora.html#dynamically-serving-lora-adapters
+// See: https://docs.vllm.ai/en/latest/features/lora/#dynamically-serving-lora-adapters
 func (c *Client) UnloadLoraAdapter(ctx context.Context, addr string, req UnloadAdapterRequest) error {
 	if err := c.post(ctx, addr, "/v1/unload_lora_adapter", req, nil, func(status int, resp errorResponse) error {
 		// example: {"object":"error","message":"The lora adapter 'xyzabc' cannot be found.","type":"InvalidUserInput","param":null,"code":400}

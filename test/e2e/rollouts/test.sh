@@ -62,7 +62,7 @@ kubectl get pods -l model=deepseek-r1-1.5b-cpu
 
 # For Ollama models, the model URL is in the startup probe command, not in container args
 NEW_POD=$(kubectl get pod -l model=deepseek-r1-1.5b-cpu -o jsonpath='{.items[0].metadata.name}')
-STARTUP_PROBE_CMD=$(kubectl get pod $NEW_POD -o jsonpath='{.spec.containers[0].startupProbe.exec.command[2]}')
+STARTUP_PROBE_CMD=$(kubectl get pod $NEW_POD -o jsonpath='{.spec.containers[0].startupProbe.exec.command[*]}')
 echo "Startup probe command for the new pod:"
 echo "$STARTUP_PROBE_CMD"
 

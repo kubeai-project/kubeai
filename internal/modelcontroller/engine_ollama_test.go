@@ -2,7 +2,6 @@
 package modelcontroller
 
 import (
-	"fmt"
 	"testing"
 
 	kubeaiv1 "github.com/kubeai-project/kubeai/api/k8s/v1"
@@ -20,7 +19,7 @@ func Test_ollamaStartupProbeScript(t *testing.T) {
 		model       kubeaiv1.Model
 		modelURL    modelURL
 		featuresMap map[kubeaiv1.ModelFeature]struct{}
-		want        string
+		want        []string
 	}{
 		"basic-model-no-pvc": {
 			model: kubeaiv1.Model{
@@ -37,8 +36,7 @@ func Test_ollamaStartupProbeScript(t *testing.T) {
 				name:   "abc",
 				pull:   true, // models pull by default
 			},
-			want: fmt.Sprintf("/bin/ollama pull %s && /bin/ollama cp %s %s && /bin/ollama run %s hi",
-				ollamaRef, ollamaRef, modelName, modelName),
+			want: []string{"/bin/ollama", "pull", ollamaRef, "&&", "/bin/ollama", "cp", ollamaRef, modelName, "&&", "/bin/ollama", "run", modelName, "hi"},
 		},
 		"basic-model-with-pvc": {
 			model: kubeaiv1.Model{
@@ -56,8 +54,7 @@ func Test_ollamaStartupProbeScript(t *testing.T) {
 				modelParam: ollamaRef,
 				pull:       true, // models pull by default
 			},
-			want: fmt.Sprintf("/bin/ollama cp %s %s && /bin/ollama run %s hi",
-				ollamaRef, modelName, modelName),
+			want: []string{"/bin/ollama", "cp", ollamaRef, modelName, "&&", "/bin/ollama", "run", modelName, "hi"},
 		},
 		"insecure-pull-no-pvc": {
 			model: kubeaiv1.Model{
@@ -75,8 +72,7 @@ func Test_ollamaStartupProbeScript(t *testing.T) {
 				insecure: true, // Set insecure flag here
 				pull:     true, // models pull by default
 			},
-			want: fmt.Sprintf("/bin/ollama pull --insecure %s && /bin/ollama cp %s %s && /bin/ollama run %s hi",
-				ollamaRef, ollamaRef, modelName, modelName),
+			want: []string{"/bin/ollama", "pull", "--insecure", ollamaRef, "&&", "/bin/ollama", "cp", ollamaRef, modelName, "&&", "/bin/ollama", "run", modelName, "hi"},
 		},
 		"no-pull-no-pvc": {
 			model: kubeaiv1.Model{
@@ -93,8 +89,7 @@ func Test_ollamaStartupProbeScript(t *testing.T) {
 				name:   "abc",
 				pull:   false, // Set pull to false
 			},
-			want: fmt.Sprintf("/bin/ollama cp %s %s && /bin/ollama run %s hi",
-				ollamaRef, modelName, modelName),
+			want: []string{"/bin/ollama", "cp", ollamaRef, modelName, "&&", "/bin/ollama", "run", modelName, "hi"},
 		},
 	}
 

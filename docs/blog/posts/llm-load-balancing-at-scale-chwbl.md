@@ -131,6 +131,6 @@ In this work, we demonstrated that incorporating the CHWBL algorithm into LLM lo
 
 ## References
 
-* [vLLM Documentation on Automatic Prefix Caching](https://docs.vllm.ai/en/latest/features/automatic_prefix_caching.html)
+* [vLLM Documentation on Automatic Prefix Caching](https://docs.vllm.ai/en/latest/design/prefix_caching/)
 * [Google Research: Consistent Hashing with Bounded Loads.](https://research.google/blog/consistent-hashing-with-bounded-loads/)
 * [KubeAI Load Balancing Concepts](https://www.kubeai.org/concepts/load-balancing/)

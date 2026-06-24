@@ -13,6 +13,8 @@ import (
 type System struct {
 	SecretNames SecretNames `json:"secretNames" validate:"required"`
 
+	Proxy Proxy `json:"proxy"`
+
 	ModelServers ModelServers `json:"modelServers" validate:"required"`
 
 	ModelLoading ModelLoading `json:"modelLoading" validate:"required"`
@@ -49,6 +51,10 @@ type System struct {
 }
 
 func (s *System) DefaultAndValidate() error {
+	if s.Proxy.Mode == "" {
+		s.Proxy.Mode = ProxyModeInternal
+	}
+
 	if s.MetricsAddr == "" {
 		s.MetricsAddr = ":8080"
 	}
@@ -120,6 +126,17 @@ type LeaderElection struct {
 	//
 	// Defaults to 2 seconds.
 	RetryPeriod Duration `json:"retryPeriod"`
+}
+
+type ProxyMode string
+
+const (
+	ProxyModeInternal ProxyMode = "internal"
+	ProxyModeExternal ProxyMode = "external"
+)
+
+type Proxy struct {
+	Mode ProxyMode `json:"mode" validate:"oneof=internal external"`
 }
 
 type ModelRollouts struct {

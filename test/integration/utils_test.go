@@ -29,6 +29,7 @@ func modelLabelSelectorForTest(t *testing.T) string {
 }
 
 func modelForTest(t *testing.T) *v1.Model {
+	t.Helper()
 	m := &v1.Model{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      strings.ToLower(truncateString(t.Name(), 39)),
@@ -63,6 +64,7 @@ func modelForTest(t *testing.T) *v1.Model {
 }
 
 func updateModel(t *testing.T, m *v1.Model, modify func(), msg string) {
+	t.Helper()
 	require.EventuallyWithT(t, func(t *assert.CollectT) {
 		assert.NoError(t, testK8sClient.Get(testCtx, client.ObjectKeyFromObject(m), m))
 		modify()
@@ -71,6 +73,7 @@ func updateModel(t *testing.T, m *v1.Model, modify func(), msg string) {
 }
 
 func updateAllModelPods(t *testing.T, m *v1.Model, modify func(*corev1.Pod) bool, mustModifyN int, msg string) {
+	t.Helper()
 	var modified int
 	require.EventuallyWithT(t, func(t *assert.CollectT) {
 		podList := &corev1.PodList{}
@@ -90,20 +93,21 @@ func updateAllModelPods(t *testing.T, m *v1.Model, modify func(*corev1.Pod) bool
 }
 
 func requireModelReplicas(t *testing.T, m *v1.Model, expectedReplicas int32, msg string, after time.Duration) {
+	t.Helper()
 	require.EventuallyWithT(t, func(t *assert.CollectT) {
-		if !assert.NoError(t, testK8sClient.Get(testCtx, client.ObjectKeyFromObject(m), m)) {
+		got := &v1.Model{}
+		if !assert.NoError(t, testK8sClient.Get(testCtx, client.ObjectKeyFromObject(m), got)) {
 			return
 		}
-		//jsn, _ := json.MarshalIndent(m, "", "  ")
-		//fmt.Println(string(jsn))
-		if !assert.NotNil(t, m.Spec.Replicas) {
+		if !assert.NotNil(t, got.Spec.Replicas) {
 			return
 		}
-		assert.Equal(t, expectedReplicas, *m.Spec.Replicas)
+		assert.Equal(t, expectedReplicas, *got.Spec.Replicas)
 	}, after, time.Second/10, "Model Replicas should match: "+msg)
 }
 
 func requireModelPods(t *testing.T, m *v1.Model, expectedPods int, msg string, after time.Duration) {
+	t.Helper()
 	require.EventuallyWithT(t, func(t *assert.CollectT) {
 		podList := &corev1.PodList{}
 		if !assert.NoError(t, testK8sClient.List(testCtx, podList, client.InNamespace(testNS), client.MatchingLabels{"model": m.Name})) {
@@ -116,6 +120,7 @@ func requireModelPods(t *testing.T, m *v1.Model, expectedPods int, msg string, a
 }
 
 func markAllModelPodsReady(t *testing.T, m *v1.Model) {
+	t.Helper()
 	require.EventuallyWithT(t, func(t *assert.CollectT) {
 		podList := &corev1.PodList{}
 		if !assert.NoError(t, testK8sClient.List(testCtx, podList, client.InNamespace(testNS), client.MatchingLabels{"model": m.Name})) {
@@ -148,6 +153,7 @@ func mustFindPodContainerByName(t assert.TestingT, pod *corev1.Pod, name string)
 }
 
 func updateModelWithBackend(t *testing.T, m *v1.Model, testModelBackend *httptest.Server) {
+	t.Helper()
 	t.Logf("testBackend URL: %s", testModelBackend.URL)
 	u, err := url.Parse(testModelBackend.URL)
 	require.NoError(t, err)
@@ -200,6 +206,7 @@ func sendOpenAIInferenceRequest(t *testing.T, modelName string, selectorHeaders 
 }
 
 func requireOpenAIModelList(t *testing.T, selectorHeaders []string, expIDs []string, msg string) {
+	t.Helper()
 	require.EventuallyWithT(t, func(t *assert.CollectT) {
 		//t.Helper()
 		req, err := http.NewRequest(http.MethodGet, "http://localhost:8000/openai/v1/models", nil)
@@ -235,13 +242,8 @@ func requireOpenAIModelList(t *testing.T, selectorHeaders []string, expIDs []str
 	}, 5*time.Second, time.Second/10, msg)
 }
 
-func closeChannels(c chan struct{}, n int) {
-	for i := 0; i < n; i++ {
-		c <- struct{}{}
-	}
-}
-
 func requireUpdateJobAsCompleted(t *testing.T, job *batchv1.Job) {
+	t.Helper()
 	require.EventuallyWithT(t, func(t *assert.CollectT) {
 		setJobCompletedStatus(job)
 		if !assert.NoError(t, testK8sClient.Status().Update(testCtx, job)) {
@@ -274,6 +276,7 @@ func setJobCompletedStatus(job *batchv1.Job) {
 
 // logPods is useful for debugging why a test case is failing.
 func logPods(t *testing.T) {
+	t.Helper()
 	podList := &corev1.PodList{}
 	require.NoError(t, testK8sClient.List(testCtx, podList, client.InNamespace(testNS)))
 	fmt.Println("=== Pods ===")

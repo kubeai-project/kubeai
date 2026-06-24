@@ -45,7 +45,7 @@ func (r *ModelReconciler) vLLMPodForModel(m *kubeaiv1.Model, c ModelConfig) *cor
 	if m.Spec.Adapters != nil {
 		args = append(args, "--enable-lora")
 		env = append(env, corev1.EnvVar{
-			// https://docs.vllm.ai/en/latest/models/lora.html#dynamically-serving-lora-adapters
+			// https://docs.vllm.ai/en/latest/features/lora/#dynamically-serving-lora-adapters
 			Name:  "VLLM_ALLOW_RUNTIME_LORA_UPDATING",
 			Value: "True",
 		})

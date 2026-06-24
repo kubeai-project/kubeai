@@ -8,7 +8,7 @@ The Least Load strategy distributes inference requests to the model replica that
 
 ## Prefix Hash
 
-The Prefix Hash strategy leverages the <a target="_blank" href="https://research.google/blog/consistent-hashing-with-bounded-loads/">Consistent Hashing with With Bounded Loads</a> (CHWBL) algorithm to optimize the performance of engines such as vLLM that support prefix caching. This strategy increases the likelihood of KV cache hits for common prefixes. See <a target="_blank" href="https://docs.vllm.ai/en/latest/automatic_prefix_caching/apc.html">vLLM prefix hashing docs</a> for more info.
+The Prefix Hash strategy leverages the <a target="_blank" href="https://research.google/blog/consistent-hashing-with-bounded-loads/">Consistent Hashing with With Bounded Loads</a> (CHWBL) algorithm to optimize the performance of engines such as vLLM that support prefix caching. This strategy increases the likelihood of KV cache hits for common prefixes. See <a target="_blank" href="https://docs.vllm.ai/en/latest/design/prefix_caching/#automatic-prefix-caching">vLLM prefix hashing docs</a> for more info.
 
 With this strategy, KubeAI hashes incoming requests based on their prefixes (in addition to a requested LoRA adapter name - if present). Requests with the same hash value are routed to the same replica, except when that replica's in-flight requests exceed the overall average by a configurable percentage.
 

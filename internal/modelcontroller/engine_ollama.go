@@ -1,7 +1,6 @@
 package modelcontroller
 
 import (
-	"fmt"
 	"sort"
 
 	kubeaiv1 "github.com/kubeai-project/kubeai/api/k8s/v1"
@@ -106,10 +105,7 @@ func (r *ModelReconciler) oLlamaPodForModel(m *kubeaiv1.Model, c ModelConfig) *c
 						TimeoutSeconds: 60 * 180,
 						ProbeHandler: corev1.ProbeHandler{
 							Exec: &corev1.ExecAction{
-								Command: []string{
-									"bash", "-c",
-									startupProbeScript,
-								},
+								Command: append([]string{"/bin/bash", "-c"}, startupProbeScript...),
 							},
 						},
 					},
@@ -170,28 +166,30 @@ func (r *ModelReconciler) oLlamaPodForModel(m *kubeaiv1.Model, c ModelConfig) *c
 
 }
 
-func ollamaStartupProbeScript(m *kubeaiv1.Model, u modelURL) string {
+func ollamaStartupProbeScript(m *kubeaiv1.Model, u modelURL) []string {
 	// Pull model and copy to rename it to Model.metadata.name.
 	// See Ollama issue for rename/copy workaround: https://github.com/ollama/ollama/issues/5914
 	// NOTE: The cp command should just create a pointer to the old model, not copy data
 	// (see https://github.com/ollama/ollama/issues/5914#issuecomment-2248168474).
 	// Use `ollama run` to send a single prompt to ollama to load the model into memory
 	// before the Pod becomes Ready. (by default it will load on the first prompt request).
-	startupScript := ""
+	startupScript := []string{}
 	// If the model is using a pvc, we don't want to try to connect/pull a model
 
 	if u.scheme == "pvc" {
 		// There is a potential race condition when multiple pods try to rename/copy the same model.
-		startupScript = fmt.Sprintf("/bin/ollama cp %s %s", u.modelParam, m.Name)
+		startupScript = append(startupScript, "/bin/ollama", "cp", u.modelParam, m.Name)
 	} else {
 		if u.pull {
-			pullCmd := "/bin/ollama pull"
+			pullCmd := []string{"/bin/ollama", "pull"}
 			if u.insecure {
-				pullCmd += " --insecure"
+				pullCmd = append(pullCmd, "--insecure")
 			}
-			startupScript = fmt.Sprintf("%s %s && /bin/ollama cp %s %s", pullCmd, u.ref, u.ref, m.Name)
+			// startupScript = fmt.Sprintf("%s %s && /bin/ollama cp %s %s", pullCmd, u.ref, u.ref, m.Name)
+			startupScript = append(startupScript, pullCmd...)
+			startupScript = append(startupScript, u.ref, "&&", "/bin/ollama", "cp", u.ref, m.Name)
 		} else {
-			startupScript = fmt.Sprintf("/bin/ollama cp %s %s", u.ref, m.Name)
+			startupScript = append(startupScript, "/bin/ollama", "cp", u.ref, m.Name)
 		}
 	}
 
@@ -206,7 +204,7 @@ func ollamaStartupProbeScript(m *kubeaiv1.Model, u modelURL) string {
 		// ollama run nomic-embed-text hey
 		// Error: "nomic-embed-text" does not support generate
 		//
-		startupScript += fmt.Sprintf(" && /bin/ollama run %s hi", m.Name)
+		startupScript = append(startupScript, "&&", "/bin/ollama", "run", m.Name, "hi")
 	}
 
 	return startupScript

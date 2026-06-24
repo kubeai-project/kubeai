@@ -11,6 +11,8 @@ data:
       aws: {{ include "kubeai.awsSecretName" . }}
       gcp: {{ include "kubeai.gcpSecretName" . }}
       huggingface: {{ include "kubeai.huggingfaceSecretName" . }}
+    proxy:
+      mode: {{ .Values.proxy.mode }}
     resourceProfiles:
       {{- .Values.resourceProfiles | toYaml | nindent 6 }}
     cacheProfiles:

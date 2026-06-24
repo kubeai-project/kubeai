@@ -13,3 +13,6 @@ spec:
   minReplicas: 0
   maxReplicas: 3
   targetRequests: 1
+  env:
+    VLLM_CPU_KVCACHE_SPACE: "1"
+    VLLM_CPU_OMP_THREADS_BIND: "0"

@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	v1 "github.com/kubeai-project/kubeai/api/k8s/v1"
 	"github.com/kubeai-project/kubeai/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -63,7 +64,7 @@ func TestProxy(t *testing.T) {
 	requireModelReplicas(t, m, 1, "Replicas should be scaled up to 1 to process messaging request", 5*time.Second)
 	requireModelPods(t, m, 1, "Pod should be created for the messaging request", 5*time.Second)
 	markAllModelPodsReady(t, m)
-	closeChannels(backendComplete, 1)
+	completeBackendRequests(backendComplete, 1)
 	require.Equal(t, int32(1), totalBackendRequests.Load(), "ensure the request made its way to the backend")
 
 	const autoscaleUpWait = 25 * time.Second
@@ -77,11 +78,12 @@ func TestProxy(t *testing.T) {
 	// Make sure deployment will not be scaled past max (3).
 	sendRequests(t, &wg, m.Name, nil, 2, http.StatusOK, "", "request 4,5")
 	require.Never(t, func() bool {
-		assert.NoError(t, testK8sClient.Get(testCtx, client.ObjectKeyFromObject(m), m))
-		return *m.Spec.Replicas > *m.Spec.MaxReplicas
+		got := &v1.Model{}
+		assert.NoError(t, testK8sClient.Get(testCtx, client.ObjectKeyFromObject(m), got))
+		return *got.Spec.Replicas > *got.Spec.MaxReplicas
 	}, autoscaleUpWait, time.Second/10, "Replicas should not be scaled past MaxReplicas")
 
-	closeChannels(backendComplete, 4)
+	completeBackendRequests(backendComplete, 4)
 	require.Equal(t, int32(5), totalBackendRequests.Load(), "ensure all the requests made their way to the backend")
 
 	// Ensure the deployment is autoscaled back down to MinReplicas.

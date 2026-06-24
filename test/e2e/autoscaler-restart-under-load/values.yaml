@@ -7,3 +7,17 @@ modelLoading:
   image: "ghcr.io/kubeai-project/kubeai-model-loader:test"
 image:
   tag: "test"
+modelServers:
+  VLLM:
+    images:
+      default: "ghcr.io/kubeai-project/vllm-cpu-test-env:v0.10.2"
+      cpu: "ghcr.io/kubeai-project/vllm-cpu-test-env:v0.10.2"
+resourceProfiles:
+  cpu:
+    imageName: "cpu"
+    requests:
+      cpu: 1
+      memory: "2Gi"
+    limits:
+      cpu: 1
+      memory: "4Gi"
