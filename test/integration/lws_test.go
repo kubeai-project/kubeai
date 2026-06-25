@@ -1,7 +1,6 @@
 package integration
 
 import (
-	"strings"
 	"testing"
 	"time"
 
@@ -29,7 +28,7 @@ func TestLWSMultiNode(t *testing.T) {
 	// but we can verify the LWS object itself.
 	var lws lwsv1.LeaderWorkerSet
 	require.EventuallyWithT(t, func(ct *assert.CollectT) {
-		lwsName := strings.ReplaceAll(m.Name, ".", "-")
+		lwsName := modelcontroller.LwsName(m)
 		err := testK8sClient.Get(testCtx, client.ObjectKey{
 			Name:      lwsName,
 			Namespace: testNS,
@@ -80,7 +79,7 @@ func TestLWSMultiNodeUpdateRollout(t *testing.T) {
 	// but we can verify the LWS object itself.
 	var lws lwsv1.LeaderWorkerSet
 	require.EventuallyWithT(t, func(ct *assert.CollectT) {
-		lwsName := strings.ReplaceAll(m.Name, ".", "-")
+		lwsName := modelcontroller.LwsName(m)
 		err := testK8sClient.Get(testCtx, client.ObjectKey{
 			Name:      lwsName,
 			Namespace: testNS,

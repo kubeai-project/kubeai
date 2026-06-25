@@ -2,6 +2,7 @@ package modelcontroller
 
 import (
 	"context"
+	"crypto"
 	"errors"
 	"fmt"
 	"math"
@@ -54,7 +55,7 @@ func (r *ModelReconciler) calculateLWSPlan(ctx context.Context, model *kubeaiv1.
 	k8sutils.SetLabel(newLWS, kubeaiv1.WorkerHashLabel, workerExpectedHash)
 
 	lws := new(lwsv1.LeaderWorkerSet)
-	lwsKey := apitypes.NamespacedName{Name: lwsName(model), Namespace: model.Namespace}
+	lwsKey := apitypes.NamespacedName{Name: LwsName(model), Namespace: model.Namespace}
 	if err := r.Client.Get(ctx, lwsKey, lws); err != nil {
 		if !apierrors.IsNotFound(err) {
 			return nil, fmt.Errorf("getting LeaderWorkerSet: %w", err)
@@ -110,8 +111,10 @@ func (r *ModelReconciler) calculateLWSPlan(ctx context.Context, model *kubeaiv1.
 }
 
 // lwsName returns a DNS-compatible name for the LWS resource.
-func lwsName(model *kubeaiv1.Model) string {
-	return strings.ReplaceAll(model.Name, ".", "-")
+func LwsName(model *kubeaiv1.Model) string {
+	sha256 := fmt.Sprintf("%x", crypto.SHA256.New().Sum([]byte(model.Name)))[:8]
+	lwsName := fmt.Sprintf("model-%s-%s", strings.ReplaceAll(model.Name, ".", "-"), sha256)
+	return lwsName
 }
 
 // lwsPlan implements executablePlan for multi-node (LeaderWorkerSet) models.
@@ -293,7 +296,7 @@ func (r *ModelReconciler) buildLeaderWorkerSet(model *kubeaiv1.Model, cfg ModelC
 			Kind:       "LeaderWorkerSet",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        lwsName(model),
+			Name:        LwsName(model),
 			Namespace:   model.Namespace,
 			Labels:      lbs,
 			Annotations: ann,

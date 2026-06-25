@@ -100,7 +100,7 @@ func TestCalculateLWSPlan(t *testing.T) {
 		},
 		"No-op when LWS at correct scale": {
 			existingLWS: &lwsv1.LeaderWorkerSet{
-				ObjectMeta: metav1.ObjectMeta{Name: "test-model", Namespace: "default"},
+				ObjectMeta: metav1.ObjectMeta{Name: LwsName(&kubeaiv1.Model{ObjectMeta: metav1.ObjectMeta{Name: "test-model"}}), Namespace: "default"},
 				Spec:       lwsv1.LeaderWorkerSetSpec{Replicas: ptr.To[int32](2)},
 				Status:     lwsv1.LeaderWorkerSetStatus{Replicas: 2, ReadyReplicas: 2},
 			},
@@ -111,7 +111,7 @@ func TestCalculateLWSPlan(t *testing.T) {
 		},
 		"Scales up when desired > observed": {
 			existingLWS: &lwsv1.LeaderWorkerSet{
-				ObjectMeta: metav1.ObjectMeta{Name: "test-model", Namespace: "default"},
+				ObjectMeta: metav1.ObjectMeta{Name: LwsName(&kubeaiv1.Model{ObjectMeta: metav1.ObjectMeta{Name: "test-model"}}), Namespace: "default"},
 				Spec:       lwsv1.LeaderWorkerSetSpec{Replicas: ptr.To[int32](1)},
 				Status:     lwsv1.LeaderWorkerSetStatus{Replicas: 1, ReadyReplicas: 1},
 			},
@@ -123,7 +123,7 @@ func TestCalculateLWSPlan(t *testing.T) {
 		},
 		"Scales down when desired < observed": {
 			existingLWS: &lwsv1.LeaderWorkerSet{
-				ObjectMeta: metav1.ObjectMeta{Name: "test-model", Namespace: "default"},
+				ObjectMeta: metav1.ObjectMeta{Name: LwsName(&kubeaiv1.Model{ObjectMeta: metav1.ObjectMeta{Name: "test-model"}}), Namespace: "default"},
 				Spec:       lwsv1.LeaderWorkerSetSpec{Replicas: ptr.To[int32](3)},
 				Status:     lwsv1.LeaderWorkerSetStatus{Replicas: 3, ReadyReplicas: 3},
 			},
@@ -140,7 +140,7 @@ func TestCalculateLWSPlan(t *testing.T) {
 		},
 		"Update LWS when model spec changes": {
 			existingLWS: &lwsv1.LeaderWorkerSet{
-				ObjectMeta: metav1.ObjectMeta{Name: "test-model", Namespace: "default"},
+				ObjectMeta: metav1.ObjectMeta{Name: LwsName(&kubeaiv1.Model{ObjectMeta: metav1.ObjectMeta{Name: "test-model"}}), Namespace: "default"},
 				Spec: lwsv1.LeaderWorkerSetSpec{
 					Replicas: ptr.To[int32](2),
 					LeaderWorkerTemplate: lwsv1.LeaderWorkerTemplate{
@@ -266,12 +266,6 @@ func TestBuildLeaderWorkerSet(t *testing.T) {
 	specs := map[string]struct {
 		check func(t *testing.T)
 	}{
-		"LWS name matches model": {
-			check: func(t *testing.T) {
-				assert.Equal(t, "test-model", lws.Name)
-				assert.Equal(t, "default", lws.Namespace)
-			},
-		},
 		"LWS has model label": {
 			check: func(t *testing.T) {
 				assert.Equal(t, model.Name, lws.Labels["model"])
