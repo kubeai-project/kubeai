@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://www.kubeai.org/reference/kubernetes-api/">
+        <link rel="canonical" href="https://www.kubeai.org/how-to/load-models-from-oci/">
       
       
-        <link rel="prev" href="../../contributing/release-process/">
+        <link rel="prev" href="../install-models/">
       
       
-        <link rel="next" href="../openai-api-compatibility/">
+        <link rel="next" href="../load-models-from-pvc/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Kubernetes API - KubeAI</title>
+        <title>Load Models from OCI Images - KubeAI</title>
       
     
     
@@ -67,15 +67,15 @@
     
   
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Kubernetes API - KubeAI" />
-<meta property="og:image" content="https://www.kubeai.org/assets/images/social/reference/kubernetes-api.png" />
+<meta property="og:title" content="Load Models from OCI Images - KubeAI" />
+<meta property="og:image" content="https://www.kubeai.org/assets/images/social/how-to/load-models-from-oci.png" />
 <meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:url" content="https://www.kubeai.org/reference/kubernetes-api/" />
+<meta property="og:url" content="https://www.kubeai.org/how-to/load-models-from-oci/" />
 <meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:title" content="Kubernetes API - KubeAI" />
-<meta property="twitter:image" content="https://www.kubeai.org/assets/images/social/reference/kubernetes-api.png" />
+<meta property="twitter:title" content="Load Models from OCI Images - KubeAI" />
+<meta property="twitter:image" content="https://www.kubeai.org/assets/images/social/how-to/load-models-from-oci.png" />
 </head>
   
   
@@ -93,7 +93,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#kubernetes-api" class="md-skip">
+        <a href="#load-models-from-oci-images" class="md-skip">
           Skip to content
         </a>
       
@@ -129,7 +129,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Kubernetes API
+              Load Models from OCI Images
             
           </span>
         </div>
@@ -439,18 +439,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -471,7 +473,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -489,7 +491,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/architect-for-multitenancy/" class="md-nav__link">
+      <a href="../architect-for-multitenancy/" class="md-nav__link">
         
   
   
@@ -517,7 +519,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/authenticate-to-model-repos/" class="md-nav__link">
+      <a href="../authenticate-to-model-repos/" class="md-nav__link">
         
   
   
@@ -545,7 +547,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/build-models-into-containers/" class="md-nav__link">
+      <a href="../build-models-into-containers/" class="md-nav__link">
         
   
   
@@ -573,7 +575,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/cache-models-with-aws-efs/" class="md-nav__link">
+      <a href="../cache-models-with-aws-efs/" class="md-nav__link">
         
   
   
@@ -601,7 +603,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/cache-models-with-gcp-filestore/" class="md-nav__link">
+      <a href="../cache-models-with-gcp-filestore/" class="md-nav__link">
         
   
   
@@ -629,7 +631,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/configure-autoscaling/" class="md-nav__link">
+      <a href="../configure-autoscaling/" class="md-nav__link">
         
   
   
@@ -657,7 +659,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/configure-embedding-models/" class="md-nav__link">
+      <a href="../configure-embedding-models/" class="md-nav__link">
         
   
   
@@ -685,7 +687,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/configure-reranking-models/" class="md-nav__link">
+      <a href="../configure-reranking-models/" class="md-nav__link">
         
   
   
@@ -713,7 +715,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/configure-resource-profiles/" class="md-nav__link">
+      <a href="../configure-resource-profiles/" class="md-nav__link">
         
   
   
@@ -741,7 +743,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/configure-speech-to-text/" class="md-nav__link">
+      <a href="../configure-speech-to-text/" class="md-nav__link">
         
   
   
@@ -769,7 +771,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/configure-text-generation-models/" class="md-nav__link">
+      <a href="../configure-text-generation-models/" class="md-nav__link">
         
   
   
@@ -797,7 +799,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/install-models/" class="md-nav__link">
+      <a href="../install-models/" class="md-nav__link">
         
   
   
@@ -822,10 +824,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../how-to/load-models-from-oci/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Models from OCI Images
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -841,6 +870,82 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#vllm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        vLLM
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="vLLM">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#image-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Image requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-for-private-registries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication for private registries
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication for private registries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-loading-opt-125m-from-an-oci-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Loading OPT-125m from an OCI image
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -853,7 +958,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/load-models-from-pvc/" class="md-nav__link">
+      <a href="../load-models-from-pvc/" class="md-nav__link">
         
   
   
@@ -881,7 +986,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/observability-with-prometheus-stack/" class="md-nav__link">
+      <a href="../observability-with-prometheus-stack/" class="md-nav__link">
         
   
   
@@ -909,7 +1014,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to/serve-lora-adapters/" class="md-nav__link">
+      <a href="../serve-lora-adapters/" class="md-nav__link">
         
   
   
@@ -1495,20 +1600,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
           <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
@@ -1529,7 +1632,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1544,37 +1647,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Kubernetes API
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../reference/kubernetes-api/" class="md-nav__link">
         
   
   
@@ -1590,192 +1666,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#packages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Packages
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#kubeaiorgv1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        kubeai.org/v1
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="kubeai.org/v1">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#resource-types" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Resource Types
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Resource Types">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#adapter" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Adapter
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#file" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        File
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#loadbalancing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        LoadBalancing
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#loadbalancingstrategy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        LoadBalancingStrategy
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#model" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Model
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#modelfeature" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ModelFeature
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#modelspec" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ModelSpec
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#modelstatus" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ModelStatus
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#modelstatuscache" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ModelStatusCache
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#modelstatusreplicas" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ModelStatusReplicas
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#prefixhash" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        PrefixHash
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1788,7 +1678,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../openai-api-compatibility/" class="md-nav__link">
+      <a href="../../reference/openai-api-compatibility/" class="md-nav__link">
         
   
   
@@ -2207,155 +2097,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#packages" class="md-nav__link">
+  <a href="#vllm" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Packages
+        vLLM
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#kubeaiorgv1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        kubeai.org/v1
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="kubeai.org/v1">
+    <nav class="md-nav" aria-label="vLLM">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#resource-types" class="md-nav__link">
+  <a href="#image-requirements" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Resource Types
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Resource Types">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#adapter" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Adapter
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#file" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        File
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#loadbalancing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        LoadBalancing
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#loadbalancingstrategy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        LoadBalancingStrategy
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#model" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Model
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#modelfeature" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ModelFeature
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#modelspec" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ModelSpec
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#modelstatus" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ModelStatus
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#modelstatuscache" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ModelStatusCache
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#modelstatusreplicas" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ModelStatusReplicas
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#prefixhash" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        PrefixHash
+        Image requirements
       
     </span>
   </a>
@@ -2364,6 +2121,29 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-for-private-registries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication for private registries
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication for private registries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-loading-opt-125m-from-an-oci-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Loading OPT-125m from an OCI image
+      
+    </span>
+  </a>
   
 </li>
         
@@ -2392,418 +2172,74 @@
   
 
 
-<h1 id="kubernetes-api">Kubernetes API<a class="headerlink" href="#kubernetes-api" title="Permanent link">&para;</a></h1>
-<h2 id="packages">Packages<a class="headerlink" href="#packages" title="Permanent link">&para;</a></h2>
-<ul>
-<li><a href="#kubeaiorgv1">kubeai.org/v1</a></li>
-</ul>
-<h2 id="kubeaiorgv1">kubeai.org/v1<a class="headerlink" href="#kubeaiorgv1" title="Permanent link">&para;</a></h2>
-<p>Package v1 contains API Schema definitions for the kubeai v1 API group</p>
-<h3 id="resource-types">Resource Types<a class="headerlink" href="#resource-types" title="Permanent link">&para;</a></h3>
-<ul>
-<li><a href="#model">Model</a></li>
-</ul>
-<h4 id="adapter">Adapter<a class="headerlink" href="#adapter" title="Permanent link">&para;</a></h4>
-<p><em>Appears in:</em>
-- <a href="#modelspec">ModelSpec</a></p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-<th>Default</th>
-<th>Validation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>name</code> <em>string</em></td>
-<td>Name must be a lowercase string with no spaces.</td>
-<td></td>
-<td>MaxLength: 63 <br />Pattern: <code>^[a-z0-9-]+$</code> <br />Required: {} <br /></td>
-</tr>
-<tr>
-<td><code>url</code> <em>string</em></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h4 id="file">File<a class="headerlink" href="#file" title="Permanent link">&para;</a></h4>
-<p>File represents a file to be mounted in the model pod.</p>
-<p><em>Appears in:</em>
-- <a href="#modelspec">ModelSpec</a></p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-<th>Default</th>
-<th>Validation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>path</code> <em>string</em></td>
-<td>Path where the file should be mounted in the pod.<br />Must be an absolute path.</td>
-<td></td>
-<td>MaxLength: 1024 <br />Required: {} <br /></td>
-</tr>
-<tr>
-<td><code>content</code> <em>string</em></td>
-<td>Content of the file to be mounted.<br />Will be injected into a ConfigMap and mounted in the model Pods.</td>
-<td></td>
-<td>MaxLength: 100000 <br />Required: {} <br /></td>
-</tr>
-</tbody>
-</table>
-<h4 id="loadbalancing">LoadBalancing<a class="headerlink" href="#loadbalancing" title="Permanent link">&para;</a></h4>
-<p><em>Appears in:</em>
-- <a href="#modelspec">ModelSpec</a></p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-<th>Default</th>
-<th>Validation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>strategy</code> <em><a href="#loadbalancingstrategy">LoadBalancingStrategy</a></em></td>
-<td></td>
-<td>LeastLoad</td>
-<td>Enum: [LeastLoad PrefixHash] <br />Optional: {} <br /></td>
-</tr>
-<tr>
-<td><code>prefixHash</code> <em><a href="#prefixhash">PrefixHash</a></em></td>
-<td></td>
-<td>{  }</td>
-<td>Optional: {} <br /></td>
-</tr>
-</tbody>
-</table>
-<h4 id="loadbalancingstrategy">LoadBalancingStrategy<a class="headerlink" href="#loadbalancingstrategy" title="Permanent link">&para;</a></h4>
-<p><em>Underlying type:</em> <em>string</em></p>
-<p><em>Validation:</em>
-- Enum: [LeastLoad PrefixHash]</p>
-<p><em>Appears in:</em>
-- <a href="#loadbalancing">LoadBalancing</a></p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>LeastLoad</code></td>
-<td></td>
-</tr>
-<tr>
-<td><code>PrefixHash</code></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h4 id="model">Model<a class="headerlink" href="#model" title="Permanent link">&para;</a></h4>
-<p>Model resources define the ML models that will be served by KubeAI.</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-<th>Default</th>
-<th>Validation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>apiVersion</code> <em>string</em></td>
-<td><code>kubeai.org/v1</code></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>kind</code> <em>string</em></td>
-<td><code>Model</code></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>metadata</code> <em><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.31/#objectmeta-v1-meta">ObjectMeta</a></em></td>
-<td>Refer to Kubernetes API documentation for fields of <code>metadata</code>.</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>spec</code> <em><a href="#modelspec">ModelSpec</a></em></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>status</code> <em><a href="#modelstatus">ModelStatus</a></em></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h4 id="modelfeature">ModelFeature<a class="headerlink" href="#modelfeature" title="Permanent link">&para;</a></h4>
-<p><em>Underlying type:</em> <em>string</em></p>
-<p><em>Validation:</em>
-- Enum: [TextGeneration TextEmbedding Reranking SpeechToText]</p>
-<p><em>Appears in:</em>
-- <a href="#modelspec">ModelSpec</a></p>
-<h4 id="modelspec">ModelSpec<a class="headerlink" href="#modelspec" title="Permanent link">&para;</a></h4>
-<p>ModelSpec defines the desired state of Model.</p>
-<p><em>Appears in:</em>
-- <a href="#model">Model</a></p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-<th>Default</th>
-<th>Validation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>url</code> <em>string</em></td>
-<td>URL of the model to be served.<br />Currently the following formats are supported:<br />For VLLM, FasterWhisper, Infinity engines:<br />"hf://<repo>/<model>"<br />"pvc://<pvcName>"<br />"pvc://<pvcName>/<pvcSubpath>"<br />"oci://<registry>/<repository>:<tag>"<br />"gs://<bucket>/<path>" (only with cacheProfile)<br />"oss://<bucket>/<path>" (only with cacheProfile)<br />"s3://<bucket>/<path>" (only with cacheProfile)<br />For OLlama engine:<br />"ollama://<model>"</td>
-<td></td>
-<td>Pattern: <code>^([a-z0-9]+):\/\/([a-zA-Z0-9._:/-]+)(\?.*)?$</code> <br />Required: {} <br /></td>
-</tr>
-<tr>
-<td><code>adapters</code> <em><a href="#adapter">Adapter</a> array</em></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>features</code> <em><a href="#modelfeature">ModelFeature</a> array</em></td>
-<td>Features that the model supports.<br />Dictates the APIs that are available for the model.</td>
-<td></td>
-<td>Enum: [TextGeneration TextEmbedding Reranking SpeechToText] <br /></td>
-</tr>
-<tr>
-<td><code>engine</code> <em>string</em></td>
-<td>Engine to be used for the server process.</td>
-<td></td>
-<td>Enum: [OLlama VLLM FasterWhisper Infinity] <br />Required: {} <br /></td>
-</tr>
-<tr>
-<td><code>resourceProfile</code> <em>string</em></td>
-<td>ResourceProfile required to serve the model.<br />Use the format "<resource-profile-name>:<count>".<br />Example: "nvidia-gpu-l4:2" - 2x NVIDIA L4 GPUs.<br />Must be a valid ResourceProfile defined in the system config.</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>cacheProfile</code> <em>string</em></td>
-<td>CacheProfile to be used for caching model artifacts.<br />Must be a valid CacheProfile defined in the system config.</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>image</code> <em>string</em></td>
-<td>Image to be used for the server process.<br />Will be set from ResourceProfile + Engine if not specified.</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>args</code> <em>string array</em></td>
-<td>Args to be added to the server process.</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>env</code> <em>object (keys:string, values:string)</em></td>
-<td>Env variables to be added to the server process.</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>envFrom</code> <em><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.31/#envfromsource-v1-core">EnvFromSource</a> array</em></td>
-<td>Env variables to be added to the server process from Secret or ConfigMap.</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>replicas</code> <em>integer</em></td>
-<td>Replicas is the number of Pod replicas that should be actively<br />serving the model. KubeAI will manage this field unless AutoscalingDisabled<br />is set to true.</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>minReplicas</code> <em>integer</em></td>
-<td>MinReplicas is the minimum number of Pod replicas that the model can scale down to.<br />Note: 0 is a valid value.</td>
-<td></td>
-<td>Minimum: 0 <br />Optional: {} <br /></td>
-</tr>
-<tr>
-<td><code>maxReplicas</code> <em>integer</em></td>
-<td>MaxReplicas is the maximum number of Pod replicas that the model can scale up to.<br />Empty value means no limit.</td>
-<td></td>
-<td>Minimum: 1 <br /></td>
-</tr>
-<tr>
-<td><code>autoscalingDisabled</code> <em>boolean</em></td>
-<td>AutoscalingDisabled will stop the controller from managing the replicas<br />for the Model. When disabled, metrics will not be collected on server Pods.</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>targetRequests</code> <em>integer</em></td>
-<td>TargetRequests is average number of active requests that the autoscaler<br />will try to maintain on model server Pods.</td>
-<td>100</td>
-<td>Minimum: 1 <br /></td>
-</tr>
-<tr>
-<td><code>scaleDownDelaySeconds</code> <em>integer</em></td>
-<td>ScaleDownDelay is the minimum time before a deployment is scaled down after<br />the autoscaling algorithm determines that it should be scaled down.</td>
-<td>30</td>
-<td></td>
-</tr>
-<tr>
-<td><code>owner</code> <em>string</em></td>
-<td>Owner of the model. Used solely to populate the owner field in the<br />OpenAI /v1/models endpoint.<br />DEPRECATED.</td>
-<td></td>
-<td>Optional: {} <br /></td>
-</tr>
-<tr>
-<td><code>loadBalancing</code> <em><a href="#loadbalancing">LoadBalancing</a></em></td>
-<td>LoadBalancing configuration for the model.<br />If not specified, a default is used based on the engine and request.</td>
-<td>{  }</td>
-<td></td>
-</tr>
-<tr>
-<td><code>files</code> <em><a href="#file">File</a> array</em></td>
-<td>Files to be mounted in the model Pods.</td>
-<td></td>
-<td>MaxItems: 10 <br /></td>
-</tr>
-<tr>
-<td><code>priorityClassName</code> <em>string</em></td>
-<td>PriorityClassName sets the priority class for all pods created for this model.<br />If specified, the PriorityClass must exist before the model is created.<br />This is useful for implementing priority and preemption for models.</td>
-<td></td>
-<td>Optional: {} <br /></td>
-</tr>
-</tbody>
-</table>
-<h4 id="modelstatus">ModelStatus<a class="headerlink" href="#modelstatus" title="Permanent link">&para;</a></h4>
-<p>ModelStatus defines the observed state of Model.</p>
-<p><em>Appears in:</em>
-- <a href="#model">Model</a></p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-<th>Default</th>
-<th>Validation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>replicas</code> <em><a href="#modelstatusreplicas">ModelStatusReplicas</a></em></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>cache</code> <em><a href="#modelstatuscache">ModelStatusCache</a></em></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h4 id="modelstatuscache">ModelStatusCache<a class="headerlink" href="#modelstatuscache" title="Permanent link">&para;</a></h4>
-<p><em>Appears in:</em>
-- <a href="#modelstatus">ModelStatus</a></p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-<th>Default</th>
-<th>Validation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>loaded</code> <em>boolean</em></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h4 id="modelstatusreplicas">ModelStatusReplicas<a class="headerlink" href="#modelstatusreplicas" title="Permanent link">&para;</a></h4>
-<p><em>Appears in:</em>
-- <a href="#modelstatus">ModelStatus</a></p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-<th>Default</th>
-<th>Validation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>all</code> <em>integer</em></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>ready</code> <em>integer</em></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h4 id="prefixhash">PrefixHash<a class="headerlink" href="#prefixhash" title="Permanent link">&para;</a></h4>
-<p><em>Appears in:</em>
-- <a href="#loadbalancing">LoadBalancing</a></p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-<th>Default</th>
-<th>Validation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>meanLoadFactor</code> <em>integer</em></td>
-<td>MeanLoadPercentage is the percentage that any given endpoint's load must not exceed<br />over the mean load of all endpoints in the hash ring. Defaults to 125% which is<br />a widely accepted value for the Consistent Hashing with Bounded Loads algorithm.</td>
-<td>125</td>
-<td>Minimum: 100 <br />Optional: {} <br /></td>
-</tr>
-<tr>
-<td><code>replication</code> <em>integer</em></td>
-<td>Replication is the number of replicas of each endpoint on the hash ring.<br />Higher values will result in a more even distribution of load but will<br />decrease lookup performance.</td>
-<td>256</td>
-<td>Optional: {} <br /></td>
-</tr>
-<tr>
-<td><code>prefixCharLength</code> <em>integer</em></td>
-<td>PrefixCharLength is the number of characters to count when building the prefix to hash.</td>
-<td>100</td>
-<td>Optional: {} <br /></td>
-</tr>
-</tbody>
-</table>
+<h1 id="load-models-from-oci-images">Load Models from OCI Images<a class="headerlink" href="#load-models-from-oci-images" title="Permanent link">&para;</a></h1>
+<p>You can package your models into OCI images and let KubeAI use them for serving.
+KubeAI mounts the image contents directly into the model server Pod using a Kubernetes
+<a href="https://kubernetes.io/docs/tasks/configure-pod-container/image-volumes/">image volume</a>,
+so the model files are available without a separate download step.</p>
+<blockquote>
+<p><strong>Note:</strong> The container runtime determines what kind of OCI references are supported:
+- When <strong>containerd</strong> is used as the container runtime, only <strong>OCI images</strong> are supported.
+- When <strong>CRI-O</strong> is used as the container runtime, both <strong>OCI images</strong> and <strong>OCI artifacts</strong> are supported.</p>
+<p>Image volumes also require a sufficiently recent Kubernetes version with the
+<code>ImageVolume</code> feature enabled on the cluster.</p>
+</blockquote>
+<h2 id="vllm">vLLM<a class="headerlink" href="#vllm" title="Permanent link">&para;</a></h2>
+<p>For vLLM, use the following URL format:
+<div class="highlight"><pre><span></span><code><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oci://$REGISTRY/$REPOSITORY:$TAG</span><span class="w">    </span><span class="c1"># Loads the model from the OCI image</span>
+</code></pre></div></p>
+<p>For example:
+<div class="highlight"><pre><span></span><code><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oci://docker.io/myorg/llama-3.1-8b:latest</span>
+</code></pre></div></p>
+<p>The contents of the image are mounted at <code>/model</code> inside the model server Pod and vLLM is
+configured to load the model from that path.</p>
+<h3 id="image-requirements">Image requirements<a class="headerlink" href="#image-requirements" title="Permanent link">&para;</a></h3>
+<p>The OCI image must contain the model files (the same layout vLLM expects when loading a model
+from a local directory) at the root of the image filesystem. KubeAI mounts the image read-only,
+so the model files must already be present in the image before creating the Model resource.</p>
+<h2 id="authentication-for-private-registries">Authentication for private registries<a class="headerlink" href="#authentication-for-private-registries" title="Permanent link">&para;</a></h2>
+<p>When pulling from a private registry, create a Kubernetes image pull <code>Secret</code> and configure
+KubeAI to use it.</p>
+<ol>
+<li>Create the pull secret:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>docker-registry<span class="w"> </span>oci-pull-secret<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--docker-server<span class="o">=</span><span class="nv">$REGISTRY</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--docker-username<span class="o">=</span><span class="nv">$USERNAME</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--docker-password<span class="o">=</span><span class="nv">$PASSWORD</span>
+</code></pre></div>
+<ol>
+<li>Reference the secret in your KubeAI installation:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>kubeai<span class="w"> </span>kubeai/kubeai<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--set<span class="w"> </span>secrets.oci.name<span class="o">=</span>oci-pull-secret<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>...
+</code></pre></div>
+<p>KubeAI adds this secret to the model server Pod's <code>imagePullSecrets</code> so the image volume can
+   be pulled from the private registry.</p>
+<p><strong>NOTE:</strong> KubeAI does not automatically react to updates to credentials. You will need to
+manually delete and allow KubeAI to recreate any failed Jobs/Pods that required credentials.</p>
+<h3 id="example-loading-opt-125m-from-an-oci-image">Example: Loading OPT-125m from an OCI image<a class="headerlink" href="#example-loading-opt-125m-from-an-oci-image" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p>Push an OCI image that contains the model files to a registry your cluster can access.</p>
+</li>
+<li>
+<p>Create a Model to load from the OCI image:</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubeai.org/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Model</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">opt-125m-cpu</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">TextGeneration</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">facebook</span>
+<span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oci://docker.io/myorg/facebook-opt-125m:oci-image</span>
+<span class="w">  </span><span class="nt">engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VLLM</span>
+<span class="w">  </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu:1</span>
+<span class="w">  </span><span class="nt">minReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</code></pre></div>
 
 
 
