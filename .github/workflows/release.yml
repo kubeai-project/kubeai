@@ -1,0 +1,136 @@
+# Open a release PR from a GitHub milestone.
+#
+# On manual dispatch:
+#   1. Collect merged PRs assigned to the given milestone.
+#   2. Prepend a CHANGELOG.md entry listing them.
+#   3. Bump chart versions (charts/kubeai + charts/models).
+#   4. Push a `release/vX.Y.Z` branch and open a PR labeled `release`.
+#
+# Merging the PR triggers release-tag.yml, which pushes `vX.Y.Z` and
+# `helm-vX.Y.Z` tags. Those tag pushes fan out into create-gh-release.yml
+# (GitHub Release) and release-helm-chart.yml (Helm chart index).
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. v0.24.0)"
+        required: true
+        type: string
+      milestone:
+        description: "Milestone title to collect PRs from (defaults to `version`)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+jobs:
+  release-pr:
+    runs-on: ubuntu-22.04
+    env:
+      VERSION: ${{ inputs.version }}
+      MILESTONE: ${{ inputs.milestone || inputs.version }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Validate version
+        run: |
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "version must match vX.Y.Z (got: $VERSION)" >&2
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify tags do not already exist
+        run: |
+          for t in "$VERSION" "helm-$VERSION"; do
+            if git rev-parse -q --verify "refs/tags/$t" >/dev/null; then
+              echo "tag $t already exists" >&2
+              exit 1
+            fi
+          done
+
+      - name: Resolve milestone and collect merged PRs
+        run: |
+          milestone_num=$(gh api "repos/$GITHUB_REPOSITORY/milestones?state=all&per_page=100" \
+            --jq ".[] | select(.title == \"$MILESTONE\") | .number")
+          if [ -z "$milestone_num" ]; then
+            echo "milestone '$MILESTONE' not found" >&2
+            exit 1
+          fi
+
+          gh pr list \
+            --milestone "$MILESTONE" \
+            --state merged \
+            --limit 500 \
+            --json number,title,author,url \
+            > /tmp/prs.json
+
+          count=$(jq 'length' /tmp/prs.json)
+          if [ "$count" -eq 0 ]; then
+            echo "no merged PRs found for milestone '$MILESTONE'" >&2
+            exit 1
+          fi
+          echo "Collected $count PRs from milestone '$MILESTONE'."
+
+      - name: Update CHANGELOG.md
+        run: |
+          release_date=$(date -u +%F)
+          {
+            echo "## $VERSION - $release_date"
+            echo
+            jq -r '.[] | "- \(.title) by @\(.author.login) in \(.url)"' /tmp/prs.json
+            echo
+            if [ -f CHANGELOG.md ]; then
+              cat CHANGELOG.md
+            fi
+          } > CHANGELOG.new.md
+          mv CHANGELOG.new.md CHANGELOG.md
+
+      - name: Bump chart versions
+        run: |
+          semver="${VERSION#v}"
+          yq -i ".version = \"$semver\" | .appVersion = \"$VERSION\"" charts/kubeai/Chart.yaml
+          yq -i ".version = \"$semver\"" charts/models/Chart.yaml
+
+      - name: Ensure `release` label exists
+        run: |
+          gh label create release \
+            --color "0e8a16" \
+            --description "Release PR — merging pushes tags" \
+            2>/dev/null || true
+
+      - name: Push release branch and open PR
+        run: |
+          branch="release/$VERSION"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add CHANGELOG.md charts/kubeai/Chart.yaml charts/models/Chart.yaml
+          git commit -m "chore(release): $VERSION"
+          git push --set-upstream origin "$branch"
+
+          body=$(cat <<EOF
+          Automated release PR for **$VERSION** (milestone: \`$MILESTONE\`).
+
+          Merging this PR will push \`$VERSION\` and \`helm-$VERSION\` tags,
+          which trigger the GitHub Release and Helm chart workflows.
+
+          ## Included PRs
+          $(jq -r '.[] | "- #\(.number) \(.title) by @\(.author.login)"' /tmp/prs.json)
+          EOF
+          )
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "Release $VERSION" \
+            --body "$body" \
+            --label release

@@ -1,0 +1,57 @@
+# Push release tags after a release PR merges.
+#
+# Triggered when a PR labeled `release` is closed via merge. Uses
+# `RELEASE_TOKEN` (PAT with `contents: write`) so the tag pushes trigger
+# create-gh-release.yml and release-helm-chart.yml — GITHUB_TOKEN pushes
+# don't fan out into other workflows.
+name: Release Tag
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  tag:
+    if: >-
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'release')
+    runs-on: ubuntu-22.04
+    env:
+      PR_TITLE: ${{ github.event.pull_request.title }}
+      MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+    steps:
+      - name: Extract version from PR title
+        id: parse
+        run: |
+          # Expected title: "Release vX.Y.Z"
+          if [[ ! "$PR_TITLE" =~ ^Release\ (v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "PR title '$PR_TITLE' does not match 'Release vX.Y.Z'" >&2
+            exit 1
+          fi
+          version="${BASH_REMATCH[1]}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout merge commit
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ env.MERGE_SHA }}
+          # PAT so tag pushes fire downstream tag-triggered workflows.
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Push release tags
+        env:
+          VERSION: ${{ steps.parse.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for t in "$VERSION" "helm-$VERSION"; do
+            if git rev-parse -q --verify "refs/tags/$t" >/dev/null; then
+              echo "tag $t already exists, skipping" >&2
+              continue
+            fi
+            git tag -a "$t" -m "$t" "$MERGE_SHA"
+            git push origin "$t"
+          done
