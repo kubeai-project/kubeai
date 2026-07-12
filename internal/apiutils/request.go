@@ -180,7 +180,12 @@ func (r *Request) readJSONBody(body io.Reader, path string) error {
 		return fmt.Errorf("unknown path: %q", path)
 	}
 
-	if err := json.UnmarshalRead(body, r.modelRequest); err != nil {
+	raw, err := io.ReadAll(body)
+	if err != nil {
+		return fmt.Errorf("reading: %w", err)
+	}
+
+	if err := json.Unmarshal(raw, r.modelRequest); err != nil {
 		return fmt.Errorf("decoding: %w", err)
 	}
 
@@ -194,13 +199,19 @@ func (r *Request) readJSONBody(body io.Reader, path string) error {
 	if r.Adapter != "" {
 		// vLLM expects the adapter to be in the model field.
 		r.modelRequest.SetModel(r.Adapter)
-	}
 
-	rewritten, err := json.Marshal(r.modelRequest)
-	if err != nil {
-		return fmt.Errorf("remarshalling: %w", err)
+		rewritten, err := json.Marshal(r.modelRequest)
+		if err != nil {
+			return fmt.Errorf("remarshalling: %w", err)
+		}
+		r.Body = rewritten
+	} else {
+		// Preserve the original body bytes. Re-serializing shuffles JSON map
+		// key order (e.g. tool JSON schemas typed as `any`), which changes the
+		// rendered prompt on every request and breaks prompt caching in
+		// downstream inference servers.
+		r.Body = raw
 	}
-	r.Body = rewritten
 	r.ContentLength = int64(len(r.Body))
 
 	return nil
