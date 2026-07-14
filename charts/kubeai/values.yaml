@@ -99,6 +99,15 @@ proxy:
   # Valid values: internal, external
   mode: "internal"
 
+# watchNamespaces restricts the set of namespaces that the controller reconciles
+# Model resources in.
+#   - [] (default): watch only the release namespace. Uses a namespace-scoped RoleBinding.
+#   - ["*"]:        watch all namespaces. Uses a ClusterRoleBinding.
+#   - ["a", "b"]:   watch the listed namespaces. Emits one RoleBinding per namespace
+#                   plus the release namespace (which is always watched so that
+#                   leader election and autoscaler state remain functional).
+watchNamespaces: []
+
 metrics:
   prometheusOperator:
     vLLMPodMonitor:
