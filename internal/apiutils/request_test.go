@@ -65,6 +65,13 @@ func TestParseRequest(t *testing.T) {
 			path:     "/v1/rerank",
 			expModel: "test-model",
 		},
+		{
+			name:      "chat completion with tool schema",
+			body:      `{"model": "test-model", "messages": [{"role": "user", "content": "test"}], "tools": [{"type": "function", "function": {"name": "get_weather", "description": "Get current weather", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "City name"}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}}, "required": ["location"]}}}, {"type": "function", "function": {"name": "get_time", "description": "Get current time", "parameters": {"type": "object", "properties": {"timezone": {"type": "string", "description": "IANA tz"}, "format": {"type": "string", "enum": ["12h", "24h"]}}, "required": ["timezone"]}}}]}`,
+			path:      "/v1/chat/completions",
+			expModel:  "test-model",
+			expPrefix: "test",
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -78,6 +85,11 @@ func TestParseRequest(t *testing.T) {
 			require.Equal(t, c.expModel, req.Model, "model")
 			require.Equal(t, c.expAdapter, req.Adapter, "adapter")
 			require.Equal(t, c.expPrefix, req.Prefix, "prefix")
+
+			if c.expAdapter == "" {
+				require.Equal(t, c.body, string(req.Body),
+					"no-adapter path must forward the client body byte-for-byte")
+			}
 		})
 	}
 
