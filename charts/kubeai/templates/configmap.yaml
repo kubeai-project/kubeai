@@ -6,6 +6,13 @@ metadata:
     {{- include "kubeai.labels" . | nindent 4 }}
 data:
   system.yaml: |
+    {{- if .Values.gatewayAPI.enabled }}
+    gatewayAPI:
+      enabled: true
+      inferencePoolName: {{ required "gatewayAPI.inferencePoolName is required when gatewayAPI.enabled is true" .Values.gatewayAPI.inferencePoolName }}
+      endpointPickerService: {{ required "gatewayAPI.endpointPickerService is required when gatewayAPI.enabled is true" .Values.gatewayAPI.endpointPickerService }}
+      endpointPickerPort: {{ .Values.gatewayAPI.endpointPickerPort | default 9002 }}
+    {{- end }}
     secretNames:
       alibaba: {{ include "kubeai.alibabaSecretName" . }}
       aws: {{ include "kubeai.awsSecretName" . }}

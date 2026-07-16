@@ -15,6 +15,8 @@ type System struct {
 
 	Proxy Proxy `json:"proxy"`
 
+	GatewayAPI GatewayAPI `json:"gatewayAPI,omitempty"`
+
 	ModelServers ModelServers `json:"modelServers" validate:"required"`
 
 	ModelLoading ModelLoading `json:"modelLoading" validate:"required"`
@@ -51,6 +53,18 @@ type System struct {
 func (s *System) DefaultAndValidate() error {
 	if s.Proxy.Mode == "" {
 		s.Proxy.Mode = ProxyModeInternal
+	}
+
+	if s.GatewayAPI.Enabled {
+		if s.GatewayAPI.InferencePoolName == "" {
+			return errors.New("gatewayAPI.inferencePoolName is required when gatewayAPI.enabled is true")
+		}
+		if s.GatewayAPI.EndpointPickerService == "" {
+			return errors.New("gatewayAPI.endpointPickerService is required when gatewayAPI.enabled is true")
+		}
+		if s.GatewayAPI.EndpointPickerPort == 0 {
+			s.GatewayAPI.EndpointPickerPort = 9002
+		}
 	}
 
 	if s.MetricsAddr == "" {
@@ -135,6 +149,21 @@ const (
 
 type Proxy struct {
 	Mode ProxyMode `json:"mode" validate:"oneof=internal external"`
+}
+
+// GatewayAPI configures the optional bridge controller that reconciles Gateway API
+// Inference Extension resources (InferencePool) from KubeAI Model objects.
+// Intended for use with proxy.mode=external.
+type GatewayAPI struct {
+	// Enabled activates the bridge controller. Defaults to false.
+	Enabled bool `json:"enabled"`
+	// InferencePoolName is the name of the singleton InferencePool to maintain.
+	InferencePoolName string `json:"inferencePoolName,omitempty"`
+	// EndpointPickerService is the name of the Endpoint Picker extension Service.
+	EndpointPickerService string `json:"endpointPickerService,omitempty"`
+	// EndpointPickerPort is the port of the Endpoint Picker extension Service.
+	// Defaults to 9002 when unset.
+	EndpointPickerPort int32 `json:"endpointPickerPort,omitempty"`
 }
 
 type ModelRollouts struct {

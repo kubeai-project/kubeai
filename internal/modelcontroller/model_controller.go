@@ -56,6 +56,7 @@ const (
 type ModelReconciler struct {
 	client.Client
 	ProxyMode               config.ProxyMode
+	GatewayAPIEnabled       bool
 	RESTConfig              *rest.Config
 	PodRESTClient           rest.Interface
 	Scheme                  *runtime.Scheme
@@ -231,10 +232,11 @@ func (r *ModelReconciler) reconcileHeadlessService(ctx context.Context, model *k
 		},
 	}
 
-	if r.ProxyMode != config.ProxyModeExternal {
-		// Ensure it does not exist in internal mode.
+	if r.ProxyMode != config.ProxyModeExternal || r.GatewayAPIEnabled {
+		// Ensure it does not exist: either in internal proxy mode, or when gateway API
+		// is enabled (InferencePool handles pod selection instead).
 		if err := r.Client.Delete(ctx, svc); client.IgnoreNotFound(err) != nil {
-			return fmt.Errorf("deleting headless service in internal mode: %w", err)
+			return fmt.Errorf("deleting headless service: %w", err)
 		}
 		return nil
 	}

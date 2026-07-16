@@ -34,6 +34,7 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	kubeaiv1 "github.com/kubeai-project/kubeai/api/k8s/v1"
+	"github.com/kubeai-project/kubeai/internal/gatewaybridge"
 	"github.com/kubeai-project/kubeai/internal/leader"
 	"github.com/kubeai-project/kubeai/internal/loadbalancer"
 	"github.com/kubeai-project/kubeai/internal/messenger"
@@ -43,6 +44,7 @@ import (
 	"github.com/kubeai-project/kubeai/internal/modelproxy"
 	"github.com/kubeai-project/kubeai/internal/openaiserver"
 	"github.com/kubeai-project/kubeai/internal/vllmclient"
+	infextv1 "sigs.k8s.io/gateway-api-inference-extension/api/v1"
 
 	// Pulling in these packages will register the gocloud implementations.
 	_ "gocloud.dev/pubsub/awssnssqs"
@@ -67,7 +69,7 @@ func init() {
 	// AddToScheme in init() to allow tests to use the same Scheme before calling Run().
 	utilruntime.Must(clientgoscheme.AddToScheme(Scheme))
 	utilruntime.Must(kubeaiv1.AddToScheme(Scheme))
-
+	utilruntime.Must(infextv1.Install(Scheme))
 }
 
 // Run starts all components of the system and blocks until they complete.
@@ -218,6 +220,7 @@ func Run(ctx context.Context, k8sCfg *rest.Config, cfg config.System) error {
 	modelReconciler := &modelcontroller.ModelReconciler{
 		Client:                  mgr.GetClient(),
 		ProxyMode:               cfg.Proxy.Mode,
+		GatewayAPIEnabled:       cfg.GatewayAPI.Enabled,
 		RESTConfig:              mgr.GetConfig(),
 		PodRESTClient:           podRESTClient,
 		Scheme:                  mgr.GetScheme(),
@@ -237,6 +240,18 @@ func Run(ctx context.Context, k8sCfg *rest.Config, cfg config.System) error {
 	if err = modelReconciler.SetupWithManager(mgr); err != nil {
 		return fmt.Errorf("unable to create Model controller: %w", err)
 	}
+
+	if cfg.GatewayAPI.Enabled {
+		bridgeReconciler := &gatewaybridge.Reconciler{
+			Client:    mgr.GetClient(),
+			Namespace: namespace,
+			Config:    cfg.GatewayAPI,
+		}
+		if err = bridgeReconciler.SetupWithManager(mgr); err != nil {
+			return fmt.Errorf("unable to create gateway bridge controller: %w", err)
+		}
+	}
+
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

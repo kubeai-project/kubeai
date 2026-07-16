@@ -140,3 +140,14 @@ rules:
   - update
   - patch
   - delete
+- apiGroups:
+  - inference.networking.k8s.io
+  resources:
+  - inferencepools
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch

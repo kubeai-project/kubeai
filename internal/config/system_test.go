@@ -166,3 +166,64 @@ func TestProxyMode(t *testing.T) {
 		})
 	}
 }
+
+func TestGatewayAPIConfig(t *testing.T) {
+	base := func() config.System {
+		return config.System{
+			MetricsAddr:   ":8080",
+			HealthAddress: ":8081",
+			SecretNames:   config.SecretNames{Alibaba: "a", AWS: "b", GCP: "c", Huggingface: "d"},
+			ModelServers: config.ModelServers{
+				VLLM: config.ModelServer{Images: map[string]string{"default": "vllm:latest"}},
+			},
+			ModelLoading:     config.ModelLoading{Image: "loader:latest"},
+			ResourceProfiles: map[string]config.ResourceProfile{"cpu": {}},
+			ModelAutoscaling: config.ModelAutoscaling{StateConfigMapName: "state"},
+		}
+	}
+
+	t.Run("disabled_no_validation", func(t *testing.T) {
+		sys := base()
+		require.NoError(t, sys.DefaultAndValidate())
+	})
+
+	t.Run("enabled_all_fields", func(t *testing.T) {
+		sys := base()
+		sys.GatewayAPI = config.GatewayAPI{
+			Enabled:               true,
+			InferencePoolName:     "kubeai-pool",
+			EndpointPickerService: "epp-svc",
+			EndpointPickerPort:    9002,
+		}
+		require.NoError(t, sys.DefaultAndValidate())
+	})
+
+	t.Run("enabled_default_port", func(t *testing.T) {
+		sys := base()
+		sys.GatewayAPI = config.GatewayAPI{
+			Enabled:               true,
+			InferencePoolName:     "kubeai-pool",
+			EndpointPickerService: "epp-svc",
+		}
+		require.NoError(t, sys.DefaultAndValidate())
+		require.Equal(t, int32(9002), sys.GatewayAPI.EndpointPickerPort)
+	})
+
+	t.Run("enabled_missing_pool_name", func(t *testing.T) {
+		sys := base()
+		sys.GatewayAPI = config.GatewayAPI{
+			Enabled:               true,
+			EndpointPickerService: "epp-svc",
+		}
+		require.Error(t, sys.DefaultAndValidate())
+	})
+
+	t.Run("enabled_missing_epp_service", func(t *testing.T) {
+		sys := base()
+		sys.GatewayAPI = config.GatewayAPI{
+			Enabled:           true,
+			InferencePoolName: "kubeai-pool",
+		}
+		require.Error(t, sys.DefaultAndValidate())
+	})
+}
