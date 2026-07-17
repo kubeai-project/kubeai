@@ -68,10 +68,11 @@ jobs:
           fi
 
           gh pr list \
-            --search "milestone:\"$MILESTONE\" is:merged" \
-            --state all \
+            --repo "$GITHUB_REPOSITORY" \
+            --state merged \
             --limit 500 \
-            --json number,title,author,url \
+            --json number,title,author,url,milestone \
+            --jq "[.[] | select(.milestone.title == \"$MILESTONE\")]" \
             > /tmp/prs.json
 
           count=$(jq 'length' /tmp/prs.json)
