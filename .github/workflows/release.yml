@@ -68,8 +68,8 @@ jobs:
           fi
 
           gh pr list \
-            --milestone "$MILESTONE" \
-            --state merged \
+            --search "milestone:\"$MILESTONE\" is:merged" \
+            --state all \
             --limit 500 \
             --json number,title,author,url \
             > /tmp/prs.json
