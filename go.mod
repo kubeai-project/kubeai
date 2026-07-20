@@ -2,6 +2,8 @@ module github.com/kubeai-project/kubeai
 
 go 1.25.0
 
+toolchain go1.25.1
+
 require (
 	github.com/cespare/xxhash v1.1.0
 	github.com/go-json-experiment/json v0.0.0-20250223041408-d3c622f1b874
