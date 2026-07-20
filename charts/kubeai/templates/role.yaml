@@ -31,6 +31,35 @@ rules:
   - patch
   - update
   - watch
+{{- if .Values.distributedInference }}
+- apiGroups:
+  - leaderworkerset.x-k8s.io
+  resources:
+  - leaderworkersets
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - leaderworkerset.x-k8s.io
+  resources:
+  - leaderworkersets/status
+  verbs:
+  - get
+- apiGroups:
+  - leaderworkerset.x-k8s.io
+  resources:
+  - leaderworkersets/scale
+  verbs:
+  - get
+  - patch
+  - update
+{{- end }}
 - apiGroups:
   - ""
   resources:
@@ -116,6 +145,15 @@ rules:
   verbs:
   - create
   - patch
+  - update
+- apiGroups:
+  - events.k8s.io
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+  - update
 - apiGroups:
   - ""
   resources:

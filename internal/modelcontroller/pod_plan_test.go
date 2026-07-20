@@ -60,6 +60,7 @@ func Test_calculatePodPlan(t *testing.T) {
 	}
 
 	expectedHash := k8sutils.PodHash(r.vLLMPodForModel(model, modelConfig).Spec)
+	modelConfig.PodBuilder = r.vLLMPodForModel
 
 	type readiness bool
 	const ready = readiness(true)

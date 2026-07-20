@@ -18,6 +18,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
+// executablePlan is the interface both podPlan and lwsPlan implement.
+// execute returns true if a scaling action was taken.
+type executablePlan interface {
+	execute(ctx context.Context, client client.Client, scheme *runtime.Scheme) (scaled bool, err error)
+}
+
 // calculatePodPlan calculates the Pod plan for the given Model.
 // It assumes the list of Pods represents an accurate snapshot of the current state.
 // It returns a Pod plan that contains Pods to create and delete.
@@ -26,18 +32,7 @@ import (
 // - Recreates any out-of-date Pod that is not Ready immediately
 // - Waits for all Pods to be Ready before recreating any out-of-date Pods that are Ready
 func (r *ModelReconciler) calculatePodPlan(allPods *corev1.PodList, model *kubeaiv1.Model, modelConfig ModelConfig) (*podPlan, error) {
-	var podForModel *corev1.Pod
-
-	switch model.Spec.Engine {
-	case kubeaiv1.OLlamaEngine:
-		podForModel = r.oLlamaPodForModel(model, modelConfig)
-	case kubeaiv1.FasterWhisperEngine:
-		podForModel = r.fasterWhisperPodForModel(model, modelConfig)
-	case kubeaiv1.InfinityEngine:
-		podForModel = r.infinityPodForModel(model, modelConfig)
-	default:
-		podForModel = r.vLLMPodForModel(model, modelConfig)
-	}
+	podForModel := modelConfig.PodBuilder(model, modelConfig)
 
 	if err := applyJSONPatchToPod(r.ModelServerPods.JSONPatches, podForModel); err != nil {
 		return nil, err
@@ -81,6 +76,10 @@ func (r *ModelReconciler) calculatePodPlan(allPods *corev1.PodList, model *kubea
 			outOfDate = append(outOfDate, p)
 		}
 	}
+
+	// Set model status from observed pods.
+	model.Status.Replicas.All = int32(len(allPods.Items))
+	model.Status.Replicas.Ready = int32(readyAll)
 
 	var (
 		details  []string

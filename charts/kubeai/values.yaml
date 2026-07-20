@@ -96,6 +96,9 @@ modelRollouts:
   # The number of replicas to add when rolling out a new model.
   surge: 1
 
+# Enable distributed inference support (LeaderWorkerSet-based multi-node serving).
+# When false, 3-part resource profiles (<name>:<tensor-parallel>:<pipeline-parallel>) are rejected.
+distributedInference: false
 proxy:
   # Mode controls how the KubeAI proxy handles model endpoints.
   # "internal" uses pod IPs directly; "external" defers to an external load balancer.

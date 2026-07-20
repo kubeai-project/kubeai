@@ -5,8 +5,9 @@ const (
 	// PodHashLabel is a label key used to store the hash of the Pod spec
 	// that was used to create the Pod. This is used to determine if a Pod
 	// needs to be recreated.
-	PodHashLabel = "pod-hash"
-
+	PodHashLabel            = "pod-hash"
+	LeaderHashLabel         = "leader-hash"
+	WorkerHashLabel         = "worker-hash"
 	ModelFeatureLabelDomain = "features.kubeai.org"
 
 	// ModelPodIPAnnotation is the annotation key used to specify an IP
