@@ -45,37 +45,20 @@ jobs:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           CR_SKIP_EXISTING: "true"
           CR_RELEASE_NAME_TEMPLATE: "helm-chart-{{ .Name }}-{{ .Version }}"
-      # TODO (samos123): Remove these comments after next helm release.
-      # The chart-releaser action is not able to publish all the the chart on tag push.
-      # It only published the kubeai chart.
-      # Workaround that was used for always publishing all charts on tag push.
-      # Source: https://github.com/helm/chart-releaser-action/issues/8#issuecomment-962501009
-      # - name: Package and upload helm chart
-      #   run: |
-      #     set -xe
-      #     # donwload helm chart releaser
-      #     VERSION=v1.6.1
-      #     curl -sSLo cr.tar.gz "https://github.com/helm/chart-releaser/releases/download/${VERSION}/chart-releaser_1.6.1_linux_amd64.tar.gz"
-      #     tar -xzf cr.tar.gz
-      #     rm -f cr.tar.gz
-      #     owner=$(cut -d '/' -f 1 <<< "$GITHUB_REPOSITORY")
-      #     repo=$(cut -d '/' -f 2 <<< "$GITHUB_REPOSITORY")
-      #     # package charts
-      #     ./cr package charts/kubeai
-      #     ./cr package charts/models
-      #     # upload chart to github relases
-      #     ./cr upload \
-      #         --owner "$owner" \
-      #         --git-repo "$repo" \
-      #         --token "${{ secrets.GITHUB_TOKEN }}" \
-      #         --skip-existing \
-      #         --release-name-template "kubeai-helm-chart-{{ .Name }}-{{ .Version }}" \
-      #     # update index and push to github pages
-      #     ./cr index \
-      #         --owner "$owner" \
-      #         --git-repo "$repo" \
-      #         --token "${{ secrets.GITHUB_TOKEN }}" \
-      #         --release-name-template "kubeai-helm-chart-{{ .Name }}-{{ .Version }}" \
-      #         --index-path ./index.yaml \
-      #         --charts-repo https://$owner.github.io/$repo \
-      #         --push
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push charts to GHCR
+        run: |
+          shopt -s nullglob
+          for pkg in .cr-release-packages/*; do
+            if [ -z "${pkg:-}" ]; then
+              break
+            fi
+            helm push "${pkg}" "oci://ghcr.io/${GITHUB_REPOSITORY_OWNER}/charts"
+          done
