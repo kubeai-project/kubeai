@@ -17,19 +17,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build and export kubeai
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           tags: ghcr.io/kubeai-project/kubeai:test
           outputs: type=docker,dest=${{ runner.temp }}/kubeai.tar
 
       - name: Build and export model loader
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./components/model-loader
           file: ./components/model-loader/Dockerfile
@@ -37,7 +37,7 @@ jobs:
           outputs: type=docker,dest=${{ runner.temp }}/model-loader.tar
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: docker-images
           path: ${{ runner.temp }}/*.tar
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Run unit tests
         run: make test-unit
@@ -103,9 +103,9 @@ jobs:
           docker builder prune -af || true
           df -h
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Download artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: docker-images
           path: ${{ runner.temp }}
@@ -152,10 +152,10 @@ jobs:
         cacheProfile: ["", "e2e-test-kind-pv"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Download artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: docker-images
           path: ${{ runner.temp }}
