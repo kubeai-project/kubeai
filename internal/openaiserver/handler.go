@@ -23,25 +23,19 @@ func NewHandler(k8sClient client.Client, modelProxy *modelproxy.Handler) *Handle
 	}
 
 	mux := http.NewServeMux()
-	// handle is a replacement for mux.Handle
-	// which enriches the handler's HTTP instrumentation with the pattern as the http.route.
-	handle := func(pattern string, routeHandler http.Handler) {
-		// Configure the "http.route" for the HTTP instrumentation.
-		mux.Handle(pattern, otelhttp.WithRouteTag(pattern, routeHandler))
-	}
 
 	// NOTE: Proxying all paths to backend engines is a security risk.
 	// Make sure to only proxy paths that are safe to expose to the public.
 	// Example: vLLM supports loading arbitrary model adapaters via the API
 	// at `/v1/load_lora_adapter`.
 
-	handle("/openai/v1/chat/completions", http.StripPrefix("/openai", modelProxy))
-	handle("/openai/v1/completions", http.StripPrefix("/openai", modelProxy))
-	handle("/openai/v1/embeddings", http.StripPrefix("/openai", modelProxy))
-	handle("/openai/v1/rerank", http.StripPrefix("/openai", modelProxy))
-	handle("/openai/v1/audio/transcriptions", http.StripPrefix("/openai", modelProxy))
-	handle("/openai/v1/responses", http.StripPrefix("/openai", modelProxy))
-	handle("/openai/v1/models", http.HandlerFunc(h.getModels))
+	mux.Handle("/openai/v1/chat/completions", http.StripPrefix("/openai", modelProxy))
+	mux.Handle("/openai/v1/completions", http.StripPrefix("/openai", modelProxy))
+	mux.Handle("/openai/v1/embeddings", http.StripPrefix("/openai", modelProxy))
+	mux.Handle("/openai/v1/rerank", http.StripPrefix("/openai", modelProxy))
+	mux.Handle("/openai/v1/audio/transcriptions", http.StripPrefix("/openai", modelProxy))
+	mux.Handle("/openai/v1/responses", http.StripPrefix("/openai", modelProxy))
+	mux.Handle("/openai/v1/models", http.HandlerFunc(h.getModels))
 
 	// Add HTTP instrumentation for the whole server.
 	h.Handler = otelhttp.NewHandler(mux, "/")
