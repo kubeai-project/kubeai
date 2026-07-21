@@ -10,6 +10,7 @@ import (
 	"github.com/kubeai-project/kubeai/internal/metrics"
 	io_prometheus_client "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
+	"github.com/prometheus/common/model"
 )
 
 func aggregateAllMetrics(agg *metricsAggregation, addrs []string, path string) (err error) {
@@ -47,8 +48,8 @@ func scrapeAndAggregateMetrics(agg *metricsAggregation, url string) error {
 		return fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	// Use the expfmt library to parse the Prometheus metrics
-	parser := expfmt.TextParser{}
+	// Prometheus/common v0.70+ requires an explicit validation scheme.
+	parser := expfmt.NewTextParser(model.UTF8Validation)
 	metricFamilies, err := parser.TextToMetricFamilies(strings.NewReader(string(body)))
 	if err != nil {
 		return fmt.Errorf("failed to parse metrics: %w", err)

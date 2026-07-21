@@ -73,7 +73,7 @@ func TestResponsesRequest_JSON(t *testing.T) {
 			},
 		},
 		{
-			name: "array input with type field",
+			name:      "array input with type field",
 			inputJSON: `{"model":"gpt-4o","input":[{"type":"message","role":"user","content":"Hi"}]}`,
 			req: &v1.ResponsesRequest{
 				Model: "gpt-4o",
@@ -85,7 +85,7 @@ func TestResponsesRequest_JSON(t *testing.T) {
 			},
 		},
 		{
-			name: "instructions and stream",
+			name:      "instructions and stream",
 			inputJSON: `{"model":"gpt-4o","input":"Hello","instructions":"You are helpful","stream":true}`,
 			req: &v1.ResponsesRequest{
 				Model:        "gpt-4o",
@@ -121,7 +121,7 @@ func TestResponsesRequest_JSON(t *testing.T) {
 			},
 		},
 		{
-			name: "multipart content in array input",
+			name:      "multipart content in array input",
 			inputJSON: `{"model":"gpt-4o","input":[{"role":"user","content":[{"type":"text","text":"What is this?"},{"type":"image_url","image_url":{"url":"https://example.com/img.jpg"}}]}]}`,
 			req: &v1.ResponsesRequest{
 				Model: "gpt-4o",
@@ -141,7 +141,7 @@ func TestResponsesRequest_JSON(t *testing.T) {
 			},
 		},
 		{
-			name: "multi-turn conversation",
+			name:      "multi-turn conversation",
 			inputJSON: `{"model":"gpt-4o","input":[{"role":"system","content":"Be concise"},{"role":"user","content":"Hello"},{"role":"assistant","content":"Hi!"},{"role":"user","content":"How are you?"}]}`,
 			req: &v1.ResponsesRequest{
 				Model: "gpt-4o",
