@@ -14,6 +14,10 @@ data:
       oci: {{ .Values.secrets.oci.name }}
     proxy:
       mode: {{ .Values.proxy.mode }}
+    {{- with .Values.watchNamespaces }}
+    watchNamespaces:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
     resourceProfiles:
       {{- .Values.resourceProfiles | toYaml | nindent 6 }}
     cacheProfiles:

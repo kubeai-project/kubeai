@@ -44,7 +44,8 @@ spec:
           env:
           - name: CONFIG_PATH
             value: "/app/config/system.yaml"
-          # Configure kubeai to only manage objects in its own namespace.
+          # POD_NAMESPACE is the operator's own namespace. It is always watched
+          # (see .Values.watchNamespaces to expand the watch scope).
           - name: POD_NAMESPACE
             valueFrom:
               fieldRef:
