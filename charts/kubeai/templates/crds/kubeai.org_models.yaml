@@ -183,6 +183,65 @@ spec:
                   Image to be used for the server process.
                   Will be set from ResourceProfile + Engine if not specified.
                 type: string
+              jsonPatches:
+                description: |-
+                  JSONPatches is a list of patches to apply to the model pod template.
+                  This is a JSON Patch as defined in RFC 6902.
+                  https://datatracker.ietf.org/doc/html/rfc6902
+                items:
+                  description: JSONPatch represents a single JSON Patch operation
+                    as defined in RFC 6902.
+                  properties:
+                    from:
+                      description: |-
+                        From is the JSON Pointer path to the source location for "move" and "copy" operations.
+                        Must start with a forward slash (/).
+                      maxLength: 1024
+                      type: string
+                      x-kubernetes-validations:
+                      - message: from must start with a forward slash
+                        rule: self.startsWith('/')
+                    op:
+                      description: 'Op is the operation to perform. Must be one of:
+                        "add", "remove", "replace", "move", "copy", or "test".'
+                      enum:
+                      - add
+                      - remove
+                      - replace
+                      - move
+                      - copy
+                      - test
+                      type: string
+                    path:
+                      description: |-
+                        Path is the JSON Pointer path to the target location.
+                        Must start with a forward slash (/).
+                      maxLength: 1024
+                      type: string
+                      x-kubernetes-validations:
+                      - message: path must start with a forward slash
+                        rule: self.startsWith('/')
+                    value:
+                      description: |-
+                        Value is the value to be used in the operation, must be a valid JSON encoded value.
+                        Required for "add", "replace", and "test" operations.
+                      type: string
+                  required:
+                  - op
+                  - path
+                  type: object
+                  x-kubernetes-validations:
+                  - message: value is required for test, add, and replace operations
+                    rule: '(self.op == ''test'' || self.op == ''add'' || self.op ==
+                      ''replace'') ? has(self.value) : true'
+                  - message: from is required for move and copy operations
+                    rule: '(self.op == ''move'' || self.op == ''copy'') ? has(self.from)
+                      : true'
+                  - message: remove operation cannot have value or from
+                    rule: self.op != 'remove' || (!has(self.value) && !has(self.from))
+                  - message: only one of value or from can be present
+                    rule: '!has(self.value) || !has(self.from)'
+                type: array
               loadBalancing:
                 default: {}
                 description: |-
