@@ -55,3 +55,22 @@ jobs:
             git tag -a "$t" -m "$t" "$MERGE_SHA"
             git push origin "$t"
           done
+
+      - name: Close milestone
+        env:
+          VERSION: ${{ steps.parse.outputs.version }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          milestone_num=$(gh api "repos/$GITHUB_REPOSITORY/milestones?state=open&per_page=100" \
+            --jq ".[] | select(.title == \"$VERSION\") | .number")
+          if [ -z "$milestone_num" ]; then
+            echo "milestone '$VERSION' not found or already closed"
+            exit 0
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/milestones/$milestone_num" \
+            --input - <<EOF
+          {
+            "state": "closed"
+          }
+          EOF
+          echo "Closed milestone '$VERSION' (number: $milestone_num)"
