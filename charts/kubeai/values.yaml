@@ -85,8 +85,9 @@ modelServerPods:
     capabilities:
       drop:
         - ALL
-  # JSONPatch to apply to the model server pods
+  # JSONPatch to apply to the model server pods.
   # Invalid patches will be ignored.
+  # NOTE: This applies to all models. For per-model DRA, use spec.resourceClaimName on the Model.
   # jsonPatches:
   # - op: add
   #   path: /spec/priorityClassName

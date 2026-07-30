@@ -46,6 +46,9 @@ spec:
   {{- with $model.resourceProfile }}
   resourceProfile: {{ . }}
   {{- end}}
+  {{- with $model.resourceClaimName }}
+  resourceClaimName: {{ . }}
+  {{- end}}
   {{- with $model.cacheProfile }}
   cacheProfile: {{ . }}
   {{- end}}

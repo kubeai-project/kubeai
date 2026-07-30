@@ -42,6 +42,7 @@ func (r *ModelReconciler) calculatePodPlan(allPods *corev1.PodList, model *kubea
 	if err := applyJSONPatchToPod(r.ModelServerPods.JSONPatches, podForModel); err != nil {
 		return nil, err
 	}
+	applyResourceClaimsForModel(podForModel, model)
 
 	expectedHash := k8sutils.PodHash(podForModel.Spec)
 	podForModel.GenerateName = fmt.Sprintf("model-%s-%s-", model.Name, expectedHash)
