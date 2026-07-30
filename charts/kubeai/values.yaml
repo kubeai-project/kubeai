@@ -220,6 +220,32 @@ resourceProfiles:
         operator: "Equal"
         value: "present"
         effect: "NoSchedule"
+  # DRA profile examples - Dynamic Resource Allocation (Kubernetes 1.32+).
+  # DRA profiles are mutually exclusive with GPU entries in limits.
+  # The cluster admin must pre-create the referenced ResourceClaimTemplate or ResourceClaim.
+  #
+  # Exclusive per-Pod allocation via ResourceClaimTemplate (primary path):
+  # nvidia-gpu-h100-dra:
+  #   imageName: "nvidia-gpu"
+  #   requests:
+  #     cpu: "12"
+  #     memory: "80Gi"
+  #   tolerations:
+  #     - key: nvidia.com/gpu
+  #       effect: NoSchedule
+  #   dra:
+  #     resourceClaimTemplateName: "nvidia-h100-exclusive"
+  #     # claimName defaults to "gpu-claim"
+  #     # claimRequest defaults to "gpu"
+  #
+  # Shared claim for MPS / time-slicing pools:
+  # nvidia-gpu-mps:
+  #   imageName: "nvidia-gpu"
+  #   requests:
+  #     cpu: "4"
+  #     memory: "20Gi"
+  #   dra:
+  #     resourceClaimName: "nvidia-mps-shared"
 
 cacheProfiles: {}
 

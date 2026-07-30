@@ -3,7 +3,9 @@ package config
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -94,6 +96,29 @@ func (s *System) DefaultAndValidate() error {
 			}
 		}
 		s.CacheProfiles[name] = profile
+	}
+
+	for name, profile := range s.ResourceProfiles {
+		if profile.DRA != nil {
+			for resourceName := range profile.Limits {
+				if strings.Contains(strings.ToLower(string(resourceName)), "gpu") {
+					return fmt.Errorf("resourceProfile %q: dra is mutually exclusive with GPU device plugin limits (found %q)", name, resourceName)
+				}
+			}
+			if profile.DRA.ClaimName == "" {
+				profile.DRA.ClaimName = "gpu-claim"
+			}
+			if profile.DRA.ClaimRequest == "" {
+				profile.DRA.ClaimRequest = "gpu"
+			}
+			if profile.DRA.ResourceClaimTemplateName != "" && profile.DRA.ResourceClaimName != "" {
+				return fmt.Errorf("resourceProfile %q: dra.resourceClaimTemplateName and dra.resourceClaimName are mutually exclusive", name)
+			}
+			if profile.DRA.ResourceClaimTemplateName == "" && profile.DRA.ResourceClaimName == "" {
+				return fmt.Errorf("resourceProfile %q: dra requires either resourceClaimTemplateName or resourceClaimName", name)
+			}
+			s.ResourceProfiles[name] = profile
+		}
 	}
 
 	return validator.New(validator.WithRequiredStructEnabled()).Struct(s)
@@ -224,6 +249,30 @@ type ResourceProfile struct {
 	Tolerations      []corev1.Toleration `json:"tolerations,omitempty"`
 	SchedulerName    string              `json:"schedulerName,omitempty"`
 	RuntimeClassName *string             `json:"runtimeClassName,omitempty"`
+	// DRA configures Dynamic Resource Allocation for this profile.
+	// When set, Pods use ResourceClaims instead of device plugin limits.
+	// Mutually exclusive with GPU entries in Limits.
+	DRA *DRAConfig `json:"dra,omitempty"`
+}
+
+// DRAConfig configures how a ResourceProfile allocates accelerator devices
+// via Kubernetes Dynamic Resource Allocation (DRA).
+type DRAConfig struct {
+	// ResourceClaimTemplateName names a pre-created ResourceClaimTemplate.
+	// The scheduler creates one ResourceClaim per Pod (exclusive allocation).
+	// This is the primary path for standard dedicated GPU access.
+	// Mutually exclusive with ResourceClaimName.
+	ResourceClaimTemplateName string `json:"resourceClaimTemplateName,omitempty"`
+	// ResourceClaimName names a pre-created, shared ResourceClaim.
+	// All Pods for a Model share this single claim (e.g. MPS pools).
+	// Mutually exclusive with ResourceClaimTemplateName.
+	ResourceClaimName string `json:"resourceClaimName,omitempty"`
+	// ClaimName is the local name for this claim inside the Pod spec.
+	// Defaults to "gpu-claim".
+	ClaimName string `json:"claimName,omitempty"`
+	// ClaimRequest is the request name within the claim.
+	// Defaults to "gpu".
+	ClaimRequest string `json:"claimRequest,omitempty"`
 }
 
 type CacheProfile struct {
