@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func Test_parseModelURL(t *testing.T) {
@@ -161,4 +162,73 @@ func Test_parseModelURL(t *testing.T) {
 			require.Equal(t, c.want, got)
 		})
 	}
+}
+
+func Test_ociPodAdditions(t *testing.T) {
+	t.Parallel()
+
+	r := &ModelReconciler{}
+	r.ModelLoaders.Llmman = "ghcr.io/kubeai-project/kubeai-llmman-loader:test"
+
+	url, err := parseModelURL("oci://ghcr.io/org/model:tag")
+	require.NoError(t, err)
+	additions := r.ociPodAdditions(url)
+
+	// An emptyDir, not an ImageVolume: containerd cannot mount a plain OCI
+	// artifact as an image volume, so the bytes are pulled into a volume the
+	// model container reads.
+	require.Len(t, additions.volumes, 1)
+	require.NotNil(t, additions.volumes[0].EmptyDir)
+	require.Nil(t, additions.volumes[0].Image)
+
+	require.Len(t, additions.initContainers, 1)
+	puller := additions.initContainers[0]
+	require.Equal(t, "ghcr.io/kubeai-project/kubeai-llmman-loader:test", puller.Image)
+	// The whole reference is handed to the puller, and the mount path matches
+	// what the model container expects.
+	require.Equal(t, []string{"ghcr.io/org/model:tag", "/model"}, puller.Args)
+	require.Equal(t, "/model", puller.VolumeMounts[0].MountPath)
+
+	require.Len(t, additions.volumeMounts, 1)
+	require.Equal(t, "/model", additions.volumeMounts[0].MountPath)
+	require.True(t, additions.volumeMounts[0].ReadOnly)
+
+	// The daemon address is passed through, defaulted when unset.
+	var host string
+	for _, env := range puller.Env {
+		if env.Name == "LLMMAN_HOST" {
+			host = env.Value
+		}
+	}
+	require.Equal(t, defaultLlmmanHost, host)
+
+	// No image pull secret: registry credentials live on the llmman daemon.
+	require.Empty(t, additions.imagePullSecrets)
+}
+
+func Test_llmmanHost(t *testing.T) {
+	t.Parallel()
+
+	r := &ModelReconciler{}
+	require.Equal(t, defaultLlmmanHost, r.llmmanHost())
+
+	// A cluster can point every model pod at one shared daemon.
+	r.ModelLoaders.LlmmanHost = "llmman.kubeai.svc:17434"
+	require.Equal(t, "llmman.kubeai.svc:17434", r.llmmanHost())
+
+	r.ModelLoaders.LlmmanHost = "   "
+	require.Equal(t, defaultLlmmanHost, r.llmmanHost())
+}
+
+func Test_applyToPodSpecAddsInitContainers(t *testing.T) {
+	t.Parallel()
+
+	spec := &corev1.PodSpec{Containers: []corev1.Container{{Name: "server"}}}
+	additions := &modelSourcePodAdditions{
+		initContainers: []corev1.Container{{Name: "model-puller"}},
+	}
+	additions.applyToPodSpec(spec, 0)
+
+	require.Len(t, spec.InitContainers, 1)
+	require.Equal(t, "model-puller", spec.InitContainers[0].Name)
 }

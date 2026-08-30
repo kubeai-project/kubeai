@@ -74,6 +74,12 @@ modelServers:
 
 modelLoading:
   image: "ghcr.io/kubeai-project/kubeai-model-loader:v0.14.0"
+  # Init container that pulls an oci:// model through an llmman daemon.
+  llmman: "ghcr.io/kubeai-project/kubeai-llmman-loader:v0.14.0"
+  # Address of the `llmman serve` daemon oci:// models are pulled through.
+  # Defaults to llmman's own default (127.0.0.1:17434) when empty; set this to
+  # point every model pod at one shared daemon, e.g. "llmman.kubeai.svc:17434".
+  llmmanHost: ""
 
 modelServerPods:
   # Security Context for the model pods

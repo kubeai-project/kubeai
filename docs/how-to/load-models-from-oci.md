@@ -1,16 +1,29 @@
 # Load Models from OCI Images
 
-You can package your models into OCI images and let KubeAI use them for serving.
-KubeAI mounts the image contents directly into the model server Pod using a Kubernetes
-[image volume](https://kubernetes.io/docs/tasks/configure-pod-container/image-volumes/),
-so the model files are available without a separate download step.
+You can package your models into OCI images or [CNCF ModelPack](https://github.com/modelpack/model-spec)
+artifacts and let KubeAI use them for serving.
 
-> **Note:** The container runtime determines what kind of OCI references are supported:
-> - When **containerd** is used as the container runtime, only **OCI images** are supported.
-> - When **CRI-O** is used as the container runtime, both **OCI images** and **OCI artifacts** are supported.
->
-> Image volumes also require a sufficiently recent Kubernetes version with the
-> `ImageVolume` feature enabled on the cluster.
+KubeAI pulls the reference through a running [`llmman serve`](https://github.com/llmmanorg/llmman)
+daemon in an init container, into a volume the model server Pod reads. llmman
+speaks both the registry v2 protocol and the ModelPack media types, so the same
+URL works for an image and for an artifact, on any container runtime.
+
+> **Note:** this used to mount a Kubernetes
+> [image volume](https://kubernetes.io/docs/tasks/configure-pod-container/image-volumes/),
+> which restricted OCI *artifacts* to CRI-O clusters (containerd can only mount
+> runnable images) and required the `ImageVolume` feature gate. Neither
+> restriction applies now.
+
+## Requirements
+
+An `llmman serve` daemon must be reachable from the model Pod. By default the
+init container uses llmman's own default address, `127.0.0.1:17434`. To point
+every model Pod at one shared daemon, set it in your Helm values:
+
+```yaml
+modelLoading:
+  llmmanHost: "llmman.kubeai.svc:17434"
+```
 
 ## vLLM
 
@@ -35,8 +48,12 @@ so the model files must already be present in the image before creating the Mode
 
 ## Authentication for private registries
 
-When pulling from a private registry, create a Kubernetes image pull `Secret` and configure
-KubeAI to use it.
+Registry credentials are configured on the `llmman serve` daemon rather than on
+each Model, so one place covers every model pulled through it. See llmman's
+`llmman login` documentation.
+
+The previous image pull `Secret` mechanism no longer applies, since KubeAI is
+not asking the kubelet to pull the reference.
 
 1. Create the pull secret:
 
