@@ -71,6 +71,26 @@ modelServers:
       cpu: "michaelf34/infinity:0.0.77-cpu"
       amd-gpu: "michaelf34/infinity:0.0.77-rocm"
       nvidia-gpu: "michaelf34/infinity:0.0.77"
+  SGLang:
+    images:
+      default: "lmsysorg/sglang:v0.5.18"
+      nvidia-gpu: "lmsysorg/sglang:v0.5.18"
+      # SGLang publishes no generic CPU image. The "-xeon" build targets Intel
+      # Xeon with AMX and will not run on other CPUs.
+      cpu: "lmsysorg/sglang:v0.5.18-xeon"
+      # ROCm images are split by GPU generation; mi30x covers MI300X-class
+      # cards. For MI355X use "v0.5.18-rocm720-mi35x" via .spec.image.
+      amd-gpu: "lmsysorg/sglang:v0.5.18-rocm700-mi30x"
+  LlamaCpp:
+    images:
+      # Tags carry the llama.cpp daily build number, not the release tag.
+      # Only the "server" target is needed: KubeAI runs llama-server directly.
+      default: "ghcr.io/ggml-org/llama.cpp:server-b10680"
+      cpu: "ghcr.io/ggml-org/llama.cpp:server-b10680"
+      # CUDA 12.8. The CUDA 13 build is "server-cuda13-b10680" via .spec.image.
+      nvidia-gpu: "ghcr.io/ggml-org/llama.cpp:server-cuda-b10680"
+      amd-gpu: "ghcr.io/ggml-org/llama.cpp:server-rocm-b10680"
+      gh200: "ghcr.io/ggml-org/llama.cpp:server-cuda-b10680"
 
 modelLoading:
   image: "ghcr.io/kubeai-project/kubeai-model-loader:v0.14.0"
@@ -108,6 +128,19 @@ metrics:
       # Enable creation of PodMonitor resource that scrapes vLLM metrics endpoint.
       enabled: false
       # Set the apiVersion to azmonitoring.coreos.com/v1 when using Azure Monitor managed service for Prometheus
+      apiVersion: monitoring.coreos.com/v1
+      labels: {}
+    sGLangPodMonitor:
+      # Enable creation of PodMonitor resource that scrapes the SGLang metrics
+      # endpoint. Requires "--enable-metrics" in the Model's .spec.args.
+      enabled: false
+      apiVersion: monitoring.coreos.com/v1
+      labels: {}
+    llamaCppPodMonitor:
+      # Enable creation of PodMonitor resource that scrapes the llama.cpp
+      # metrics endpoint. Its metric names are prefixed "llamacpp:", so it
+      # needs a PodMonitor of its own rather than the vLLM one.
+      enabled: false
       apiVersion: monitoring.coreos.com/v1
       labels: {}
 

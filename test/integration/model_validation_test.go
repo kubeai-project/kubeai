@@ -464,6 +464,85 @@ func TestModelValidation(t *testing.T) {
 			},
 			expErrContain: "may not be more than 100000 bytes",
 		},
+		{
+			model: v1.Model{
+				ObjectMeta: metadata("llamacpp-pvc-valid"),
+				Spec: v1.ModelSpec{
+					URL:      "pvc://test-pvc/gguf?model=model.gguf",
+					Engine:   "LlamaCpp",
+					Features: []v1.ModelFeature{v1.ModelFeatureTextGeneration},
+				},
+			},
+			expValid: true,
+		},
+		{
+			model: v1.Model{
+				ObjectMeta: metadata("llamacpp-hf-valid"),
+				Spec: v1.ModelSpec{
+					URL:      "hf://test-repo/test-model",
+					Engine:   "LlamaCpp",
+					Features: []v1.ModelFeature{v1.ModelFeatureTextGeneration},
+				},
+			},
+			expValid: true,
+		},
+		{
+			model: v1.Model{
+				ObjectMeta: metadata("llamacpp-ollama-url-invalid"),
+				Spec: v1.ModelSpec{
+					URL:      "ollama://qwen2:0.5b",
+					Engine:   "LlamaCpp",
+					Features: []v1.ModelFeature{v1.ModelFeatureTextGeneration},
+				},
+			},
+			expErrContain: "LlamaCpp engine only supports urls",
+		},
+		{
+			model: v1.Model{
+				ObjectMeta: metadata("llamacpp-cacheprofile-invalid"),
+				Spec: v1.ModelSpec{
+					URL:          "hf://test-repo/test-model",
+					Engine:       "LlamaCpp",
+					CacheProfile: "e2e-test-kind-pv",
+					Features:     []v1.ModelFeature{v1.ModelFeatureTextGeneration},
+				},
+			},
+			expErrContain: "cacheProfile is not supported with the LlamaCpp engine",
+		},
+		{
+			model: v1.Model{
+				ObjectMeta: metadata("sglang-hf-valid"),
+				Spec: v1.ModelSpec{
+					URL:      "hf://test-repo/test-model",
+					Engine:   "SGLang",
+					Features: []v1.ModelFeature{v1.ModelFeatureTextGeneration},
+				},
+			},
+			expValid: true,
+		},
+		{
+			model: v1.Model{
+				ObjectMeta: metadata("sglang-ollama-url-invalid"),
+				Spec: v1.ModelSpec{
+					URL:      "ollama://qwen2:0.5b",
+					Engine:   "SGLang",
+					Features: []v1.ModelFeature{v1.ModelFeatureTextGeneration},
+				},
+			},
+			expErrContain: "not supported with the SGLang engine",
+		},
+		{
+			model: v1.Model{
+				ObjectMeta: metadata("sglang-adapters-invalid"),
+				Spec: v1.ModelSpec{
+					URL:      "hf://test-repo/test-model",
+					Engine:   "SGLang",
+					Features: []v1.ModelFeature{v1.ModelFeatureTextGeneration},
+					Adapters: []v1.Adapter{{Name: "test", URL: "hf://test-repo/test-adapter"}},
+				},
+			},
+			expErrContain: "adapters only supported with VLLM engine",
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.model.Name, func(t *testing.T) {

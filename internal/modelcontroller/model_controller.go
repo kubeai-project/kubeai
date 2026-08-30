@@ -396,6 +396,12 @@ func (r *ModelReconciler) getModelConfig(model *kubeaiv1.Model) (ModelConfig, er
 	}
 	result.Image = image
 
+	if model.Spec.Engine == kubeaiv1.LlamaCppEngine {
+		if err := validateLlamaCppModel(model); err != nil {
+			return result, err
+		}
+	}
+
 	return result, nil
 }
 
@@ -412,6 +418,10 @@ func (r *ModelReconciler) lookupServerImage(model *kubeaiv1.Model, profile confi
 		serverImgs = r.ModelServers.FasterWhisper.Images
 	case kubeaiv1.InfinityEngine:
 		serverImgs = r.ModelServers.Infinity.Images
+	case kubeaiv1.SGLangEngine:
+		serverImgs = r.ModelServers.SGLang.Images
+	case kubeaiv1.LlamaCppEngine:
+		serverImgs = r.ModelServers.LlamaCpp.Images
 	default:
 		serverImgs = r.ModelServers.VLLM.Images
 	}

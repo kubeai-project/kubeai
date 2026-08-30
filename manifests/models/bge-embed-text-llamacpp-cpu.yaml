@@ -1,0 +1,12 @@
+# Source: models/templates/models.yaml
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: bge-embed-text-llamacpp-cpu
+spec:
+  features:
+    - TextEmbedding
+  url: hf://ggml-org/bge-small-en-v1.5-Q8_0-GGUF
+  engine: LlamaCpp
+  minReplicas: 0
+  resourceProfile: cpu:1

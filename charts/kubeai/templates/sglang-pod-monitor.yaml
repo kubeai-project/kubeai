@@ -1,0 +1,17 @@
+{{- if .Values.metrics.prometheusOperator.sGLangPodMonitor.enabled }}
+apiVersion: {{ .Values.metrics.prometheusOperator.sGLangPodMonitor.apiVersion }}
+kind: PodMonitor
+metadata:
+  name: {{ include "kubeai.fullname" . }}-sglang
+  labels:
+    {{- include "kubeai.labels" . | nindent 4 }}
+    {{- with .Values.metrics.prometheusOperator.sGLangPodMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sglang
+  podMetricsEndpoints:
+  - port: http
+{{- end }}
