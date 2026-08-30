@@ -85,6 +85,8 @@ spec:
                 - VLLM
                 - FasterWhisper
                 - Infinity
+                - SGLang
+                - LlamaCpp
                 type: string
               env:
                 additionalProperties:
@@ -283,7 +285,7 @@ spec:
                   URL of the model to be served.
                   Currently the following formats are supported:
 
-                  For VLLM, FasterWhisper, Infinity engines:
+                  For VLLM, SGLang, FasterWhisper, Infinity engines:
 
                   "hf://<repo>/<model>"
                   "pvc://<pvcName>"
@@ -292,6 +294,20 @@ spec:
                   "gs://<bucket>/<path>" (only with cacheProfile)
                   "oss://<bucket>/<path>" (only with cacheProfile)
                   "s3://<bucket>/<path>" (only with cacheProfile)
+
+                  For the LlamaCpp engine:
+
+                  "hf://<repo>/<model>"
+                  "hf://<repo>/<model>:<quant>"
+                  "pvc://<pvcName>/<pvcSubpath>?model=<file>.gguf"
+                  "pvc://<pvcName>/<pvcSubpath>/<file>.gguf"
+                  "oci://<registry>/<repository>:<tag>?model=<file>.gguf"
+
+                  The "model" query parameter names the GGUF file inside the mounted
+                  directory. It is required for "oci://" sources and for "pvc://" paths
+                  that do not already name a .gguf file. A model split across shards has
+                  to use it and keep every shard in the same directory, because llama.cpp
+                  derives the sibling shard paths from the file name.
 
                   For OLlama engine:
 
@@ -324,6 +340,15 @@ spec:
               rule: '!has(self.maxReplicas) || self.minReplicas <= self.maxReplicas'
             - message: adapters only supported with VLLM engine.
               rule: '!has(self.adapters) || self.engine == "VLLM"'
+            - message: the LlamaCpp engine only supports urls of format "hf://...",
+                "pvc://...", or "oci://...".
+              rule: self.engine != "LlamaCpp" || self.url.startsWith("hf://") || self.url.startsWith("pvc://")
+                || self.url.startsWith("oci://")
+            - message: cacheProfile is not supported with the LlamaCpp engine.
+              rule: '!has(self.cacheProfile) || self.engine != "LlamaCpp"'
+            - message: urls of format "ollama://..." are not supported with the SGLang
+                engine.
+              rule: self.engine != "SGLang" || !self.url.startsWith("ollama://")
             - message: url is immutable when using cacheProfile.
               rule: '!has(oldSelf.cacheProfile) || self.url == oldSelf.url'
             - message: All file paths must be unique.

@@ -35,6 +35,10 @@ func (r *ModelReconciler) calculatePodPlan(allPods *corev1.PodList, model *kubea
 		podForModel = r.fasterWhisperPodForModel(model, modelConfig)
 	case kubeaiv1.InfinityEngine:
 		podForModel = r.infinityPodForModel(model, modelConfig)
+	case kubeaiv1.SGLangEngine:
+		podForModel = r.sGLangPodForModel(model, modelConfig)
+	case kubeaiv1.LlamaCppEngine:
+		podForModel = r.llamaCppPodForModel(model, modelConfig)
 	default:
 		podForModel = r.vLLMPodForModel(model, modelConfig)
 	}

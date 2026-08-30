@@ -1,0 +1,15 @@
+# Source: models/templates/models.yaml
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: qwen2-500m-instruct-sglang-cpu
+spec:
+  features:
+    - TextGeneration
+  url: hf://Qwen/Qwen2.5-0.5B-Instruct
+  engine: SGLang
+  args:
+    - --context-length=2048
+    - --max-running-requests=1
+  minReplicas: 0
+  resourceProfile: cpu:1
