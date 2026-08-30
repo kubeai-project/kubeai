@@ -262,6 +262,17 @@ type ModelServer struct {
 
 type ModelLoading struct {
 	Image string `json:"image" validate:"required"`
+
+	// Llmman is the image of the init container that pulls an oci:// model
+	// through an llmman daemon. Only needed when an oci:// URL is used, so it
+	// is not required: an install that never uses one should not have to set
+	// it.
+	Llmman string `json:"llmman" required:"false"`
+
+	// LlmmanHost is the address of the `llmman serve` daemon oci:// models are
+	// pulled through, as [scheme://]host[:port]. Defaults to llmman's own
+	// default; set this to point every model pod at one shared daemon.
+	LlmmanHost string `json:"llmmanHost" required:"false"`
 }
 
 type JSONPatch struct {

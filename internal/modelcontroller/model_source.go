@@ -50,6 +50,7 @@ type modelSourcePodAdditions struct {
 	volumes          []corev1.Volume
 	volumeMounts     []corev1.VolumeMount
 	imagePullSecrets []corev1.LocalObjectReference
+	initContainers   []corev1.Container
 }
 
 func (c *modelSourcePodAdditions) append(other *modelSourcePodAdditions) {
@@ -58,6 +59,7 @@ func (c *modelSourcePodAdditions) append(other *modelSourcePodAdditions) {
 	c.volumes = append(c.volumes, other.volumes...)
 	c.volumeMounts = append(c.volumeMounts, other.volumeMounts...)
 	c.imagePullSecrets = append(c.imagePullSecrets, other.imagePullSecrets...)
+	c.initContainers = append(c.initContainers, other.initContainers...)
 }
 
 func (c *modelSourcePodAdditions) applyToPodSpec(spec *corev1.PodSpec, containerIndex int) {
@@ -66,6 +68,7 @@ func (c *modelSourcePodAdditions) applyToPodSpec(spec *corev1.PodSpec, container
 	spec.Volumes = append(spec.Volumes, c.volumes...)
 	spec.Containers[containerIndex].VolumeMounts = append(spec.Containers[containerIndex].VolumeMounts, c.volumeMounts...)
 	spec.ImagePullSecrets = append(spec.ImagePullSecrets, c.imagePullSecrets...)
+	spec.InitContainers = append(spec.InitContainers, c.initContainers...)
 }
 
 func (r *ModelReconciler) modelAuthCredentialsForAllSources() *modelSourcePodAdditions {
@@ -231,33 +234,61 @@ func (r *ModelReconciler) pvcPodAdditions(url modelURL) *modelSourcePodAdditions
 	}
 }
 
+// ociPodAdditions acquires an OCI reference through a running `llmman serve`
+// daemon, into an emptyDir the model container then reads.
+//
+// This replaces the Kubernetes ImageVolume this used to mount. ImageVolume
+// only works for runnable container *images*: containerd cannot mount a plain
+// OCI artifact as an image volume (CRI-O can), so a model published as a CNCF
+// ModelPack artifact -- the CNCF spec for shipping weights through a registry
+// -- could not be used on most clusters. llmman speaks both the registry v2
+// protocol and the ModelPack media types, so one code path now covers a
+// modelcar image and an artifact, on any runtime.
 func (r *ModelReconciler) ociPodAdditions(url modelURL) *modelSourcePodAdditions {
-	volumeName := "model"
+	const volumeName = "model"
+	reference := url.name + "/" + url.path
+
 	return &modelSourcePodAdditions{
 		volumes: []corev1.Volume{
 			{
-				Name: volumeName,
-				VolumeSource: corev1.VolumeSource{
-					Image: &corev1.ImageVolumeSource{
-						Reference:  url.name + "/" + url.path,
-						PullPolicy: corev1.PullIfNotPresent,
-					},
-				},
+				Name:         volumeName,
+				VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 			},
 		},
 		volumeMounts: []corev1.VolumeMount{
 			{
 				Name:      volumeName,
 				MountPath: "/model",
+				ReadOnly:  true,
 			},
 		},
-		imagePullSecrets: []corev1.LocalObjectReference{
+		initContainers: []corev1.Container{
 			{
-				Name: r.SecretNames.OCI,
+				Name:            "model-puller",
+				Image:           r.ModelLoaders.Llmman,
+				ImagePullPolicy: corev1.PullIfNotPresent,
+				Args:            []string{reference, "/model"},
+				Env: []corev1.EnvVar{
+					{Name: "LLMMAN_HOST", Value: r.llmmanHost()},
+				},
+				VolumeMounts: []corev1.VolumeMount{
+					{Name: volumeName, MountPath: "/model"},
+				},
 			},
 		},
 	}
 }
+
+// llmmanHost is the daemon address the puller talks to, overridable so a
+// cluster can point every model pod at one shared daemon.
+func (r *ModelReconciler) llmmanHost() string {
+	if host := strings.TrimSpace(r.ModelLoaders.LlmmanHost); host != "" {
+		return host
+	}
+	return defaultLlmmanHost
+}
+
+const defaultLlmmanHost = "127.0.0.1:17434"
 
 var modelURLRegex = regexp.MustCompile(`^([a-z0-9]+):\/\/([a-zA-Z0-9._:/-]+)(\?.*)?$`)
 var safeQueryParamModelRef = regexp.MustCompile(`^[a-zA-Z0-9._:/-]+$`)
