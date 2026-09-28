@@ -1,6 +1,7 @@
 package modelcontroller
 
 import (
+	"maps"
 	"sort"
 
 	kubeaiv1 "github.com/kubeai-project/kubeai/api/k8s/v1"
@@ -44,14 +45,18 @@ func (r *ModelReconciler) sGLangPodForModel(m *kubeaiv1.Model, c ModelConfig) *c
 	args = append(args, sGLangFeatureArgs(m.Spec.Features)...)
 	args = append(args, m.Spec.Args...)
 
+	// /health answers without running a generation; /health_generate runs
+	// one and backs the liveness probe.
+	envVars := map[string]string{"SGLANG_ENABLE_HEALTH_ENDPOINT_GENERATION": "false"}
+	maps.Copy(envVars, m.Spec.Env)
 	env := []corev1.EnvVar{}
 	var envKeys []string
-	for key := range m.Spec.Env {
+	for key := range envVars {
 		envKeys = append(envKeys, key)
 	}
 	sort.Strings(envKeys)
 	for _, key := range envKeys {
-		env = append(env, corev1.EnvVar{Name: key, Value: m.Spec.Env[key]})
+		env = append(env, corev1.EnvVar{Name: key, Value: envVars[key]})
 	}
 
 	pod := &corev1.Pod{
@@ -97,21 +102,23 @@ func (r *ModelReconciler) sGLangPodForModel(m *kubeaiv1.Model, c ModelConfig) *c
 						PeriodSeconds:    2,
 						TimeoutSeconds:   2,
 						SuccessThreshold: 1,
-						ProbeHandler:     sGLangHealthProbe(),
+						ProbeHandler:     sGLangHealthProbe("/health"),
 					},
 					ReadinessProbe: &corev1.Probe{
 						FailureThreshold: 3,
 						PeriodSeconds:    10,
 						TimeoutSeconds:   2,
 						SuccessThreshold: 1,
-						ProbeHandler:     sGLangHealthProbe(),
+						ProbeHandler:     sGLangHealthProbe("/health"),
 					},
 					LivenessProbe: &corev1.Probe{
 						FailureThreshold: 3,
 						PeriodSeconds:    30,
-						TimeoutSeconds:   3,
+						// Exceeds SGLang's 20s default SGLANG_HEALTH_CHECK_TIMEOUT
+						// plus the 1s poll interval of /health_generate.
+						TimeoutSeconds:   30,
 						SuccessThreshold: 1,
-						ProbeHandler:     sGLangHealthProbe(),
+						ProbeHandler:     sGLangHealthProbe("/health_generate"),
 					},
 					VolumeMounts: []corev1.VolumeMount{
 						{
@@ -143,12 +150,10 @@ func (r *ModelReconciler) sGLangPodForModel(m *kubeaiv1.Model, c ModelConfig) *c
 	return pod
 }
 
-// sGLangHealthProbe targets /health rather than /health_generate: the latter
-// runs a token generation on every probe.
-func sGLangHealthProbe() corev1.ProbeHandler {
+func sGLangHealthProbe(path string) corev1.ProbeHandler {
 	return corev1.ProbeHandler{
 		HTTPGet: &corev1.HTTPGetAction{
-			Path: "/health",
+			Path: path,
 			Port: intstr.FromString("http"),
 		},
 	}
@@ -166,4 +171,10 @@ func sGLangFeatureArgs(features []kubeaiv1.ModelFeature) []string {
 		}
 	}
 	return nil
+}
+
+// validateSGLangModel rejects Model specs the SGLang engine cannot serve.
+// The URL scheme is covered by CRD validation.
+func validateSGLangModel(m *kubeaiv1.Model) error {
+	return validateEmbeddingExcludesGeneration(m.Spec.Engine, m.Spec.Features)
 }

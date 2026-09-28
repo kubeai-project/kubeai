@@ -5,6 +5,7 @@ import (
 
 	kubeaiv1 "github.com/kubeai-project/kubeai/api/k8s/v1"
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -84,10 +85,16 @@ func Test_sGLangPodForModel(t *testing.T) {
 			require.Equal(t, []string{"python3", "-m", "sglang.launch_server"}, ctr.Command)
 			require.Equal(t, c.wantArgs, ctr.Args)
 			require.Equal(t, "8000", pod.Annotations[kubeaiv1.ModelPodPortAnnotation])
+			require.Equal(t, "/health", ctr.StartupProbe.HTTPGet.Path)
 			require.Equal(t, "/health", ctr.ReadinessProbe.HTTPGet.Path)
+			require.Equal(t, "/health_generate", ctr.LivenessProbe.HTTPGet.Path)
+			require.Equal(t, int32(30), ctr.LivenessProbe.TimeoutSeconds)
 			// Env keys are sorted so the Pod hash stays stable across reconciles.
-			require.Equal(t, "A_VAR", ctr.Env[0].Name)
-			require.Equal(t, "B_VAR", ctr.Env[1].Name)
+			require.Equal(t, []corev1.EnvVar{
+				{Name: "A_VAR", Value: "a"},
+				{Name: "B_VAR", Value: "b"},
+				{Name: "SGLANG_ENABLE_HEALTH_ENDPOINT_GENERATION", Value: "false"},
+			}, ctr.Env[:3])
 		})
 	}
 }
@@ -109,6 +116,73 @@ func Test_sGLangFeatureArgs(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			require.Equal(t, c.want, sGLangFeatureArgs(c.features))
+		})
+	}
+}
+
+func Test_sGLangPodForModel_healthGenerationEnvOverride(t *testing.T) {
+	t.Parallel()
+
+	const url = "hf://Qwen/Qwen2.5-0.5B-Instruct"
+	r := &ModelReconciler{}
+	src, err := r.parseModelSource(url)
+	require.NoError(t, err)
+	m := &kubeaiv1.Model{
+		ObjectMeta: metav1.ObjectMeta{Name: "model-name", Namespace: "default"},
+		Spec: kubeaiv1.ModelSpec{
+			URL:      url,
+			Engine:   kubeaiv1.SGLangEngine,
+			Features: []kubeaiv1.ModelFeature{kubeaiv1.ModelFeatureTextGeneration},
+			Env:      map[string]string{"SGLANG_ENABLE_HEALTH_ENDPOINT_GENERATION": "true"},
+		},
+	}
+	pod := r.sGLangPodForModel(m, ModelConfig{Source: src})
+
+	env := pod.Spec.Containers[0].Env
+	require.Contains(t, env, corev1.EnvVar{Name: "SGLANG_ENABLE_HEALTH_ENDPOINT_GENERATION", Value: "true"})
+	require.NotContains(t, env, corev1.EnvVar{Name: "SGLANG_ENABLE_HEALTH_ENDPOINT_GENERATION", Value: "false"})
+}
+
+func Test_validateSGLangModel(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		features []kubeaiv1.ModelFeature
+		wantErr  bool
+	}{
+		"text-generation": {features: []kubeaiv1.ModelFeature{kubeaiv1.ModelFeatureTextGeneration}},
+		"embedding":       {features: []kubeaiv1.ModelFeature{kubeaiv1.ModelFeatureTextEmbedding}},
+		"reranking":       {features: []kubeaiv1.ModelFeature{kubeaiv1.ModelFeatureReranking}},
+		"embedding-and-reranking": {
+			features: []kubeaiv1.ModelFeature{kubeaiv1.ModelFeatureTextEmbedding, kubeaiv1.ModelFeatureReranking},
+		},
+		"generation-and-embedding-conflict": {
+			features: []kubeaiv1.ModelFeature{kubeaiv1.ModelFeatureTextGeneration, kubeaiv1.ModelFeatureTextEmbedding},
+			wantErr:  true,
+		},
+		"generation-and-reranking-conflict": {
+			features: []kubeaiv1.ModelFeature{kubeaiv1.ModelFeatureTextGeneration, kubeaiv1.ModelFeatureReranking},
+			wantErr:  true,
+		},
+	}
+
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			m := &kubeaiv1.Model{
+				ObjectMeta: metav1.ObjectMeta{Name: "model-name"},
+				Spec: kubeaiv1.ModelSpec{
+					URL:      "hf://Qwen/Qwen2.5-0.5B-Instruct",
+					Engine:   kubeaiv1.SGLangEngine,
+					Features: c.features,
+				},
+			}
+			err := validateSGLangModel(m)
+			if c.wantErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
 		})
 	}
 }

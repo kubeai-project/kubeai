@@ -2,6 +2,7 @@ package modelcontroller
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -215,20 +216,8 @@ func validateLlamaCppModel(m *kubeaiv1.Model) error {
 		}
 	}
 
-	var generation, embedding bool
-	for _, f := range m.Spec.Features {
-		switch f {
-		case kubeaiv1.ModelFeatureSpeechToText:
-			return fmt.Errorf("the LlamaCpp engine does not support the %q feature", f)
-		case kubeaiv1.ModelFeatureTextGeneration:
-			generation = true
-		case kubeaiv1.ModelFeatureTextEmbedding, kubeaiv1.ModelFeatureReranking:
-			embedding = true
-		}
+	if slices.Contains(m.Spec.Features, kubeaiv1.ModelFeatureSpeechToText) {
+		return fmt.Errorf("the LlamaCpp engine does not support the %q feature", kubeaiv1.ModelFeatureSpeechToText)
 	}
-	if generation && embedding {
-		return fmt.Errorf("the LlamaCpp engine cannot serve %q together with %q or %q: the embedding flags restrict llama-server to embeddings",
-			kubeaiv1.ModelFeatureTextGeneration, kubeaiv1.ModelFeatureTextEmbedding, kubeaiv1.ModelFeatureReranking)
-	}
-	return nil
+	return validateEmbeddingExcludesGeneration(m.Spec.Engine, m.Spec.Features)
 }

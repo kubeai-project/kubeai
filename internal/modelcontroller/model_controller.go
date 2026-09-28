@@ -396,13 +396,38 @@ func (r *ModelReconciler) getModelConfig(model *kubeaiv1.Model) (ModelConfig, er
 	}
 	result.Image = image
 
-	if model.Spec.Engine == kubeaiv1.LlamaCppEngine {
+	switch model.Spec.Engine {
+	case kubeaiv1.LlamaCppEngine:
 		if err := validateLlamaCppModel(model); err != nil {
+			return result, err
+		}
+	case kubeaiv1.SGLangEngine:
+		if err := validateSGLangModel(model); err != nil {
 			return result, err
 		}
 	}
 
 	return result, nil
+}
+
+// validateEmbeddingExcludesGeneration rejects TextGeneration combined with
+// TextEmbedding or Reranking, for engines whose embedding mode disables
+// text generation.
+func validateEmbeddingExcludesGeneration(engine string, features []kubeaiv1.ModelFeature) error {
+	var generation, embedding bool
+	for _, f := range features {
+		switch f {
+		case kubeaiv1.ModelFeatureTextGeneration:
+			generation = true
+		case kubeaiv1.ModelFeatureTextEmbedding, kubeaiv1.ModelFeatureReranking:
+			embedding = true
+		}
+	}
+	if generation && embedding {
+		return fmt.Errorf("the %s engine cannot serve %q together with %q or %q: embedding mode disables text generation",
+			engine, kubeaiv1.ModelFeatureTextGeneration, kubeaiv1.ModelFeatureTextEmbedding, kubeaiv1.ModelFeatureReranking)
+	}
+	return nil
 }
 
 func (r *ModelReconciler) lookupServerImage(model *kubeaiv1.Model, profile config.ResourceProfile) (string, error) {
