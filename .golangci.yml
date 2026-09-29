@@ -1,6 +1,7 @@
+version: "2"
+
 run:
   timeout: 5m
-  allow-parallel-runners: true
 
 issues:
   # don't skip warning about doc comments
@@ -16,18 +17,15 @@ issues:
       linters:
         - dupl
         - lll
+
 linters:
   disable-all: true
   enable:
     - dupl
     - errcheck
-    - exportloopref
     - ginkgolinter
     - goconst
     - gocyclo
-    - gofmt
-    - goimports
-    - gosimple
     - govet
     - ineffassign
     - lll
@@ -36,12 +34,14 @@ linters:
     - prealloc
     - revive
     - staticcheck
-    - typecheck
     - unconvert
     - unparam
-    - unused
+  settings:
+    revive:
+      rules:
+        - name: comment-spacings
 
-linters-settings:
-  revive:
-    rules:
-      - name: comment-spacings
+formatters:
+  enable:
+    - gofmt
+    - goimports
