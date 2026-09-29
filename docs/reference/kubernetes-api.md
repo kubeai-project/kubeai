@@ -133,6 +133,7 @@ _Appears in:_
 | `features` _[ModelFeature](#modelfeature) array_ | Features that the model supports.<br />Dictates the APIs that are available for the model. |  | Enum: [TextGeneration TextEmbedding Reranking SpeechToText] <br /> |
 | `engine` _string_ | Engine to be used for the server process. |  | Enum: [OLlama VLLM FasterWhisper Infinity] <br />Required: \{\} <br /> |
 | `resourceProfile` _string_ | ResourceProfile required to serve the model.<br />Use the format "<resource-profile-name>:<count>".<br />Example: "nvidia-gpu-l4:2" - 2x NVIDIA L4 GPUs.<br />Must be a valid ResourceProfile defined in the system config. |  |  |
+| `resourceClaimName` _string_ | ResourceClaimName is the name of a ResourceClaim to attach to model server Pods.<br />This uses Kubernetes Dynamic Resource Allocation (DRA) and is referenced as<br />a Pod resource claim named "gpu-claim" with request "gpu". |  |  |
 | `cacheProfile` _string_ | CacheProfile to be used for caching model artifacts.<br />Must be a valid CacheProfile defined in the system config. |  |  |
 | `image` _string_ | Image to be used for the server process.<br />Will be set from ResourceProfile + Engine if not specified. |  |  |
 | `args` _string array_ | Args to be added to the server process. |  |  |
@@ -216,5 +217,3 @@ _Appears in:_
 | `meanLoadFactor` _integer_ | MeanLoadPercentage is the percentage that any given endpoint's load must not exceed<br />over the mean load of all endpoints in the hash ring. Defaults to 125% which is<br />a widely accepted value for the Consistent Hashing with Bounded Loads algorithm. | 125 | Minimum: 100 <br />Optional: \{\} <br /> |
 | `replication` _integer_ | Replication is the number of replicas of each endpoint on the hash ring.<br />Higher values will result in a more even distribution of load but will<br />decrease lookup performance. | 256 | Optional: \{\} <br /> |
 | `prefixCharLength` _integer_ | PrefixCharLength is the number of characters to count when building the prefix to hash. | 100 | Optional: \{\} <br /> |
-
-
