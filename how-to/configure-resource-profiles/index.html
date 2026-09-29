@@ -2113,8 +2113,8 @@
 <span class="nt">resourceProfiles</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">nvidia-gpu-l4</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">nodeSelector</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">cloud.google.com/gke-accelerator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;nvidia-l4&quot;</span>
-<span class="w">      </span><span class="nt">cloud.google.com/gke-spot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span>
+<span class="w">      </span><span class="nt">cloud.google.com/gke-accelerator</span><span class="p">:</span><span class="w"> </span><span class="s">"nvidia-l4"</span>
+<span class="w">      </span><span class="nt">cloud.google.com/gke-spot</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
 </code></pre></div>
 <p>NOTE: See the cloud-specific installation guide for a comprehensive list of settings.</p>
 <h2 id="adding-additional-resource-profiles">Adding additional resource profiles<a class="headerlink" href="#adding-additional-resource-profiles" title="Permanent link">&para;</a></h2>
@@ -2122,27 +2122,27 @@
 <div class="highlight"><pre><span></span><code><span class="c1"># helm-values.yaml</span>
 <span class="nt">resourceProfiles</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">my-custom-gpu</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">imageName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;optional-custom-image-name&quot;</span>
+<span class="w">    </span><span class="nt">imageName</span><span class="p">:</span><span class="w"> </span><span class="s">"optional-custom-image-name"</span>
 <span class="w">    </span><span class="nt">nodeSelector</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">my-custom-node-pool</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;some-value&quot;</span>
+<span class="w">      </span><span class="nt">my-custom-node-pool</span><span class="p">:</span><span class="w"> </span><span class="s">"some-value"</span>
 <span class="w">    </span><span class="nt">limits</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">custom.com/gpu</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
+<span class="w">      </span><span class="nt">custom.com/gpu</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span>
 <span class="w">    </span><span class="nt">requests</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">custom.com/gpu</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
-<span class="w">      </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3&quot;</span>
-<span class="w">      </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12Gi&quot;</span>
-<span class="w">    </span><span class="nt">schedulerName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my-custom-scheduler&quot;</span>
-<span class="w">    </span><span class="nt">runtimeClassName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my-custom-runtime-class&quot;</span>
+<span class="w">      </span><span class="nt">custom.com/gpu</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span>
+<span class="w">      </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">"3"</span>
+<span class="w">      </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">"12Gi"</span>
+<span class="w">    </span><span class="nt">schedulerName</span><span class="p">:</span><span class="w"> </span><span class="s">"my-custom-scheduler"</span>
+<span class="w">    </span><span class="nt">runtimeClassName</span><span class="p">:</span><span class="w"> </span><span class="s">"my-custom-runtime-class"</span>
 </code></pre></div>
 <p>If you need to run custom model server images on your resource profile, make sure to also add those in the <code>modelServers</code> section:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># helm-values.yaml</span>
 <span class="nt">modelServers</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">VLLM</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">images</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">optional-custom-image-name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my-repo/my-vllm-image:v1.2.3&quot;</span>
+<span class="w">      </span><span class="nt">optional-custom-image-name</span><span class="p">:</span><span class="w"> </span><span class="s">"my-repo/my-vllm-image:v1.2.3"</span>
 <span class="w">  </span><span class="nt">OLlama</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">images</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">optional-custom-image-name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my-repo/my-ollama-image:v1.2.3&quot;</span>
+<span class="w">      </span><span class="nt">optional-custom-image-name</span><span class="p">:</span><span class="w"> </span><span class="s">"my-repo/my-ollama-image:v1.2.3"</span>
 </code></pre></div>
 <h1 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h1>
 <p>See the guide on <a href="../install-models/">how to install models</a> which includes how to configure the resource profile to use for a given model.</p>

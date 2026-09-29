@@ -2160,10 +2160,10 @@
 </details>
 <h2 id="1-create-eks-cluster-with-karpenter">1. Create EKS cluster with Karpenter<a class="headerlink" href="#1-create-eks-cluster-with-karpenter" title="Permanent link">&para;</a></h2>
 <p>Set the environment variables used throughout this guide:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">CLUSTER_NAME</span><span class="o">=</span><span class="s2">&quot;cluster-with-karpenter&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_DEFAULT_REGION</span><span class="o">=</span><span class="s2">&quot;us-west-2&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">K8S_VERSION</span><span class="o">=</span><span class="s2">&quot;1.30&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">GPU_AMI_ID</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>aws<span class="w"> </span>ssm<span class="w"> </span>get-parameter<span class="w"> </span>--name<span class="w"> </span>/aws/service/eks/optimized-ami/<span class="si">${</span><span class="nv">K8S_VERSION</span><span class="si">}</span>/amazon-linux-2-gpu/recommended/image_id<span class="w"> </span>--query<span class="w"> </span>Parameter.Value<span class="w"> </span>--output<span class="w"> </span>text<span class="k">)</span><span class="s2">&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">CLUSTER_NAME</span><span class="o">=</span><span class="s2">"cluster-with-karpenter"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_DEFAULT_REGION</span><span class="o">=</span><span class="s2">"us-west-2"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">K8S_VERSION</span><span class="o">=</span><span class="s2">"1.30"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GPU_AMI_ID</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>aws<span class="w"> </span>ssm<span class="w"> </span>get-parameter<span class="w"> </span>--name<span class="w"> </span>/aws/service/eks/optimized-ami/<span class="si">${</span><span class="nv">K8S_VERSION</span><span class="si">}</span>/amazon-linux-2-gpu/recommended/image_id<span class="w"> </span>--query<span class="w"> </span>Parameter.Value<span class="w"> </span>--output<span class="w"> </span>text<span class="k">)</span><span class="s2">"</span>
 </code></pre></div>
 <p>Create the EKS cluster using eksctl:
 <div class="highlight"><pre><span></span><code>eksctl<span class="w"> </span>create<span class="w"> </span>cluster<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;EOF</span>
@@ -2171,22 +2171,22 @@
 <span class="s">apiVersion: eksctl.io/v1alpha5</span>
 <span class="s">kind: ClusterConfig</span>
 <span class="s">metadata:</span>
-<span class="s">  name: &quot;${CLUSTER_NAME}&quot;</span>
-<span class="s">  region: &quot;${AWS_DEFAULT_REGION}&quot;</span>
-<span class="s">  version: &quot;${K8S_VERSION}&quot;</span>
+<span class="s">  name: "${CLUSTER_NAME}"</span>
+<span class="s">  region: "${AWS_DEFAULT_REGION}"</span>
+<span class="s">  version: "${K8S_VERSION}"</span>
 <span class="s">  tags:</span>
-<span class="s">    karpenter.sh/discovery: &quot;${CLUSTER_NAME}&quot; # here, it is set to the cluster name</span>
+<span class="s">    karpenter.sh/discovery: "${CLUSTER_NAME}" # here, it is set to the cluster name</span>
 
 <span class="s">iam:</span>
 <span class="s">  withOIDC: true # required</span>
 
 <span class="s">karpenter:</span>
-<span class="s">  version: &#39;1.0.6&#39; # Exact version must be specified</span>
+<span class="s">  version: '1.0.6' # Exact version must be specified</span>
 
 <span class="s">managedNodeGroups:</span>
 <span class="s">- instanceType: m5.large</span>
 <span class="s">  amiFamily: AmazonLinux2</span>
-<span class="s">  name: &quot;${CLUSTER_NAME}-m5-ng&quot;</span>
+<span class="s">  name: "${CLUSTER_NAME}-m5-ng"</span>
 <span class="s">  desiredCapacity: 2</span>
 <span class="s">  minSize: 1</span>
 <span class="s">  maxSize: 10</span>
@@ -2205,10 +2205,10 @@
 <span class="s">      requirements:</span>
 <span class="s">        - key: karpenter.sh/capacity-type</span>
 <span class="s">          operator: In</span>
-<span class="s">          values: [&quot;spot&quot;, &quot;on-demand&quot;]</span>
+<span class="s">          values: ["spot", "on-demand"]</span>
 <span class="s">        - key: karpenter.k8s.aws/instance-category</span>
 <span class="s">          operator: In</span>
-<span class="s">          values: [&quot;g&quot;, &quot;p&quot;]</span>
+<span class="s">          values: ["g", "p"]</span>
 <span class="s">      nodeClassRef:</span>
 <span class="s">        group: karpenter.k8s.aws</span>
 <span class="s">        kind: EC2NodeClass</span>
@@ -2216,7 +2216,7 @@
 <span class="s">      expireAfter: 720h # 30 * 24h = 720h</span>
 <span class="s">      taints:</span>
 <span class="s">      - key: nvidia.com/gpu</span>
-<span class="s">        value: &quot;true&quot;</span>
+<span class="s">        value: "true"</span>
 <span class="s">        effect: NoSchedule</span>
 <span class="s">  limits:</span>
 <span class="s">    cpu: 1000</span>
@@ -2230,15 +2230,15 @@
 <span class="s">  name: gpu</span>
 <span class="s">spec:</span>
 <span class="s">  amiFamily: AL2 # Amazon Linux 2</span>
-<span class="s">  role: &quot;eksctl-KarpenterNodeRole-${CLUSTER_NAME}&quot;</span>
+<span class="s">  role: "eksctl-KarpenterNodeRole-${CLUSTER_NAME}"</span>
 <span class="s">  subnetSelectorTerms:</span>
 <span class="s">    - tags:</span>
-<span class="s">        karpenter.sh/discovery: &quot;${CLUSTER_NAME}&quot; # replace with your cluster name</span>
+<span class="s">        karpenter.sh/discovery: "${CLUSTER_NAME}" # replace with your cluster name</span>
 <span class="s">  securityGroupSelectorTerms:</span>
 <span class="s">    - tags:</span>
-<span class="s">        karpenter.sh/discovery: &quot;${CLUSTER_NAME}&quot; # replace with your cluster name</span>
+<span class="s">        karpenter.sh/discovery: "${CLUSTER_NAME}" # replace with your cluster name</span>
 <span class="s">  amiSelectorTerms:</span>
-<span class="s">    - id: &quot;${GPU_AMI_ID}&quot; # &lt;- GPU Optimized AMD AMI </span>
+<span class="s">    - id: "${GPU_AMI_ID}" # &lt;- GPU Optimized AMD AMI </span>
 <span class="s">  blockDeviceMappings:</span>
 <span class="s">    - deviceName: /dev/xvda</span>
 <span class="s">      ebs:</span>
@@ -2256,7 +2256,7 @@
 helm<span class="w"> </span>repo<span class="w"> </span>update
 </code></pre></div>
 <p><strong>Make sure</strong> you have a HuggingFace Hub token set in your environment (<code>HUGGING_FACE_HUB_TOKEN</code>).</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">HF_TOKEN</span><span class="o">=</span><span class="s2">&quot;replace-with-your-huggingface-token&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">HF_TOKEN</span><span class="o">=</span><span class="s2">"replace-with-your-huggingface-token"</span>
 </code></pre></div>
 <p>Install KubeAI with <a href="https://helm.sh/docs/intro/install/">Helm</a>.</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-L<span class="w"> </span>-O<span class="w"> </span>https://raw.githubusercontent.com/substratusai/kubeai/refs/heads/main/charts/kubeai/values-eks.yaml

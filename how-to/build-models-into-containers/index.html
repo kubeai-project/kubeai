@@ -2037,10 +2037,10 @@ docker<span class="w"> </span>push<span class="w"> </span><span class="nv">$IMAG
 <span class="s">metadata:</span>
 <span class="s">  name: builtin-model-example</span>
 <span class="s">spec:</span>
-<span class="s">  features: [&quot;TextGeneration&quot;]</span>
+<span class="s">  features: ["TextGeneration"]</span>
 <span class="s">  owner: alibaba</span>
 <span class="s">  image: $IMAGE # &lt;-- The image with model built-in</span>
-<span class="s">  url: &quot;$MODEL_URL&quot;</span>
+<span class="s">  url: "$MODEL_URL"</span>
 <span class="s">  engine: OLlama</span>
 <span class="s">  resourceProfile: cpu:1</span>
 <span class="s">EOF</span>

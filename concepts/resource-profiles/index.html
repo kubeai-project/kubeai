@@ -2087,11 +2087,11 @@
 <p>Kubernetes Model resources specify a resource profile and the count of that resource that they require (for example <code>resourceProfile: nvidia-gpu-l4:2</code> - 2x L4 GPUs).</p>
 <p>A given profile might need to contain slightly different settings based on the cluster/cloud that KubeAI is deployed in.</p>
 <p>Example: A resource profile named <code>nvidia-gpu-l4</code> might contain the following node selectors when installing KubeAI on a GKE Kubernetes cluster:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">cloud.google.com/gke-accelerator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;nvidia-l4&quot;</span>
-<span class="nt">cloud.google.com/gke-spot</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">cloud.google.com/gke-accelerator</span><span class="p">:</span><span class="w"> </span><span class="s">"nvidia-l4"</span>
+<span class="nt">cloud.google.com/gke-spot</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
 </code></pre></div>
 <p>and add the following resource requests to the model server Pods:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">nvidia.com/gpu</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">nvidia.com/gpu</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span>
 </code></pre></div>
 <p>In addition to node selectors and resource requirements, a resource profile may optionally specify an image name. This name maps to the container image that will be selected when serving a model on that resource.</p>
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>

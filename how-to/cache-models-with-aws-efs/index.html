@@ -2233,24 +2233,24 @@
 <p>Follow the <a href="../../installation/eks/">EKS install guide</a>.</p>
 <h2 id="1-create-an-efs-file-system">1. Create an EFS File System<a class="headerlink" href="#1-create-an-efs-file-system" title="Permanent link">&para;</a></h2>
 <p>Set environment variables to match your environment.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">CLUSTER_NAME</span><span class="o">=</span><span class="s2">&quot;cluster-with-karpenter&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">CLUSTER_REGION</span><span class="o">=</span><span class="s2">&quot;us-west-2&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">CLUSTER_NAME</span><span class="o">=</span><span class="s2">"cluster-with-karpenter"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CLUSTER_REGION</span><span class="o">=</span><span class="s2">"us-west-2"</span>
 </code></pre></div>
 <p>Create an EFS file system in the same VPC as your EKS cluster.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">vpc_id</span><span class="o">=</span><span class="k">$(</span>aws<span class="w"> </span>eks<span class="w"> </span>describe-cluster<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--name<span class="w"> </span><span class="nv">$CLUSTER_NAME</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--query<span class="w"> </span><span class="s2">&quot;cluster.resourcesVpcConfig.vpcId&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--query<span class="w"> </span><span class="s2">"cluster.resourcesVpcConfig.vpcId"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--output<span class="w"> </span>text<span class="k">)</span>
 
 <span class="nv">cidr_range</span><span class="o">=</span><span class="k">$(</span>aws<span class="w"> </span>ec2<span class="w"> </span>describe-vpcs<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--vpc-ids<span class="w"> </span><span class="nv">$vpc_id</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--query<span class="w"> </span><span class="s2">&quot;Vpcs[].CidrBlock&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--query<span class="w"> </span><span class="s2">"Vpcs[].CidrBlock"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--output<span class="w"> </span>text<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--region<span class="w"> </span><span class="si">${</span><span class="nv">CLUSTER_REGION</span><span class="si">}</span><span class="k">)</span>
 
 <span class="nv">security_group_id</span><span class="o">=</span><span class="k">$(</span>aws<span class="w"> </span>ec2<span class="w"> </span>create-security-group<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--group-name<span class="w"> </span>MyEfsSecurityGroup<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--description<span class="w"> </span><span class="s2">&quot;My EFS security group&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--description<span class="w"> </span><span class="s2">"My EFS security group"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--vpc-id<span class="w"> </span><span class="nv">$vpc_id</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--output<span class="w"> </span>text<span class="k">)</span>
 
@@ -2263,17 +2263,17 @@ aws<span class="w"> </span>ec2<span class="w"> </span>authorize-security-group-i
 <span class="nv">file_system_id</span><span class="o">=</span><span class="k">$(</span>aws<span class="w"> </span>efs<span class="w"> </span>create-file-system<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--region<span class="w"> </span><span class="si">${</span><span class="nv">CLUSTER_REGION</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--performance-mode<span class="w"> </span>generalPurpose<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--query<span class="w"> </span><span class="s1">&#39;FileSystemId&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--query<span class="w"> </span><span class="s1">'FileSystemId'</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--output<span class="w"> </span>text<span class="k">)</span>
 </code></pre></div>
 <p>Expose the EFS file system to the subnets used by your EKS cluster.
-<div class="highlight"><pre><span></span><code><span class="nv">SUBNETS</span><span class="o">=</span><span class="k">$(</span>eksctl<span class="w"> </span>get<span class="w"> </span>cluster<span class="w"> </span>--region<span class="w"> </span>us-west-2<span class="w"> </span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.[0].ResourcesVpcConfig.SubnetIds[]&#39;</span><span class="k">)</span>
+<div class="highlight"><pre><span></span><code><span class="nv">SUBNETS</span><span class="o">=</span><span class="k">$(</span>eksctl<span class="w"> </span>get<span class="w"> </span>cluster<span class="w"> </span>--region<span class="w"> </span>us-west-2<span class="w"> </span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.[0].ResourcesVpcConfig.SubnetIds[]'</span><span class="k">)</span>
 
 <span class="k">while</span><span class="w"> </span><span class="nv">IFS</span><span class="o">=</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>subnet<span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Creating EFS mount target in </span><span class="nv">$subnet</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"Creating EFS mount target in </span><span class="nv">$subnet</span><span class="s2">"</span>
 <span class="w">    </span>aws<span class="w"> </span>efs<span class="w"> </span>create-mount-target<span class="w"> </span>--file-system-id<span class="w"> </span><span class="nv">$file_system_id</span><span class="w"> </span><span class="se">\</span>
 <span class="w">      </span>--subnet-id<span class="w"> </span><span class="nv">$subnet</span><span class="w"> </span>--security-groups<span class="w"> </span><span class="nv">$security_group_id</span><span class="w"> </span>--output<span class="w"> </span>text
-<span class="k">done</span><span class="w"> </span><span class="o">&lt;&lt;&lt;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$SUBNETS</span><span class="s2">&quot;</span>
+<span class="k">done</span><span class="w"> </span><span class="o">&lt;&lt;&lt;</span><span class="w"> </span><span class="s2">"</span><span class="nv">$SUBNETS</span><span class="s2">"</span>
 </code></pre></div></p>
 <h2 id="2-install-the-efs-csi-driver">2. Install the EFS CSI driver<a class="headerlink" href="#2-install-the-efs-csi-driver" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">ROLE_NAME</span><span class="o">=</span>AmazonEKS_EFS_CSI_DriverRole
@@ -2287,14 +2287,14 @@ eksctl<span class="w"> </span>create<span class="w"> </span>iamserviceaccount<sp
 <span class="w">    </span>--approve
 
 <span class="nv">TRUST_POLICY</span><span class="o">=</span><span class="k">$(</span>aws<span class="w"> </span>iam<span class="w"> </span>get-role<span class="w"> </span>--role-name<span class="w"> </span><span class="si">${</span><span class="nv">ROLE_NAME</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--query<span class="w"> </span><span class="s1">&#39;Role.AssumeRolePolicyDocument&#39;</span><span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>sed<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/efs-csi-controller-sa/efs-csi-*/&#39;</span><span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/StringEquals/StringLike/&#39;</span><span class="k">)</span>
+<span class="w">    </span>--query<span class="w"> </span><span class="s1">'Role.AssumeRolePolicyDocument'</span><span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>sed<span class="w"> </span>-e<span class="w"> </span><span class="s1">'s/efs-csi-controller-sa/efs-csi-*/'</span><span class="w"> </span>-e<span class="w"> </span><span class="s1">'s/StringEquals/StringLike/'</span><span class="k">)</span>
 
-aws<span class="w"> </span>iam<span class="w"> </span>update-assume-role-policy<span class="w"> </span>--role-name<span class="w"> </span><span class="si">${</span><span class="nv">ROLE_NAME</span><span class="si">}</span><span class="w"> </span>--policy-document<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$TRUST_POLICY</span><span class="s2">&quot;</span>
+aws<span class="w"> </span>iam<span class="w"> </span>update-assume-role-policy<span class="w"> </span>--role-name<span class="w"> </span><span class="si">${</span><span class="nv">ROLE_NAME</span><span class="si">}</span><span class="w"> </span>--policy-document<span class="w"> </span><span class="s2">"</span><span class="nv">$TRUST_POLICY</span><span class="s2">"</span>
 
 <span class="c1"># Get the role ARN</span>
 <span class="nv">EFS_ROLE_ARN</span><span class="o">=</span><span class="k">$(</span>aws<span class="w"> </span>iam<span class="w"> </span>get-role<span class="w"> </span>--role-name<span class="w"> </span>AmazonEKS_EFS_CSI_DriverRole<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--query<span class="w"> </span><span class="s1">&#39;Role.Arn&#39;</span><span class="w"> </span>--output<span class="w"> </span>text<span class="k">)</span>
+<span class="w">  </span>--query<span class="w"> </span><span class="s1">'Role.Arn'</span><span class="w"> </span>--output<span class="w"> </span>text<span class="k">)</span>
 
 aws<span class="w"> </span>eks<span class="w"> </span>create-addon<span class="w"> </span>--cluster-name<span class="w"> </span><span class="nv">$CLUSTER_NAME</span><span class="w"> </span>--addon-name<span class="w"> </span>aws-efs-csi-driver<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--service-account-role-arn<span class="w"> </span><span class="nv">$EFS_ROLE_ARN</span>
@@ -2315,8 +2315,8 @@ Verify that the EFS CSI driver is running.</p>
 <span class="s">provisioner: efs.csi.aws.com</span>
 <span class="s">parameters:</span>
 <span class="s">  provisioningMode: efs-ap</span>
-<span class="s">  fileSystemId: &quot;${file_system_id}&quot;</span>
-<span class="s">  directoryPerms: &quot;700&quot;</span>
+<span class="s">  fileSystemId: "${file_system_id}"</span>
+<span class="s">  directoryPerms: "700"</span>
 <span class="s">EOF</span>
 </code></pre></div>
 <p>Make sure to set <code>file_system_id</code> match the EFS file system ID created in the first step.</p>
@@ -2328,10 +2328,10 @@ Verify that the EFS CSI driver is running.</p>
 <span class="s">cacheProfiles:</span>
 <span class="s">  efs-dynamic:</span>
 <span class="s">    sharedFilesystem:</span>
-<span class="s">      storageClassName: &quot;efs-sc&quot;</span>
+<span class="s">      storageClassName: "efs-sc"</span>
 <span class="s">  efs-static:</span>
 <span class="s">    sharedFilesystem:</span>
-<span class="s">      persistentVolumeName: &quot;efs-pv&quot;</span>
+<span class="s">      persistentVolumeName: "efs-pv"</span>
 <span class="s">EOF</span>
 </code></pre></div>
 You can also manually provision a PersistentVolume using EFS static mode.
@@ -2347,20 +2347,20 @@ The efs-static profile is used for this purpose.</p>
 <span class="s">EOF</span>
 </code></pre></div>
 <p>Wait for the Model to be fully cached.</p>
-<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>--timeout<span class="w"> </span>10m<span class="w"> </span>--for<span class="o">=</span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.cache.loaded}&#39;</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>model/llama-3.1-8b-instruct-fp8-l4
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>--timeout<span class="w"> </span>10m<span class="w"> </span>--for<span class="o">=</span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.status.cache.loaded}'</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>model/llama-3.1-8b-instruct-fp8-l4
 </code></pre></div>
 <p>This model will now be loaded from Filestore when it is served.</p>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="mountvolesetup-failed-for-volume-pvc-deadline-exceeded">MountVole.SetUp failed for volume pvc deadline exceeded<a class="headerlink" href="#mountvolesetup-failed-for-volume-pvc-deadline-exceeded" title="Permanent link">&para;</a></h3>
 <p><code>kubectl get events</code> may show an error like this:
-<div class="highlight"><pre><span></span><code>8s          Warning   FailedMount             pod/load-cache-llama-3.1-8b-instruct-fp8-l4-w7thh      MountVolume.SetUp failed for volume &quot;pvc-ceedb563-1e68-47fa-9d12-c697ae153d04&quot; : rpc error: code = DeadlineExceeded desc = context deadline exceeded
+<div class="highlight"><pre><span></span><code>8s          Warning   FailedMount             pod/load-cache-llama-3.1-8b-instruct-fp8-l4-w7thh      MountVolume.SetUp failed for volume "pvc-ceedb563-1e68-47fa-9d12-c697ae153d04" : rpc error: code = DeadlineExceeded desc = context deadline exceeded
 </code></pre></div></p>
 <p>Checking the logs of the EFS CSI DaemonSet may show an error like this:
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>efs-csi-node-4n75c<span class="w"> </span>-n<span class="w"> </span>kube-system
-Output:<span class="w"> </span>Could<span class="w"> </span>not<span class="w"> </span>start<span class="w"> </span>amazon-efs-mount-watchdog,<span class="w"> </span>unrecognized<span class="w"> </span>init<span class="w"> </span>system<span class="w"> </span><span class="s2">&quot;aws-efs-csi-dri&quot;</span>
+Output:<span class="w"> </span>Could<span class="w"> </span>not<span class="w"> </span>start<span class="w"> </span>amazon-efs-mount-watchdog,<span class="w"> </span>unrecognized<span class="w"> </span>init<span class="w"> </span>system<span class="w"> </span><span class="s2">"aws-efs-csi-dri"</span>
 Mount<span class="w"> </span>attempt<span class="w"> </span><span class="m">1</span>/3<span class="w"> </span>failed<span class="w"> </span>due<span class="w"> </span>to<span class="w"> </span>timeout<span class="w"> </span>after<span class="w"> </span><span class="m">15</span><span class="w"> </span>sec,<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="m">0</span><span class="w"> </span>sec<span class="w"> </span>before<span class="w"> </span>next<span class="w"> </span>attempt.
 Mount<span class="w"> </span>attempt<span class="w"> </span><span class="m">2</span>/3<span class="w"> </span>failed<span class="w"> </span>due<span class="w"> </span>to<span class="w"> </span>timeout<span class="w"> </span>after<span class="w"> </span><span class="m">15</span><span class="w"> </span>sec,<span class="w"> </span><span class="nb">wait</span><span class="w"> </span><span class="m">0</span><span class="w"> </span>sec<span class="w"> </span>before<span class="w"> </span>next<span class="w"> </span>attempt.
-b<span class="s1">&#39;mount.nfs4: Connection timed out&#39;</span>
+b<span class="s1">'mount.nfs4: Connection timed out'</span>
 </code></pre></div></p>
 <p>This likely means your mount target isn't setup correctly. Possibly the security group is not allowing traffic from the EKS cluster.</p>
 <h3 id="model-loading-job">Model Loading Job<a class="headerlink" href="#model-loading-job" title="Permanent link">&para;</a></h3>

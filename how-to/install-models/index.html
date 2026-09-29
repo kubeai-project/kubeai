@@ -2320,7 +2320,7 @@
 <span class="nt">catalog</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">llama-3.1-8b-instruct-fp8-l4</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">    </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nvidia-gpu-l4:2</span><span class="w"> </span><span class="c1"># Require &quot;2 NVIDIA L4 GPUs&quot;</span>
+<span class="w">    </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nvidia-gpu-l4:2</span><span class="w"> </span><span class="c1"># Require "2 NVIDIA L4 GPUs"</span>
 </code></pre></div>
 <h3 id="custom-models-with-helm">Custom models with helm<a class="headerlink" href="#custom-models-with-helm" title="Permanent link">&para;</a></h3>
 <p>If you prefer to add a custom model via the same Helm chart you use for installed KubeAI, you can add your custom model entry into the <code>.catalog</code> array of your existing values file for the <code>kubeai/models</code> Helm chart:</p>
@@ -2328,9 +2328,9 @@
 <span class="nt">catalog</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">my-custom-model-name</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">    </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;TextEmbedding&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"TextEmbedding"</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">me</span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hf://me/my-custom-model&quot;</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">"hf://me/my-custom-model"</span>
 <span class="w">    </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CPU:1</span>
 </code></pre></div>
 <h2 id="installing-models-with-kubectl">Installing models with kubectl<a class="headerlink" href="#installing-models-with-kubectl" title="Permanent link">&para;</a></h2>
@@ -2384,7 +2384,7 @@ kubectl<span class="w"> </span>explain<span class="w"> </span>models.spec.engine
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">high-priority</span>
 <span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span><span class="w">  </span><span class="c1"># Higher value means higher priority</span>
 <span class="nt">globalDefault</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;This</span><span class="nv"> </span><span class="s">priority</span><span class="nv"> </span><span class="s">class</span><span class="nv"> </span><span class="s">should</span><span class="nv"> </span><span class="s">be</span><span class="nv"> </span><span class="s">used</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">critical</span><span class="nv"> </span><span class="s">inference</span><span class="nv"> </span><span class="s">models</span><span class="nv"> </span><span class="s">only.&quot;</span>
+<span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"This</span><span class="nv"> </span><span class="s">priority</span><span class="nv"> </span><span class="s">class</span><span class="nv"> </span><span class="s">should</span><span class="nv"> </span><span class="s">be</span><span class="nv"> </span><span class="s">used</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">critical</span><span class="nv"> </span><span class="s">inference</span><span class="nv"> </span><span class="s">models</span><span class="nv"> </span><span class="s">only."</span>
 <span class="nn">---</span>
 <span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">scheduling.k8s.io/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PriorityClass</span>
@@ -2392,7 +2392,7 @@ kubectl<span class="w"> </span>explain<span class="w"> </span>models.spec.engine
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">medium-priority</span>
 <span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span>
 <span class="nt">globalDefault</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;This</span><span class="nv"> </span><span class="s">priority</span><span class="nv"> </span><span class="s">class</span><span class="nv"> </span><span class="s">should</span><span class="nv"> </span><span class="s">be</span><span class="nv"> </span><span class="s">used</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">medium</span><span class="nv"> </span><span class="s">priority</span><span class="nv"> </span><span class="s">inference</span><span class="nv"> </span><span class="s">models.&quot;</span>
+<span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"This</span><span class="nv"> </span><span class="s">priority</span><span class="nv"> </span><span class="s">class</span><span class="nv"> </span><span class="s">should</span><span class="nv"> </span><span class="s">be</span><span class="nv"> </span><span class="s">used</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">medium</span><span class="nv"> </span><span class="s">priority</span><span class="nv"> </span><span class="s">inference</span><span class="nv"> </span><span class="s">models."</span>
 <span class="nn">---</span>
 <span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">scheduling.k8s.io/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PriorityClass</span>
@@ -2400,7 +2400,7 @@ kubectl<span class="w"> </span>explain<span class="w"> </span>models.spec.engine
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">low-priority</span>
 <span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
 <span class="nt">globalDefault</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;This</span><span class="nv"> </span><span class="s">priority</span><span class="nv"> </span><span class="s">class</span><span class="nv"> </span><span class="s">should</span><span class="nv"> </span><span class="s">be</span><span class="nv"> </span><span class="s">used</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">low</span><span class="nv"> </span><span class="s">priority</span><span class="nv"> </span><span class="s">inference</span><span class="nv"> </span><span class="s">models.&quot;</span>
+<span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"This</span><span class="nv"> </span><span class="s">priority</span><span class="nv"> </span><span class="s">class</span><span class="nv"> </span><span class="s">should</span><span class="nv"> </span><span class="s">be</span><span class="nv"> </span><span class="s">used</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">low</span><span class="nv"> </span><span class="s">priority</span><span class="nv"> </span><span class="s">inference</span><span class="nv"> </span><span class="s">models."</span>
 </code></pre></div>
 <p>Then, assign these priority classes to your models:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubeai.org/v1</span>

@@ -2164,8 +2164,8 @@
 <p>When using the OpenAI compatible REST API, model adapters are referenced using the <code>&lt;base-model&gt;_&lt;adapter&gt;</code> convention. Once a Model is installed with an adapter, you can request that adapter by name via appending <code>_&lt;adapter-name&gt;</code> to the model field. This will work with any OpenAI client library.</p>
 <p>If you installed a Model with <code>name: llama-3.2</code> and configured <code>.spec.adapters[]</code> to contain an adapter with <code>name: sql</code>, you can issue a completion request to that adapter using:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>http://<span class="nv">$KUBEAI_ENDPOINT</span>/openai/v1/completions<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;prompt&quot;: &quot;Hi&quot;, &quot;model&quot;: &quot;llama-3.2_sql&quot;}&#39;</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span><span class="s1">'{"prompt": "Hi", "model": "llama-3.2_sql"}'</span>
 </code></pre></div>
 <h2 id="listing-adapters">Listing adapters<a class="headerlink" href="#listing-adapters" title="Permanent link">&para;</a></h2>
 <p>Adapters will be returned by the <code>/models</code> endpoint:</p>

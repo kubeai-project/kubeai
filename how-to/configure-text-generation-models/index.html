@@ -2411,8 +2411,8 @@ and are also published as raw manifests in the
 <span class="w">  </span><span class="nt">files</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/config/chat-template.jinja</span>
 <span class="w">    </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">      </span><span class="no">{% for message in messages %}{{&#39;&lt;|im_start|&gt;&#39; + message[&#39;role&#39;] + &#39;\n&#39; + message[&#39;content&#39;]}}{% if (loop.last and add_generation_prompt) or not loop.last %}{{ &#39;&lt;|im_end|&gt;&#39; + &#39;\n&#39;}}{% endif %}{% endfor %}</span>
-<span class="w">      </span><span class="no">{% if add_generation_prompt and messages[-1][&#39;role&#39;] != &#39;assistant&#39; %}{{ &#39;&lt;|im_start|&gt;assistant\n&#39; }}{% endif %}</span>
+<span class="w">      </span><span class="no">{% for message in messages %}{{'&lt;|im_start|&gt;' + message['role'] + '\n' + message['content']}}{% if (loop.last and add_generation_prompt) or not loop.last %}{{ '&lt;|im_end|&gt;' + '\n'}}{% endif %}{% endfor %}</span>
+<span class="w">      </span><span class="no">{% if add_generation_prompt and messages[-1]['role'] != 'assistant' %}{{ '&lt;|im_start|&gt;assistant\n' }}{% endif %}</span>
 </code></pre></div>
 <h2 id="interact-with-the-text-generation-model">Interact with the Text Generation Model<a class="headerlink" href="#interact-with-the-text-generation-model" title="Permanent link">&para;</a></h2>
 <p>The KubeAI service exposes an OpenAI compatible API that you can use to query the available models and interact with them.</p>
@@ -2425,21 +2425,21 @@ and are also published as raw manifests in the
 </code></pre></div>
 <h3 id="using-curl-to-interact-with-the-model">Using curl to interact with the model<a class="headerlink" href="#using-curl-to-interact-with-the-model" title="Permanent link">&para;</a></h3>
 <p>Run the following curl command to interact with the model named <code>llama-3.1-8b-instruct-fp8-l4</code>:
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span><span class="s2">&quot;http://localhost:8000/openai/v1/chat/completions&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">        &quot;model&quot;: &quot;llama-3.1-8b-instruct-fp8-l4&quot;,</span>
-<span class="s1">        &quot;messages&quot;: [</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span><span class="s2">"http://localhost:8000/openai/v1/chat/completions"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">        "model": "llama-3.1-8b-instruct-fp8-l4",</span>
+<span class="s1">        "messages": [</span>
 <span class="s1">            {</span>
-<span class="s1">                &quot;role&quot;: &quot;system&quot;,</span>
-<span class="s1">                &quot;content&quot;: &quot;You are a helpful assistant.&quot;</span>
+<span class="s1">                "role": "system",</span>
+<span class="s1">                "content": "You are a helpful assistant."</span>
 <span class="s1">            },</span>
 <span class="s1">            {</span>
-<span class="s1">                &quot;role&quot;: &quot;user&quot;,</span>
-<span class="s1">                &quot;content&quot;: &quot;Write a haiku about recursion in programming.&quot;</span>
+<span class="s1">                "role": "user",</span>
+<span class="s1">                "content": "Write a haiku about recursion in programming."</span>
 <span class="s1">            }</span>
 <span class="s1">        ]</span>
-<span class="s1">    }&#39;</span>
+<span class="s1">    }'</span>
 </code></pre></div></p>
 <h3 id="using-the-openai-python-sdk-to-interact-with-the-model">Using the OpenAI Python SDK to interact with the model<a class="headerlink" href="#using-the-openai-python-sdk-to-interact-with-the-model" title="Permanent link">&para;</a></h3>
 <p>Once the pod is ready, you can use the OpenAI Python SDK to interact with the model:
@@ -2448,20 +2448,20 @@ All OpenAI SDKs work with KubeAI since the KubeAI service is OpenAI API compatib
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAI</span>
 <span class="c1"># Assumes port-forward of kubeai service to localhost:8000.</span>
-<span class="n">kubeai_endpoint</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:8000/openai/v1&quot;</span>
-<span class="n">model_name</span> <span class="o">=</span> <span class="s2">&quot;llama-3.1-8b-instruct-fp8-l4&quot;</span>
+<span class="n">kubeai_endpoint</span> <span class="o">=</span> <span class="s2">"http://localhost:8000/openai/v1"</span>
+<span class="n">model_name</span> <span class="o">=</span> <span class="s2">"llama-3.1-8b-instruct-fp8-l4"</span>
 
 <span class="c1"># If you are running in a Kubernetes cluster, you can use the kubeai service endpoint.</span>
-<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;KUBERNETES_SERVICE_HOST&quot;</span><span class="p">):</span>
-    <span class="n">kubeai_endpoint</span> <span class="o">=</span> <span class="s2">&quot;http://kubeai/openai/v1&quot;</span>
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"KUBERNETES_SERVICE_HOST"</span><span class="p">):</span>
+    <span class="n">kubeai_endpoint</span> <span class="o">=</span> <span class="s2">"http://kubeai/openai/v1"</span>
 
-<span class="n">client</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;ignored&quot;</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="n">kubeai_endpoint</span><span class="p">)</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="s2">"ignored"</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="n">kubeai_endpoint</span><span class="p">)</span>
 
 <span class="n">chat_completion</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
     <span class="n">messages</span><span class="o">=</span><span class="p">[</span>
         <span class="p">{</span>
-            <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Say this is a test&quot;</span><span class="p">,</span>
+            <span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span>
+            <span class="s2">"content"</span><span class="p">:</span> <span class="s2">"Say this is a test"</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">],</span>
     <span class="n">model</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span>

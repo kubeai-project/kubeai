@@ -2166,7 +2166,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 </code></pre></div></p>
 <p>Open your browser at <a href="http://localhost:8081">http://localhost:8081</a> and log in with the default credentials (admin/prom-operator).</p>
 <p>You can get the credential if that doesn't work:
-<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w"> </span>prometheus-grafana<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s2">&quot;{.data.admin-password}&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>--decode<span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w"> </span>prometheus-grafana<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s2">"{.data.admin-password}"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>--decode<span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span>
 </code></pre></div></p>
 <p>You can import the example vLLM dashboard in the KubeAI repo at <a href="https://github.com/kubeai-project/kubeai/blob/main/examples/observability/vllm-grafana-dashboard.json">examples/observability/vllm-grafana-dashboard.json</a>.</p>
 

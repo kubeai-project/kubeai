@@ -2267,11 +2267,11 @@ kubectl<span class="w"> </span>create<span class="w"> </span>cm<span class="w"> 
 <div class="highlight"><pre><span></span><code><span class="c1"># If you are running kubeai in-cluster:</span>
 <span class="c1"># kubectl port-forward svc/kubeai 8000:80</span>
 
-curl<span class="w"> </span>http://localhost:8000/openai/v1/completions<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;prompt&quot;: &quot;Hi&quot;, &quot;model&quot;: &quot;dev&quot;}&#39;</span><span class="w"> </span>-v
+curl<span class="w"> </span>http://localhost:8000/openai/v1/completions<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span>-d<span class="w"> </span><span class="s1">'{"prompt": "Hi", "model": "dev"}'</span><span class="w"> </span>-v
 </code></pre></div>
 <h3 id="messaging-integration">Messaging Integration<a class="headerlink" href="#messaging-integration" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>gcloud<span class="w"> </span>pubsub<span class="w"> </span>topics<span class="w"> </span>publish<span class="w"> </span>test-kubeai-requests<span class="w"> </span><span class="se">\ </span><span class="w">                 </span>
-<span class="w">  </span>--message<span class="o">=</span><span class="s1">&#39;{&quot;path&quot;:&quot;/v1/completions&quot;, &quot;metadata&quot;:{&quot;a&quot;:&quot;b&quot;}, &quot;body&quot;: {&quot;model&quot;: &quot;dev&quot;, &quot;prompt&quot;: &quot;hi&quot;}}&#39;</span>
+<span class="w">  </span>--message<span class="o">=</span><span class="s1">'{"path":"/v1/completions", "metadata":{"a":"b"}, "body": {"model": "dev", "prompt": "hi"}}'</span>
 
 gcloud<span class="w"> </span>pubsub<span class="w"> </span>subscriptions<span class="w"> </span>pull<span class="w"> </span>test-kubeai-responses-sub<span class="w"> </span>--auto-ack
 </code></pre></div>

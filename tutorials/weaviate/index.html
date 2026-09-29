@@ -2322,17 +2322,17 @@ You could choose to use bigger models depending on your available hardware.</p>
 <span class="w">  </span><span class="nt">text-embedding-ada-002</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">minReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">    </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;TextEmbedding&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"TextEmbedding"</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nomic</span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ollama://nomic-embed-text&quot;</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">"ollama://nomic-embed-text"</span>
 <span class="w">    </span><span class="nt">engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OLlama</span>
 <span class="w">    </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu:1</span>
 <span class="w">  </span><span class="nt">gpt-3.5-turbo</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">minReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">    </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;TextGeneration&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"TextGeneration"</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">google</span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ollama://gemma2:2b&quot;</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">"ollama://gemma2:2b"</span>
 <span class="w">    </span><span class="nt">engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OLlama</span>
 <span class="w">    </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu:2</span>
 </code></pre></div></p>
@@ -2367,7 +2367,7 @@ We will also set the default vectorizer module to text2vec-openai.</p>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>weaviate<span class="w"> </span>https://weaviate.github.io/weaviate-helm<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>helm<span class="w"> </span>repo<span class="w"> </span>update
 
 helm<span class="w"> </span>install<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span><span class="s2">&quot;weaviate&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s2">"weaviate"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>weaviate/weaviate<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-f<span class="w"> </span>weaviate-values.yaml
 </code></pre></div></p>
@@ -2401,32 +2401,32 @@ pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </s
 <span class="k">with</span> <span class="n">weaviate</span><span class="o">.</span><span class="n">connect_to_local</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="mi">8080</span><span class="p">,</span> <span class="n">grpc_port</span><span class="o">=</span><span class="mi">50051</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
 
     <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-        <span class="s2">&quot;Question&quot;</span><span class="p">,</span>
+        <span class="s2">"Question"</span><span class="p">,</span>
         <span class="n">vectorizer_config</span><span class="o">=</span><span class="n">Configure</span><span class="o">.</span><span class="n">Vectorizer</span><span class="o">.</span><span class="n">text2vec_openai</span><span class="p">(</span>
-                <span class="n">model</span><span class="o">=</span><span class="s2">&quot;text-embedding-ada-002&quot;</span><span class="p">,</span>
-                <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;http://kubeai/openai&quot;</span><span class="p">,</span>
+                <span class="n">model</span><span class="o">=</span><span class="s2">"text-embedding-ada-002"</span><span class="p">,</span>
+                <span class="n">base_url</span><span class="o">=</span><span class="s2">"http://kubeai/openai"</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="n">generative_config</span><span class="o">=</span><span class="n">Configure</span><span class="o">.</span><span class="n">Generative</span><span class="o">.</span><span class="n">openai</span><span class="p">(</span>
-            <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">,</span>
-            <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;http://kubeai/openai&quot;</span><span class="p">,</span>
+            <span class="n">model</span><span class="o">=</span><span class="s2">"gpt-3.5-turbo"</span><span class="p">,</span>
+            <span class="n">base_url</span><span class="o">=</span><span class="s2">"http://kubeai/openai"</span><span class="p">,</span>
         <span class="p">),</span>
     <span class="p">)</span>
 
     <span class="c1"># import data</span>
-    <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;https://raw.githubusercontent.com/weaviate-tutorials/quickstart/main/data/jeopardy_tiny.json&#39;</span><span class="p">)</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'https://raw.githubusercontent.com/weaviate-tutorials/quickstart/main/data/jeopardy_tiny.json'</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>  <span class="c1"># Load data</span>
 
     <span class="n">question_objs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="n">question_objs</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-            <span class="s2">&quot;answer&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;Answer&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;Question&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;Category&quot;</span><span class="p">],</span>
+            <span class="s2">"answer"</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">"Answer"</span><span class="p">],</span>
+            <span class="s2">"question"</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">"Question"</span><span class="p">],</span>
+            <span class="s2">"category"</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">"Category"</span><span class="p">],</span>
         <span class="p">})</span>
 
-    <span class="n">questions</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Question&quot;</span><span class="p">)</span>
+    <span class="n">questions</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Question"</span><span class="p">)</span>
     <span class="n">questions</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert_many</span><span class="p">(</span><span class="n">question_objs</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data imported successfully&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Data imported successfully"</span><span class="p">)</span>
 </code></pre></div></p>
 <p>Create a collection that uses KubeAI as the openAI endpoint:
 <div class="highlight"><pre><span></span><code>python<span class="w"> </span>create-collection.py
@@ -2440,9 +2440,9 @@ You should see a message <code>Data imported successfully</code>.</p>
 
 <span class="c1"># This works due to port forward in previous step</span>
 <span class="k">with</span> <span class="n">weaviate</span><span class="o">.</span><span class="n">connect_to_local</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="mi">8080</span><span class="p">,</span> <span class="n">grpc_port</span><span class="o">=</span><span class="mi">50051</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
-    <span class="n">questions</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Question&quot;</span><span class="p">)</span>
+    <span class="n">questions</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Question"</span><span class="p">)</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">questions</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">near_text</span><span class="p">(</span>
-        <span class="n">query</span><span class="o">=</span><span class="s2">&quot;biology&quot;</span><span class="p">,</span>
+        <span class="n">query</span><span class="o">=</span><span class="s2">"biology"</span><span class="p">,</span>
         <span class="n">limit</span><span class="o">=</span><span class="mi">2</span>
     <span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>  <span class="c1"># Inspect the first object</span>
@@ -2452,9 +2452,9 @@ You should see a message <code>Data imported successfully</code>.</p>
 </code></pre></div></p>
 <p>You should see the following output:
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;answer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DNA&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;question&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;In 1953 Watson &amp; Crick built a model of the molecular structure of this, the gene-carrying substance&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SCIENCE&quot;</span>
+<span class="w">  </span><span class="nt">"answer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"DNA"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"question"</span><span class="p">:</span><span class="w"> </span><span class="s2">"In 1953 Watson &amp; Crick built a model of the molecular structure of this, the gene-carrying substance"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SCIENCE"</span>
 <span class="p">}</span>
 </code></pre></div></p>
 <h3 id="generative-search-rag">Generative Search (RAG)<a class="headerlink" href="#generative-search-rag" title="Permanent link">&para;</a></h3>
@@ -2466,12 +2466,12 @@ The generative model is run locally and managed by KubeAI.</p>
 
 <span class="c1"># This works due to port forward in previous step</span>
 <span class="k">with</span> <span class="n">weaviate</span><span class="o">.</span><span class="n">connect_to_local</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="mi">8080</span><span class="p">,</span> <span class="n">grpc_port</span><span class="o">=</span><span class="mi">50051</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
-    <span class="n">questions</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Question&quot;</span><span class="p">)</span>
+    <span class="n">questions</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Question"</span><span class="p">)</span>
 
     <span class="n">response</span> <span class="o">=</span> <span class="n">questions</span><span class="o">.</span><span class="n">generate</span><span class="o">.</span><span class="n">near_text</span><span class="p">(</span>
-        <span class="n">query</span><span class="o">=</span><span class="s2">&quot;biology&quot;</span><span class="p">,</span>
+        <span class="n">query</span><span class="o">=</span><span class="s2">"biology"</span><span class="p">,</span>
         <span class="n">limit</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">grouped_task</span><span class="o">=</span><span class="s2">&quot;Write a tweet with emojis about these facts.&quot;</span>
+        <span class="n">grouped_task</span><span class="o">=</span><span class="s2">"Write a tweet with emojis about these facts."</span>
     <span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">generated</span><span class="p">)</span>  <span class="c1"># Inspect the generated text</span>

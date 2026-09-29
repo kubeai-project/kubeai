@@ -2044,14 +2044,14 @@
 <p>Example HTTP requests:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># The returned list of models will be filtered.</span>
 curl<span class="w"> </span>http://<span class="nv">$KUBEAI_ENDPOINT</span>/openai/v1/models<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;X-Label-Selector: tenancy in (org-abc, public)&quot;</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">"X-Label-Selector: tenancy in (org-abc, public)"</span>
 
 <span class="c1"># When running inference, if the label selector does not match</span>
 <span class="c1"># a 404 will be returned.</span>
 curl<span class="w"> </span>http://<span class="nv">$KUBEAI_ENDPOINT</span>/openai/v1/completions<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;X-Label-Selector: tenancy in (org-abc, public)&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;prompt&quot;: &quot;Hi&quot;, &quot;model&quot;: &quot;llama-3.2&quot;}&#39;</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">"X-Label-Selector: tenancy in (org-abc, public)"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span><span class="s1">'{"prompt": "Hi", "model": "llama-3.2"}'</span>
 </code></pre></div>
 <p>The header value can be any valid <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors">Kubernetes label selector</a>. Some examples include:</p>
 <div class="highlight"><pre><span></span><code>X-Label-Selector: tenancy=org-abc
@@ -2061,10 +2061,10 @@ X-Label-Selector: tenancy!=private
 <p>Multiple <code>X-Label-Selector</code> headers can be specified in the same HTTP request and will be treated as a logical <code>AND</code>. For example, the following request will only match Models
 that have a label <code>tenant: org-abc</code> and <code>user: sam</code>:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>http://<span class="nv">$KUBEAI_ENDPOINT</span>/openai/v1/completions<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;X-Label-Selector: tenant=org-abc&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;X-Label-Selector: user=sam&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;prompt&quot;: &quot;Hi&quot;, &quot;model&quot;: &quot;llama-3.2&quot;}&#39;</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">"X-Label-Selector: tenant=org-abc"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">"X-Label-Selector: user=sam"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span><span class="s1">'{"prompt": "Hi", "model": "llama-3.2"}'</span>
 </code></pre></div>
 <p>Example architecture:</p>
 <p><img alt="Multitenancy" src="../../diagrams/multitenancy-labels.excalidraw.png" /></p>

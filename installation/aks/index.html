@@ -2308,13 +2308,13 @@
 <li><a href="https://helm.sh/docs/intro/install/">Helm</a></li>
 </ul>
 <h2 id="1-define-environment-variables">1. Define environment variables<a class="headerlink" href="#1-define-environment-variables" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="nv">AZURE_RESOURCE_GROUP</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">AZURE_RESOURCE_GROUP</span><span class="k">:-</span><span class="nv">kubeai</span><span class="p">-stack</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="nv">AZURE_REGION</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">AZURE_REGION</span><span class="k">:-</span><span class="nv">southcentralus</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="nv">CLUSTER_NAME</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="k">:-</span><span class="nv">kubeai</span><span class="p">-stack</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="nv">USER_NAME</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">USER_NAME</span><span class="k">:-</span><span class="nv">azureuser</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="nv">GPU_NODE_POOL_NAME</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GPU_NODE_POOL_NAME</span><span class="k">:-</span><span class="nv">gpunodes</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="nv">GPU_NODE_COUNT</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GPU_NODE_COUNT</span><span class="k">:-</span><span class="nv">1</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="nv">GPU_VM_SIZE</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GPU_VM_SIZE</span><span class="k">:-</span><span class="nv">Standard_NC48ads_A100_v4</span><span class="si">}</span><span class="s2">&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">AZURE_RESOURCE_GROUP</span><span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">AZURE_RESOURCE_GROUP</span><span class="k">:-</span><span class="nv">kubeai</span><span class="p">-stack</span><span class="si">}</span><span class="s2">"</span>
+<span class="nv">AZURE_REGION</span><span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">AZURE_REGION</span><span class="k">:-</span><span class="nv">southcentralus</span><span class="si">}</span><span class="s2">"</span>
+<span class="nv">CLUSTER_NAME</span><span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="k">:-</span><span class="nv">kubeai</span><span class="p">-stack</span><span class="si">}</span><span class="s2">"</span>
+<span class="nv">USER_NAME</span><span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">USER_NAME</span><span class="k">:-</span><span class="nv">azureuser</span><span class="si">}</span><span class="s2">"</span>
+<span class="nv">GPU_NODE_POOL_NAME</span><span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">GPU_NODE_POOL_NAME</span><span class="k">:-</span><span class="nv">gpunodes</span><span class="si">}</span><span class="s2">"</span>
+<span class="nv">GPU_NODE_COUNT</span><span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">GPU_NODE_COUNT</span><span class="k">:-</span><span class="nv">1</span><span class="si">}</span><span class="s2">"</span>
+<span class="nv">GPU_VM_SIZE</span><span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">GPU_VM_SIZE</span><span class="k">:-</span><span class="nv">Standard_NC48ads_A100_v4</span><span class="si">}</span><span class="s2">"</span>
 </code></pre></div>
 <ul>
 <li><code>AZURE_RESOURCE_GROUP</code>: The name of the Azure resource group. The default value is <code>kubeai-stack</code>.</li>
@@ -2327,31 +2327,31 @@
 </ul>
 <h2 id="2-create-a-resource-group">2. Create a Resource Group<a class="headerlink" href="#2-create-a-resource-group" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>az<span class="w"> </span>group<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--name<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">AZURE_RESOURCE_GROUP</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--location<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">AZURE_REGION</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">  </span>--name<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">AZURE_RESOURCE_GROUP</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--location<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">AZURE_REGION</span><span class="si">}</span><span class="s2">"</span>
 </code></pre></div>
 <h2 id="3-create-an-aks-cluster-cpu-only">3. Create an AKS Cluster (CPU Only)<a class="headerlink" href="#3-create-an-aks-cluster-cpu-only" title="Permanent link">&para;</a></h2>
 <p>If you only intend to run CPU-based models, you can create a simple AKS cluster as follows:</p>
 <div class="highlight"><pre><span></span><code>az<span class="w"> </span>aks<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--resource-group<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">AZURE_RESOURCE_GROUP</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--name<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--resource-group<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">AZURE_RESOURCE_GROUP</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--enable-oidc-issuer<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--enable-workload-identity<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--enable-managed-identity<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--node-count<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--location<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">AZURE_REGION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--admin-username<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">USER_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--location<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">AZURE_REGION</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--admin-username<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">USER_NAME</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--generate-ssh-keys<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--os-sku<span class="w"> </span>Ubuntu
 </code></pre></div>
 <h2 id="4-optional-add-a-gpu-node-pool">4. (Optional) Add a GPU Node Pool<a class="headerlink" href="#4-optional-add-a-gpu-node-pool" title="Permanent link">&para;</a></h2>
 <p>If you want to run GPU-backed models, you need a GPU node pool. Below is an example using the <code>Standard_NC48ads_A100_v4</code> SKU. Feel free to adjust <code>--node-vm-size</code> to match a GPU SKU you have quota for:</p>
 <div class="highlight"><pre><span></span><code>az<span class="w"> </span>aks<span class="w"> </span>nodepool<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--resource-group<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">AZURE_RESOURCE_GROUP</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--cluster-name<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--name<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GPU_NODE_POOL_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--node-count<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GPU_NODE_COUNT</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--node-vm-size<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GPU_VM_SIZE</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--resource-group<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">AZURE_RESOURCE_GROUP</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--cluster-name<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">GPU_NODE_POOL_NAME</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--node-count<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">GPU_NODE_COUNT</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--node-vm-size<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">GPU_VM_SIZE</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--enable-cluster-autoscaler<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--min-count<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--max-count<span class="w"> </span><span class="m">3</span>
@@ -2359,8 +2359,8 @@
 <h2 id="5-get-aks-credentials">5. Get AKS Credentials<a class="headerlink" href="#5-get-aks-credentials" title="Permanent link">&para;</a></h2>
 <p>Download and merge the kubeconfig for your AKS cluster:</p>
 <div class="highlight"><pre><span></span><code>az<span class="w"> </span>aks<span class="w"> </span>get-credentials<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--resource-group<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">AZURE_RESOURCE_GROUP</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--name<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--resource-group<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">AZURE_RESOURCE_GROUP</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--overwrite-existing
 </code></pre></div>
 <h2 id="6-install-the-nvidia-device-plugin-for-gpu-clusters">6. Install the NVIDIA Device Plugin (for GPU Clusters)<a class="headerlink" href="#6-install-the-nvidia-device-plugin-for-gpu-clusters" title="Permanent link">&para;</a></h2>
@@ -2380,7 +2380,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 </code></pre></div>
 <p>Install KubeAI:</p>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>kubeai<span class="w"> </span>kubeai/kubeai<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--set<span class="w"> </span>secrets.huggingface.token<span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">HUGGING_FACE_HUB_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span>secrets.huggingface.token<span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">HUGGING_FACE_HUB_TOKEN</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--wait
 </code></pre></div>
 <h3 id="resource-profiles">Resource Profiles<a class="headerlink" href="#resource-profiles" title="Permanent link">&para;</a></h3>

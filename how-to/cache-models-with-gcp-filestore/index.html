@@ -2220,10 +2220,10 @@
 <span class="s">cacheProfiles:</span>
 <span class="s">  standard-filestore:</span>
 <span class="s">    sharedFilesystem:</span>
-<span class="s">      storageClassName: &quot;standard-rwx&quot;</span>
+<span class="s">      storageClassName: "standard-rwx"</span>
 <span class="s">  premium-filestore:</span>
 <span class="s">    sharedFilesystem:</span>
-<span class="s">      storageClassName: &quot;premium-rwx&quot;</span>
+<span class="s">      storageClassName: "premium-rwx"</span>
 <span class="s">EOF</span>
 </code></pre></div></p>
 <h2 id="2-deploy-a-model-that-uses-the-filestore-caching-profile">2. Deploy a model that uses the Filestore Caching Profile<a class="headerlink" href="#2-deploy-a-model-that-uses-the-filestore-caching-profile" title="Permanent link">&para;</a></h2>
@@ -2244,7 +2244,7 @@
 <span class="s">EOF</span>
 </code></pre></div>
 <p>Wait for the Model to be fully cached. This may take a while if the Filestore instance needs to be created.</p>
-<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>--timeout<span class="w"> </span>10m<span class="w"> </span>--for<span class="o">=</span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.cache.loaded}&#39;</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>model/llama-3.1-8b-instruct-fp8-l4
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>--timeout<span class="w"> </span>10m<span class="w"> </span>--for<span class="o">=</span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.status.cache.loaded}'</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>model/llama-3.1-8b-instruct-fp8-l4
 </code></pre></div>
 <p>This model will now be loaded from Filestore when it is served.</p>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
@@ -2258,15 +2258,15 @@
 </code></pre></div>
 <details>
 <summary>Example: Out-of-quota error</summary>
-<div class="highlight"><pre><span></span><code>  Warning  ProvisioningFailed    11m (x26 over 21m)  filestore.csi.storage.gke.io_gke-50826743a27a4d52bf5b-7fac-9607-vm_b4bdb2ec-b58b-4363-adec-15c270a14066  failed to provision volume with StorageClass &quot;premium-rwx&quot;: rpc error: code = ResourceExhausted desc = googleapi: Error 429: Quota limit &#39;PremiumStorageGbPerRegion&#39; has been exceeded. Limit: 0 in region us-central1.
+<div class="highlight"><pre><span></span><code>  Warning  ProvisioningFailed    11m (x26 over 21m)  filestore.csi.storage.gke.io_gke-50826743a27a4d52bf5b-7fac-9607-vm_b4bdb2ec-b58b-4363-adec-15c270a14066  failed to provision volume with StorageClass "premium-rwx": rpc error: code = ResourceExhausted desc = googleapi: Error 429: Quota limit 'PremiumStorageGbPerRegion' has been exceeded. Limit: 0 in region us-central1.
 Details:
 [
   {
-    &quot;@type&quot;: &quot;type.googleapis.com/google.rpc.QuotaFailure&quot;,
-    &quot;violations&quot;: [
+    "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+    "violations": [
       {
-        &quot;description&quot;: &quot;Quota &#39;PremiumStorageGbPerRegion&#39; exhausted. Limit 0 in region us-central1&quot;,
-        &quot;subject&quot;: &quot;project:819220466562&quot;
+        "description": "Quota 'PremiumStorageGbPerRegion' exhausted. Limit 0 in region us-central1",
+        "subject": "project:819220466562"
       }
     ]
   }

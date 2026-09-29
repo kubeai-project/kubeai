@@ -2554,7 +2554,7 @@ under heavy load.</p>
 <span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hf://neuralmagic/Meta-Llama-3.1-8B-Instruct-FP8</span>
 <span class="w">  </span><span class="nt">engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VLLM</span>
 <span class="w">  </span><span class="nt">env</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">VLLM_USE_V1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
+<span class="w">    </span><span class="nt">VLLM_USE_V1</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span>
 <span class="w">  </span><span class="nt">args</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--enable-prefix-caching</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-model-len=16384</span>
@@ -2568,8 +2568,8 @@ under heavy load.</p>
 </code></pre></div>
 <p>In order to test Prefix Aware Load Balancing, we modify the load balancing
 strategy on the model object itself:</p>
-<p><div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>patch<span class="w"> </span>model<span class="w"> </span>llama-3.1-8b-instruct-fp8-l4<span class="w"> </span>--type<span class="o">=</span><span class="s1">&#39;merge&#39;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-p<span class="w"> </span><span class="s1">&#39;{&quot;spec&quot;: {&quot;loadBalancing&quot;: {&quot;strategy&quot;: &quot;PrefixHash&quot;}}}&#39;</span>
+<p><div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>patch<span class="w"> </span>model<span class="w"> </span>llama-3.1-8b-instruct-fp8-l4<span class="w"> </span>--type<span class="o">=</span><span class="s1">'merge'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="s1">'{"spec": {"loadBalancing": {"strategy": "PrefixHash"}}}'</span>
 </code></pre></div>
 This takes effect right away and does not require recreation of the pods.</p>
 <p>K8s native service was tested by sending requests directly

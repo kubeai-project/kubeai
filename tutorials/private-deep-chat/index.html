@@ -2087,18 +2087,18 @@
 <p><img alt="Screenshot" src="../../screenshots/private-deep-chat.png" /></p>
 <p>In this example, we will deploy a custom Go server that will authenticate users using <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#basic_authentication_scheme" target="_blank">Basic Authentication</a>. When a webpage is requested, a simple HTML page with the <code>&lt;deep-chat&gt;</code> web component will be served. We will configure Deep Chat and KubeAI to communicate using the OpenAI API format:</p>
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">deep-chat</span>
-    <span class="na">connect</span><span class="o">=</span><span class="s">&#39;{&quot;url&quot;:&quot;/openai/v1/chat/completions&quot;, ... }&#39;</span>
-    <span class="na">directConnection</span><span class="o">=</span><span class="s">&#39;{&quot;openAI&quot;: ... }&#39;</span><span class="p">&gt;</span>
+    <span class="na">connect</span><span class="o">=</span><span class="s">'{"url":"/openai/v1/chat/completions", ... }'</span>
+    <span class="na">directConnection</span><span class="o">=</span><span class="s">'{"openAI": ... }'</span><span class="p">&gt;</span>
 <span class="p">&lt;/</span><span class="nt">deep-chat</span><span class="p">&gt;</span>
 </code></pre></div>
 <p>When the HTML page loads we will use Javascript to make an initial request to fetch available models. The Go server will proxy this request to KubeAI:</p>
 <div class="highlight"><pre><span></span><code><span class="nx">proxyHandler</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">httputil</span><span class="p">.</span><span class="nx">NewSingleHostReverseProxy</span><span class="p">(</span><span class="nx">kubeAIURL</span><span class="p">)</span>
 
-<span class="nx">http</span><span class="p">.</span><span class="nx">Handle</span><span class="p">(</span><span class="s">&quot;/openai/&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">authUserToKubeAI</span><span class="p">(</span><span class="nx">proxyHandler</span><span class="p">))</span>
+<span class="nx">http</span><span class="p">.</span><span class="nx">Handle</span><span class="p">(</span><span class="s">"/openai/"</span><span class="p">,</span><span class="w"> </span><span class="nx">authUserToKubeAI</span><span class="p">(</span><span class="nx">proxyHandler</span><span class="p">))</span>
 </code></pre></div>
 <p>The server will translate the username and password provided in the basic auth header into a label selector that will tell KubeAI to filter the models it returns. The same approach will also be used to enforce access at inference-time.</p>
-<div class="highlight"><pre><span></span><code><span class="nx">r</span><span class="p">.</span><span class="nx">Header</span><span class="p">.</span><span class="nx">Set</span><span class="p">(</span><span class="s">&quot;X-Label-Selector&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">&quot;tenancy in (%s)&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="nx">tenancy</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;,&quot;</span><span class="p">),</span>
+<div class="highlight"><pre><span></span><code><span class="nx">r</span><span class="p">.</span><span class="nx">Header</span><span class="p">.</span><span class="nx">Set</span><span class="p">(</span><span class="s">"X-Label-Selector"</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"tenancy in (%s)"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="nx">tenancy</span><span class="p">,</span><span class="w"> </span><span class="s">","</span><span class="p">),</span>
 <span class="p">))</span>
 </code></pre></div>
 <p>While this is a simple example application, this overall architecture can be used when incorporating chat into a production application.</p>

@@ -2138,7 +2138,7 @@ is built and pushed to Docker Hub. Afterwards, the <code>latest</code> tag is up
 <p>Use the commands below to create a new release.</p>
 <p>Check the latest version tag:</p>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>pull<span class="w"> </span>--tags
-git<span class="w"> </span>tag<span class="w"> </span>-l<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;^v[0-9]&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;.&quot;</span><span class="w"> </span>-k1,1n<span class="w"> </span>-k2,2n<span class="w"> </span>-k3,3n
+git<span class="w"> </span>tag<span class="w"> </span>-l<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">"^v[0-9]"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-t<span class="w"> </span><span class="s2">"."</span><span class="w"> </span>-k1,1n<span class="w"> </span>-k2,2n<span class="w"> </span>-k3,3n
 </code></pre></div>
 <p>This may show <code>v0.14.0</code>. If that's the case then tag the next version with
 <code>v0.15.0</code> by running:</p>

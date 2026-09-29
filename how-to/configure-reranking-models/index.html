@@ -2089,9 +2089,9 @@
 <div class="highlight"><pre><span></span><code><span class="nt">catalog</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bge-rerank-base-cpu</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">    </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;Reranking&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"Reranking"</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">baai</span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hf://BAAI/bge-reranker-base&quot;</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">"hf://BAAI/bge-reranker-base"</span>
 <span class="w">    </span><span class="nt">engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Infinity</span>
 <span class="w">    </span><span class="c1">#engine: VLLM</span>
 <span class="w">    </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu:1</span>
@@ -2104,11 +2104,11 @@
 <p>Once the pod is ready, you can call the rerank endpoint:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
-    <span class="s2">&quot;http://localhost:8000/openai/v1/rerank&quot;</span><span class="p">,</span>
+    <span class="s2">"http://localhost:8000/openai/v1/rerank"</span><span class="p">,</span>
     <span class="n">json</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;bge-rerank-base-cpu&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="s2">&quot;Which document talks about apples?&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;documents&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;An apple a day keeps the doctor away&quot;</span><span class="p">,</span> <span class="s2">&quot;Oranges are tasty&quot;</span><span class="p">],</span>
+        <span class="s2">"model"</span><span class="p">:</span> <span class="s2">"bge-rerank-base-cpu"</span><span class="p">,</span>
+        <span class="s2">"query"</span><span class="p">:</span> <span class="s2">"Which document talks about apples?"</span><span class="p">,</span>
+        <span class="s2">"documents"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"An apple a day keeps the doctor away"</span><span class="p">,</span> <span class="s2">"Oranges are tasty"</span><span class="p">],</span>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>

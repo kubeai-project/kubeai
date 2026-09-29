@@ -2212,7 +2212,7 @@ Alternatively you can use KubeAI's native caching mechanism which downloads the 
 <p>vLLM supports both ReadWriteMany and ReadOnlyMany access modes. <code>Many</code> is used in order to support more than 1 vLLM replica.</p>
 <h2 id="ollama">Ollama<a class="headerlink" href="#ollama" title="Permanent link">&para;</a></h2>
 <p>For Ollama, use the following URL formats:
-<div class="highlight"><pre><span></span><code><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc://$PVC_NAME?model=$MODEL_NAME</span><span class="w">    </span><span class="c1"># Loads the model named $MODEL_NAME that&#39;s loaded on the disk</span>
+<div class="highlight"><pre><span></span><code><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc://$PVC_NAME?model=$MODEL_NAME</span><span class="w">    </span><span class="c1"># Loads the model named $MODEL_NAME that's loaded on the disk</span>
 <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc://$PVC_NAME/$PATH?model=$MODEL_NAME</span>
 </code></pre></div></p>
 <h3 id="pvc-requirements_1">PVC Requirements<a class="headerlink" href="#pvc-requirements_1" title="Permanent link">&para;</a></h3>
