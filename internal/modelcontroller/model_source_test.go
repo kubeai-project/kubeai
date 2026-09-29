@@ -1,6 +1,7 @@
 package modelcontroller
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -231,4 +232,30 @@ func Test_applyToPodSpecAddsInitContainers(t *testing.T) {
 
 	require.Len(t, spec.InitContainers, 1)
 	require.Equal(t, "model-puller", spec.InitContainers[0].Name)
+}
+
+func TestModelURLRejectsShellSyntax(t *testing.T) {
+	t.Parallel()
+	// Both the reference and the decoded PVC model parameter must keep #656's
+	// validation boundary. Encoded shell syntax is not a safe model name.
+	for _, value := range []string{
+		"model;id", "model&&id", "model|id", "$(id)", "`id`",
+		"model name", "model\tname", "model\nname", "model'name", `model"name`,
+		"model>file", "model<file", "model\\name",
+		"model%3Bid", "%24%28id%29", "%60id%60", "model%20name", "model%0Aname",
+	} {
+		for _, prefix := range []string{"ollama://", "pvc://models?model="} {
+			t.Run(prefix+value, func(t *testing.T) {
+				t.Parallel()
+				input := value
+				if prefix == "pvc://models?model=" {
+					// Raw & separates query parameters; encode it to test an
+					// ampersand in the model value itself.
+					input = strings.ReplaceAll(input, "&", "%26")
+				}
+				_, err := parseModelURL(prefix + input)
+				require.Error(t, err)
+			})
+		}
+	}
 }

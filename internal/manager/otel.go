@@ -107,6 +107,9 @@ func newMeterProvider() (*metric.MeterProvider, error) {
 
 	meterProvider := metric.NewMeterProvider(
 		metric.WithReader(promExporter),
+		// Autoscaling requires per-model request counts. Overflow aggregation
+		// drops the model attribute, so preserve the pre-1.44 unlimited cardinality.
+		metric.WithCardinalityLimit(0),
 		//metric.WithReader(metric.NewPeriodicReader(stdoutExporter,
 		//	// Default is 1m. Set to 3s for demonstrative purposes.
 		//	metric.WithInterval(3*time.Second))),
