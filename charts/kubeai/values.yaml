@@ -270,6 +270,13 @@ open-webui:
       drop:
         - ALL
 
+# Configure the optional k8s-aibom subchart: runtime AI inventory as
+# CycloneDX 1.6 ML-BOMs. Off by default. When enabled, label the
+# namespaces to inventory with aibom.k8saibom.dev/enabled=true; model
+# servers KubeAI runs (vLLM, Ollama) are detected out of the box.
+k8s-aibom:
+  enabled: false
+
 replicaCount: 1
 
 image:
