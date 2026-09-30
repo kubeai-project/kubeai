@@ -9,6 +9,12 @@ modelServers:
     images:
       default: "ghcr.io/kubeai-project/vllm-cpu-test-env:v0.10.2"
       cpu: "ghcr.io/kubeai-project/vllm-cpu-test-env:v0.10.2"
+  SGLang:
+    images:
+      # The CUDA images are ~14 GB, this one is ~1.5 GB and carries
+      # SGLANG_USE_CPU_ENGINE=1.
+      default: "lmsysorg/sglang:v0.5.18-xeon"
+      cpu: "lmsysorg/sglang:v0.5.18-xeon"
 image:
   tag: "test"
   # pullPolicy: Never

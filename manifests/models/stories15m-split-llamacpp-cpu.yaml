@@ -1,0 +1,15 @@
+# Source: models/templates/models.yaml
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: stories15m-split-llamacpp-cpu
+spec:
+  features:
+    - TextGeneration
+  url: pvc://model-pvc/tinyllamas/split?model=stories15M-00001-of-00003.gguf
+  engine: LlamaCpp
+  args:
+    - --ctx-size
+    - "512"
+  minReplicas: 0
+  resourceProfile: cpu:1

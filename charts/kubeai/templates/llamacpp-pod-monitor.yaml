@@ -1,0 +1,17 @@
+{{- if .Values.metrics.prometheusOperator.llamaCppPodMonitor.enabled }}
+apiVersion: {{ .Values.metrics.prometheusOperator.llamaCppPodMonitor.apiVersion }}
+kind: PodMonitor
+metadata:
+  name: {{ include "kubeai.fullname" . }}-llamacpp
+  labels:
+    {{- include "kubeai.labels" . | nindent 4 }}
+    {{- with .Values.metrics.prometheusOperator.llamaCppPodMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: llamacpp
+  podMetricsEndpoints:
+  - port: http
+{{- end }}

@@ -595,6 +595,45 @@ catalog:
     url: "hf://BAAI/bge-reranker-base"
     engine: Infinity
     resourceProfile: cpu:1
+  # SGLang #
+  qwen2-500m-instruct-sglang-cpu:
+    enabled: false
+    features: ["TextGeneration"]
+    url: "hf://Qwen/Qwen2.5-0.5B-Instruct"
+    engine: SGLang
+    resourceProfile: cpu:1
+    args:
+    - --context-length=2048
+    - --max-running-requests=1
+  # llama.cpp #
+  qwen2-500m-instruct-llamacpp-cpu:
+    enabled: false
+    features: ["TextGeneration"]
+    # The quant suffix selects the GGUF file inside the repo.
+    url: "hf://Qwen/Qwen2.5-0.5B-Instruct-GGUF:q4_k_m"
+    engine: LlamaCpp
+    resourceProfile: cpu:1
+    args:
+    - --ctx-size
+    - "4096"
+  stories15m-split-llamacpp-cpu:
+    enabled: false
+    features: ["TextGeneration"]
+    # A GGUF split across three shards. llama.cpp derives the sibling shard
+    # paths from the file name, so the whole directory has to be mounted and
+    # the first shard named with the "model" query parameter.
+    url: "pvc://model-pvc/tinyllamas/split?model=stories15M-00001-of-00003.gguf"
+    engine: LlamaCpp
+    resourceProfile: cpu:1
+    args:
+    - --ctx-size
+    - "512"
+  bge-embed-text-llamacpp-cpu:
+    enabled: false
+    features: ["TextEmbedding"]
+    url: "hf://ggml-org/bge-small-en-v1.5-Q8_0-GGUF"
+    engine: LlamaCpp
+    resourceProfile: cpu:1
   # Opt #
   opt-125m-cpu:
     enabled: false

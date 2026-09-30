@@ -29,6 +29,9 @@ import (
 // +kubebuilder:validation:XValidation:rule="!self.url.startsWith(\"oss://\") || has(self.cacheProfile)", message="urls of format \"oss://...\" only supported when using a cacheProfile"
 // +kubebuilder:validation:XValidation:rule="!has(self.maxReplicas) || self.minReplicas <= self.maxReplicas", message="minReplicas should be less than or equal to maxReplicas."
 // +kubebuilder:validation:XValidation:rule="!has(self.adapters) || self.engine == \"VLLM\"", message="adapters only supported with VLLM engine."
+// +kubebuilder:validation:XValidation:rule="self.engine != \"LlamaCpp\" || self.url.startsWith(\"hf://\") || self.url.startsWith(\"pvc://\") || self.url.startsWith(\"oci://\")", message="the LlamaCpp engine only supports urls of format \"hf://...\", \"pvc://...\", or \"oci://...\"."
+// +kubebuilder:validation:XValidation:rule="!has(self.cacheProfile) || self.engine != \"LlamaCpp\"", message="cacheProfile is not supported with the LlamaCpp engine."
+// +kubebuilder:validation:XValidation:rule="self.engine != \"SGLang\" || !self.url.startsWith(\"ollama://\")", message="urls of format \"ollama://...\" are not supported with the SGLang engine."
 // +kubebuilder:validation:XValidation:rule="!has(oldSelf.cacheProfile) || self.url == oldSelf.url", message="url is immutable when using cacheProfile."
 // +NOTE: The self.files.all() check is considered "costly" by the Kubernetes API server and will be rejected if the number of files (and length of .path) are not restricted. These restrictions are applied in field-based validations below.
 // +kubebuilder:validation:XValidation:rule="!has(self.files) || self.files.size() <= 1 || !self.files.exists(f, self.files.filter(other, other.path == f.path).size() > 1)", message="All file paths must be unique."
@@ -37,7 +40,7 @@ type ModelSpec struct {
 	// URL of the model to be served.
 	// Currently the following formats are supported:
 	//
-	// For VLLM, FasterWhisper, Infinity engines:
+	// For VLLM, SGLang, FasterWhisper, Infinity engines:
 	//
 	// "hf://<repo>/<model>"
 	// "pvc://<pvcName>"
@@ -46,6 +49,20 @@ type ModelSpec struct {
 	// "gs://<bucket>/<path>" (only with cacheProfile)
 	// "oss://<bucket>/<path>" (only with cacheProfile)
 	// "s3://<bucket>/<path>" (only with cacheProfile)
+	//
+	// For the LlamaCpp engine:
+	//
+	// "hf://<repo>/<model>"
+	// "hf://<repo>/<model>:<quant>"
+	// "pvc://<pvcName>/<pvcSubpath>?model=<file>.gguf"
+	// "pvc://<pvcName>/<pvcSubpath>/<file>.gguf"
+	// "oci://<registry>/<repository>:<tag>?model=<file>.gguf"
+	//
+	// The "model" query parameter names the GGUF file inside the mounted
+	// directory. It is required for "oci://" sources and for "pvc://" paths
+	// that do not already name a .gguf file. A model split across shards has
+	// to use it and keep every shard in the same directory, because llama.cpp
+	// derives the sibling shard paths from the file name.
 	//
 	// For OLlama engine:
 	//
@@ -63,7 +80,7 @@ type ModelSpec struct {
 	Features []ModelFeature `json:"features"`
 
 	// Engine to be used for the server process.
-	// +kubebuilder:validation:Enum=OLlama;VLLM;FasterWhisper;Infinity
+	// +kubebuilder:validation:Enum=OLlama;VLLM;FasterWhisper;Infinity;SGLang;LlamaCpp
 	// +kubebuilder:validation:Required
 	Engine string `json:"engine"`
 
@@ -160,6 +177,8 @@ const (
 	VLLMEngine          = "VLLM"
 	FasterWhisperEngine = "FasterWhisper"
 	InfinityEngine      = "Infinity"
+	SGLangEngine        = "SGLang"
+	LlamaCppEngine      = "LlamaCpp"
 )
 
 type Adapter struct {

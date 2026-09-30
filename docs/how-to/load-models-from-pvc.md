@@ -23,6 +23,42 @@ url: pvc://$PVC_NAME/$PATH    # Loads from a specific path within the PVC
 vLLM supports both ReadWriteMany and ReadOnlyMany access modes. `Many` is used in order to support more than 1 vLLM replica.
 
 
+## llama.cpp
+
+The `LlamaCpp` engine needs a single GGUF file, not a directory. Point the URL at
+the directory that holds the model and name the file with the `model` query
+parameter:
+
+```yaml
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: qwen2-500m-cpu
+spec:
+  features: [TextGeneration]
+  url: pvc://model-pvc/models?model=qwen2-0_5b-instruct-q5_k_m.gguf
+  engine: LlamaCpp
+  resourceProfile: cpu:1
+```
+
+For a model split across shards, name the first shard. llama.cpp derives the
+paths of the remaining shards from that file name, so all shards must sit in the
+same directory:
+
+```yaml
+  url: pvc://model-pvc/models?model=model-00001-of-00003.gguf
+```
+
+A URL that names the file directly (`pvc://model-pvc/models/model.gguf`) also
+works, because kubelet bind-mounts a single file at `/model`. Use it only for
+unsharded models: the mount does not preserve the file name, so llama.cpp cannot
+find sibling shards.
+
+### PVC requirements
+
+The PVC must contain the GGUF file. The access mode must allow the Pod to mount
+it on the node the model is scheduled to.
+
 ## Ollama
 
 For Ollama, use the following URL formats:
