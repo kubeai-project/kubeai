@@ -22,13 +22,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
         run: |
-          gh release view "$tag"
-          exit_code=$?
-          if [ $exit_code -eq 1 ]; then
-              gh release create "$tag" \
-                --repo="$GITHUB_REPOSITORY" \
-                --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
-                --generate-notes
-              exit_code=$?
+          if gh release view "$tag" --repo="$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              echo "Release $tag already exists, skipping."
+              exit 0
           fi
-          exit $exit_code
+          gh release create "$tag" \
+            --repo="$GITHUB_REPOSITORY" \
+            --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+            --generate-notes
