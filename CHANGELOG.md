@@ -1,3 +1,8 @@
+## v0.23.5 - 2026-09-30
+
+- Fix/otel autoscaling cardinality by @m4oc in https://github.com/kubeai-project/kubeai/pull/735
+- fix: execute Ollama preparation before startup probe succeeds by @ruslan-shaydullin in https://github.com/kubeai-project/kubeai/pull/733
+
 ## v0.23.4 - 2026-07-30
 
 - build(deps): bump github.com/onsi/ginkgo/v2 from 2.22.0 to 2.32.0 by @app/dependabot in https://github.com/kubeai-project/kubeai/pull/708
