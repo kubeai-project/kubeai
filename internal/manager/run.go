@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"sync"
 	"time"
@@ -138,6 +139,24 @@ func Run(ctx context.Context, k8sCfg *rest.Config, cfg config.System) error {
 		SecureServing: false,
 	}
 
+	cacheOpts := cache.Options{
+		Scheme: Scheme, //mgr.GetScheme(),
+	}
+	if !cfg.ClusterWide() {
+		// Restrict operations to the requested set of namespaces.
+		// The operator's own namespace is always included so that the leader-election
+		// lease and autoscaler state ConfigMap remain observable.
+		// (this should also be enforced by Namespaced RBAC rules)
+		nsSet := map[string]cache.Config{namespace: {}}
+		for _, ns := range cfg.WatchNamespaces {
+			nsSet[ns] = cache.Config{}
+		}
+		cacheOpts.DefaultNamespaces = nsSet
+		Log.Info("watching namespaces", "namespaces", nsSetKeys(nsSet))
+	} else {
+		Log.Info("watching all namespaces (cluster-wide)")
+	}
+
 	SkipNameValidation := true
 	mgr, err := ctrl.NewManager(k8sCfg, ctrl.Options{
 		Scheme:  Scheme,
@@ -152,14 +171,7 @@ func Run(ctx context.Context, k8sCfg *rest.Config, cfg config.System) error {
 		RenewDeadline:           ptr.To(cfg.LeaderElection.RenewDeadline.Duration),
 		RetryPeriod:             ptr.To(cfg.LeaderElection.RetryPeriod.Duration),
 		Controller:              controllerconfig.Controller{SkipNameValidation: &SkipNameValidation},
-		Cache: cache.Options{
-			Scheme: Scheme, //mgr.GetScheme(),
-			DefaultNamespaces: map[string]cache.Config{
-				// Restrict operations to this Namespace.
-				// (this should also be enforced by Namespaced RBAC rules)
-				namespace: {},
-			},
-		},
+		Cache:                   cacheOpts,
 		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
 		// when the Manager ends. This requires the binary to immediately end when the
 		// Manager is stopped, otherwise, this setting is unsafe. Setting this significantly
@@ -418,6 +430,15 @@ func Run(ctx context.Context, k8sCfg *rest.Config, cfg config.System) error {
 	Log.Info("run goroutines finished")
 
 	return nil
+}
+
+func nsSetKeys(m map[string]cache.Config) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 // parsePortFromAddr takes a string like ":8080" and returns 8080.

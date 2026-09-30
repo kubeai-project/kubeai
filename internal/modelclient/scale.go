@@ -7,14 +7,16 @@ import (
 
 	kubeaiv1 "github.com/kubeai-project/kubeai/api/k8s/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func (c *ModelClient) ScaleAtLeastOneReplica(ctx context.Context, model string) error {
-	obj := &kubeaiv1.Model{}
-	if err := c.client.Get(ctx, types.NamespacedName{Namespace: c.namespace, Name: model}, obj); err != nil {
-		return fmt.Errorf("get scale: %w", err)
+	obj, err := c.LookupModel(ctx, model, "", nil)
+	if err != nil {
+		return fmt.Errorf("lookup model: %w", err)
+	}
+	if obj == nil {
+		return fmt.Errorf("model %q not found", model)
 	}
 
 	if obj.Spec.AutoscalingDisabled {

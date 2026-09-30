@@ -46,6 +46,23 @@ type System struct {
 
 	// FixedSelfMetricAddrs is a list of fixed addresses to be used when scraping metrics for autoscaling. Useful for development purposes.
 	FixedSelfMetricAddrs []string `json:"fixedSelfMetricAddrs,omitempty"`
+
+	// WatchNamespaces restricts the set of namespaces that the controller watches for Model resources.
+	//   - nil or empty: watch only the operator's own namespace (POD_NAMESPACE). Backward compatible.
+	//   - ["*"]:        watch all namespaces (cluster-wide).
+	//   - list:         watch the given namespaces. The operator's own namespace is always included so
+	//                   that the leader-election lease and autoscaler state ConfigMap remain observable.
+	WatchNamespaces []string `json:"watchNamespaces,omitempty"`
+}
+
+// ClusterWide reports whether the controller should watch all namespaces.
+func (s *System) ClusterWide() bool {
+	for _, ns := range s.WatchNamespaces {
+		if ns == "*" {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *System) DefaultAndValidate() error {

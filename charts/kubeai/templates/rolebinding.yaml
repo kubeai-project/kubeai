@@ -1,13 +1,49 @@
+{{- $watchAll := false -}}
+{{- range .Values.watchNamespaces -}}
+{{- if eq . "*" -}}
+{{- $watchAll = true -}}
+{{- end -}}
+{{- end -}}
+{{- if $watchAll }}
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: {{ include "kubeai.fullname" . }}
   labels:
     {{- include "kubeai.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
   name: {{ include "kubeai.fullname" . }}
 subjects:
 - kind: ServiceAccount
   name: {{ include "kubeai.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+{{- else -}}
+{{- /* Bind to the release namespace first so that leader election, autoscaler state, and
+       Models in the operator's own namespace continue to work. */ -}}
+{{- $ns := list .Release.Namespace -}}
+{{- range .Values.watchNamespaces -}}
+{{- if ne . $.Release.Namespace -}}
+{{- $ns = append $ns . -}}
+{{- end -}}
+{{- end -}}
+{{- range $ns }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "kubeai.fullname" $ }}
+  namespace: {{ . }}
+  labels:
+    {{- include "kubeai.labels" $ | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "kubeai.fullname" $ }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "kubeai.serviceAccountName" $ }}
+  namespace: {{ $.Release.Namespace }}
+{{- end }}
+{{- end }}
