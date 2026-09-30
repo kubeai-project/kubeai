@@ -18,6 +18,14 @@ dependencies:
     condition: open-webui.enabled
     repository: https://helm.openwebui.com/
     version: 14.8.0
+  # k8s-aibom is an unprivileged controller that generates a CycloneDX 1.6
+  # ML-BOM per AI workload at runtime (model, runtime, image digests, with
+  # evidence and confidence tiers). Optional, default off.
+  # https://github.com/GoogleCloudPlatform/k8s-aibom
+  - name: k8s-aibom
+    condition: k8s-aibom.enabled
+    repository: oci://ghcr.io/googlecloudplatform/charts
+    version: 1.5.1
 keywords: ["LLM", "AI"]
 # TODO replace with kubeai.org once live
 home: https://www.substratus.ai
