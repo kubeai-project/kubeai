@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func Test_parseModelURL(t *testing.T) {
@@ -136,6 +137,31 @@ func Test_parseModelURL(t *testing.T) {
 				pull:       true,
 			},
 		},
+		"valid-oci": {
+			input: "oci://ghcr.io/org/model:tag",
+			want: modelURL{
+				scheme: "oci",
+				ref:    "ghcr.io/org/model:tag",
+				name:   "ghcr.io",
+				path:   "org/model:tag",
+				pull:   true,
+			},
+		},
+		"valid-oci-via-llmman": {
+			input: "oci://ghcr.io/org/model:tag?via=llmman",
+			want: modelURL{
+				scheme:    "oci",
+				ref:       "ghcr.io/org/model:tag",
+				name:      "ghcr.io",
+				path:      "org/model:tag",
+				pull:      true,
+				viaLlmman: true,
+			},
+		},
+		"invalid-via": {
+			input:   "oci://ghcr.io/org/model:tag?via=other",
+			wantErr: true,
+		},
 		"valid-ollama-with-no-pull": {
 			input: "ollama://gemma2:2b?pull=false",
 			want: modelURL{
@@ -162,6 +188,102 @@ func Test_parseModelURL(t *testing.T) {
 			require.Equal(t, c.want, got)
 		})
 	}
+}
+
+func newOCIReconciler() *ModelReconciler {
+	r := &ModelReconciler{}
+	r.SecretNames.OCI = "oci-secret"
+	r.ModelLoaders.Llmman = "ghcr.io/kubeai-project/kubeai-llmman-loader:test"
+	r.ModelLoaders.LlmmanStore = "llmman-store"
+	return r
+}
+
+func Test_parseModelSourceOCI(t *testing.T) {
+	t.Parallel()
+
+	r := newOCIReconciler()
+
+	// Default: a kubelet ImageVolume with the image pull secret.
+	src, err := r.parseModelSource("oci://ghcr.io/org/model:tag")
+	require.NoError(t, err)
+	require.Len(t, src.volumes, 1)
+	require.NotNil(t, src.volumes[0].Image)
+	require.Equal(t, "ghcr.io/org/model:tag", src.volumes[0].Image.Reference)
+	require.Equal(t, []corev1.LocalObjectReference{{Name: "oci-secret"}}, src.imagePullSecrets)
+	require.Empty(t, src.initContainers)
+	require.Equal(t, modelMountPath, src.volumeMounts[0].MountPath)
+	require.False(t, src.volumeMounts[0].ReadOnly)
+
+	// Opt-in: an init container pulls through llmman into an emptyDir.
+	src, err = r.parseModelSource("oci://ghcr.io/org/model:tag?via=llmman")
+	require.NoError(t, err)
+	require.Len(t, src.volumes, 2)
+	require.NotNil(t, src.volumes[0].EmptyDir)
+	require.Nil(t, src.volumes[0].Image)
+	require.Equal(t, "llmman-store", src.volumes[1].PersistentVolumeClaim.ClaimName)
+	require.Empty(t, src.imagePullSecrets)
+	require.Equal(t, modelMountPath, src.volumeMounts[0].MountPath)
+	require.True(t, src.volumeMounts[0].ReadOnly)
+
+	require.Len(t, src.initContainers, 1)
+	puller := src.initContainers[0]
+	require.Equal(t, r.ModelLoaders.Llmman, puller.Image)
+	// The opt-in marker is stripped from the reference.
+	require.Equal(t, []string{"ghcr.io/org/model:tag", modelMountPath}, puller.Args)
+	require.Equal(t, []corev1.EnvVar{
+		{Name: "LLMMAN_HOST", Value: defaultLlmmanHost},
+		{Name: "LLMMAN_MODELS", Value: "/llmman/store"},
+	}, puller.Env)
+	require.Equal(t, []corev1.VolumeMount{
+		{Name: modelVolumeName, MountPath: modelMountPath},
+		{Name: "llmman-store", MountPath: "/llmman"},
+	}, puller.VolumeMounts)
+}
+
+func Test_parseModelSourceViaLlmmanNeedsConfig(t *testing.T) {
+	t.Parallel()
+
+	for name, mutate := range map[string]func(*ModelReconciler){
+		"no-image": func(r *ModelReconciler) { r.ModelLoaders.Llmman = "" },
+		"no-store": func(r *ModelReconciler) { r.ModelLoaders.LlmmanStore = "" },
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			r := newOCIReconciler()
+			mutate(r)
+			_, err := r.parseModelSource("oci://ghcr.io/org/model:tag?via=llmman")
+			require.Error(t, err)
+			// The default path needs neither.
+			_, err = r.parseModelSource("oci://ghcr.io/org/model:tag")
+			require.NoError(t, err)
+		})
+	}
+}
+
+func Test_llmmanHost(t *testing.T) {
+	t.Parallel()
+
+	r := &ModelReconciler{}
+	require.Equal(t, defaultLlmmanHost, r.llmmanHost())
+
+	r.ModelLoaders.LlmmanHost = "llmman.kubeai.svc:17434"
+	require.Equal(t, "llmman.kubeai.svc:17434", r.llmmanHost())
+
+	r.ModelLoaders.LlmmanHost = "   "
+	require.Equal(t, defaultLlmmanHost, r.llmmanHost())
+}
+
+func Test_applyToPodSpecAddsInitContainers(t *testing.T) {
+	t.Parallel()
+
+	spec := &corev1.PodSpec{Containers: []corev1.Container{{Name: "server"}}}
+	additions := &modelSourcePodAdditions{
+		initContainers: []corev1.Container{{Name: "model-puller"}},
+	}
+	additions.applyToPodSpec(spec, 0)
+
+	require.Len(t, spec.InitContainers, 1)
+	require.Equal(t, "model-puller", spec.InitContainers[0].Name)
 }
 
 func TestModelURLRejectsShellSyntax(t *testing.T) {

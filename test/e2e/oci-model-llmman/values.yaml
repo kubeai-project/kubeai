@@ -1,0 +1,14 @@
+open-webui:
+  enabled: false
+modelServers:
+  VLLM:
+    images:
+      default: "ghcr.io/kubeai-project/vllm-cpu-test-env:v0.10.2"
+      cpu: "ghcr.io/kubeai-project/vllm-cpu-test-env:v0.10.2"
+image:
+  tag: "test"
+modelLoading:
+  image: "ghcr.io/kubeai-project/kubeai-model-loader:test"
+  llmman: "ghcr.io/kubeai-project/kubeai-llmman-loader:test"
+  llmmanHost: "llmman:17434"
+  llmmanStore: "llmman-store"

@@ -262,6 +262,20 @@ type ModelServer struct {
 
 type ModelLoading struct {
 	Image string `json:"image" validate:"required"`
+
+	// Llmman is the image of the init container that pulls an
+	// oci://...?via=llmman model through an llmman daemon. Optional: only
+	// needed by models that opt in.
+	Llmman string `json:"llmman" required:"false"`
+
+	// LlmmanHost is the address of the `llmman serve` daemon, as
+	// [scheme://]host[:port]. Defaults to llmman's own default.
+	LlmmanHost string `json:"llmmanHost" required:"false"`
+
+	// LlmmanStore is the name of a PersistentVolumeClaim holding the daemon's
+	// store (under store/). The init container resolves the pulled model from
+	// it, so the daemon must use the same volume. Needed with Llmman.
+	LlmmanStore string `json:"llmmanStore" required:"false"`
 }
 
 type JSONPatch struct {

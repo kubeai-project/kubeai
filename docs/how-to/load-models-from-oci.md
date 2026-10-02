@@ -80,3 +80,40 @@ manually delete and allow KubeAI to recreate any failed Jobs/Pods that required 
      resourceProfile: cpu:1
      minReplicas: 1
    ```
+
+## Opt-in: pull through llmman
+
+By default the kubelet mounts the reference as an image volume (see the note
+above). To instead pull it through a running
+[`llmman serve`](https://github.com/llmmanorg/llmman) daemon, append
+`?via=llmman`:
+
+```yaml
+url: oci://$REGISTRY/$REPOSITORY:$TAG?via=llmman
+```
+
+An init container pulls the reference through the daemon and copies the files
+into a volume mounted at `/model`. This works for
+[CNCF ModelPack](https://github.com/modelpack/model-spec) artifacts (GGUF or
+safetensors) on any container runtime, without the `ImageVolume` feature gate.
+It does not handle runnable container images; keep the default for those.
+
+Requirements:
+
+- An `llmman serve` daemon reachable from the model Pods, using a
+  `ReadWriteMany` PVC for its store: mount it and set `LLMMAN_MODELS` to
+  `<mount>/store`.
+- An init container image built from `components/llmman-loader`, the PVC, and
+  optionally the daemon address, in your Helm values:
+
+  ```yaml
+  modelLoading:
+    llmman: "$YOUR_REGISTRY/kubeai-llmman-loader:$TAG"
+    llmmanStore: "llmman-store"
+    llmmanHost: "llmman.kubeai.svc:17434" # default 127.0.0.1:17434
+  ```
+
+See `test/e2e/oci-model-llmman/llmman.yaml` for an example daemon.
+
+Registry credentials for this path are configured on the daemon
+(`llmman login`); `secrets.oci` does not apply.
