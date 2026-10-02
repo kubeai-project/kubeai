@@ -36,6 +36,14 @@ jobs:
           tags: ghcr.io/kubeai-project/kubeai-model-loader:test
           outputs: type=docker,dest=${{ runner.temp }}/model-loader.tar
 
+      - name: Build and export llmman loader
+        uses: docker/build-push-action@v7
+        with:
+          context: ./components/llmman-loader
+          file: ./components/llmman-loader/Dockerfile
+          tags: ghcr.io/kubeai-project/kubeai-llmman-loader:test
+          outputs: type=docker,dest=${{ runner.temp }}/llmman-loader.tar
+
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
@@ -80,6 +88,7 @@ jobs:
         - "s3-model"
         - "lora-adapter"
         - "oci-model"
+        - "oci-model-llmman"
     steps:
       - name: Aggressive cleanup
         if: matrix.testcase == 's3-model'
@@ -119,6 +128,7 @@ jobs:
         run: |
           docker load --input ${{ runner.temp }}/kubeai.tar
           docker load --input ${{ runner.temp }}/model-loader.tar
+          docker load --input ${{ runner.temp }}/llmman-loader.tar
           docker image ls -a
 
       - name: Install kind
@@ -140,6 +150,7 @@ jobs:
         run: |
           kind load docker-image ghcr.io/kubeai-project/kubeai:test
           kind load docker-image ghcr.io/kubeai-project/kubeai-model-loader:test
+          kind load docker-image ghcr.io/kubeai-project/kubeai-llmman-loader:test
 
       - name: Run the e2e testcase
         run: make test-e2e TEST_CASE=${{ matrix.testcase }}

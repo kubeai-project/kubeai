@@ -1,6 +1,7 @@
 package modelcontroller
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -26,6 +27,11 @@ func (r *ModelReconciler) parseModelSource(urlStr string) (modelSource, error) {
 	}
 
 	switch {
+	case u.scheme == "oci" && u.viaLlmman:
+		src.modelSourcePodAdditions, err = r.llmmanPodAdditions(u)
+		if err != nil {
+			return modelSource{}, err
+		}
 	case u.scheme == "gs":
 		src.modelSourcePodAdditions = r.authForGCS()
 	case u.scheme == "oss":
@@ -208,15 +214,21 @@ func (r *ModelReconciler) authForOSS() *modelSourcePodAdditions {
 	}
 }
 
+// The volume the model container reads, mounted at the same path by every
+// source that provides one (pvc, oci).
+const (
+	modelVolumeName = "model"
+	modelMountPath  = "/model"
+)
+
 func (r *ModelReconciler) pvcPodAdditions(url modelURL) *modelSourcePodAdditions {
-	volumeName := "model"
 	// Kubernetes does not support an subPath with a leading slash. SubPath needs to be
 	// a relative path or empty string to mount the entire volume.
 	path := strings.TrimLeft(url.path, "/")
 	return &modelSourcePodAdditions{
 		volumes: []corev1.Volume{
 			{
-				Name: volumeName,
+				Name: modelVolumeName,
 				VolumeSource: corev1.VolumeSource{
 					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
 						ClaimName: url.name,
@@ -226,39 +238,73 @@ func (r *ModelReconciler) pvcPodAdditions(url modelURL) *modelSourcePodAdditions
 		},
 		volumeMounts: []corev1.VolumeMount{
 			{
-				Name:      volumeName,
-				MountPath: "/model",
+				Name:      modelVolumeName,
+				MountPath: modelMountPath,
 				SubPath:   path,
 			},
 		},
 	}
 }
 
-// ociPodAdditions acquires an OCI reference through a running `llmman serve`
-// daemon, into an emptyDir the model container then reads.
-//
-// This replaces the Kubernetes ImageVolume this used to mount. ImageVolume
-// only works for runnable container *images*: containerd cannot mount a plain
-// OCI artifact as an image volume (CRI-O can), so a model published as a CNCF
-// ModelPack artifact -- the CNCF spec for shipping weights through a registry
-// -- could not be used on most clusters. llmman speaks both the registry v2
-// protocol and the ModelPack media types, so one code path now covers a
-// modelcar image and an artifact, on any runtime.
+// ociPodAdditions mounts the reference as a Kubernetes ImageVolume.
 func (r *ModelReconciler) ociPodAdditions(url modelURL) *modelSourcePodAdditions {
-	const volumeName = "model"
-	reference := url.name + "/" + url.path
-
 	return &modelSourcePodAdditions{
 		volumes: []corev1.Volume{
 			{
-				Name:         volumeName,
-				VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+				Name: modelVolumeName,
+				VolumeSource: corev1.VolumeSource{
+					Image: &corev1.ImageVolumeSource{
+						Reference:  url.ref,
+						PullPolicy: corev1.PullIfNotPresent,
+					},
+				},
 			},
 		},
 		volumeMounts: []corev1.VolumeMount{
 			{
-				Name:      volumeName,
-				MountPath: "/model",
+				Name:      modelVolumeName,
+				MountPath: modelMountPath,
+			},
+		},
+		imagePullSecrets: []corev1.LocalObjectReference{
+			{
+				Name: r.SecretNames.OCI,
+			},
+		},
+	}
+}
+
+// llmmanPodAdditions (oci://...?via=llmman) pulls the reference through a
+// running `llmman serve` into an emptyDir the model container reads. Unlike
+// ImageVolume it also handles ModelPack artifacts, on any runtime.
+func (r *ModelReconciler) llmmanPodAdditions(url modelURL) (*modelSourcePodAdditions, error) {
+	if r.ModelLoaders.Llmman == "" || r.ModelLoaders.LlmmanStore == "" {
+		return nil, errors.New("via=llmman needs modelLoading.llmman and modelLoading.llmmanStore")
+	}
+	const (
+		storeVolumeName = "llmman-store"
+		storeMountPath  = "/llmman"
+	)
+
+	return &modelSourcePodAdditions{
+		volumes: []corev1.Volume{
+			{
+				Name:         modelVolumeName,
+				VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+			},
+			{
+				Name: storeVolumeName,
+				VolumeSource: corev1.VolumeSource{
+					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+						ClaimName: r.ModelLoaders.LlmmanStore,
+					},
+				},
+			},
+		},
+		volumeMounts: []corev1.VolumeMount{
+			{
+				Name:      modelVolumeName,
+				MountPath: modelMountPath,
 				ReadOnly:  true,
 			},
 		},
@@ -267,20 +313,22 @@ func (r *ModelReconciler) ociPodAdditions(url modelURL) *modelSourcePodAdditions
 				Name:            "model-puller",
 				Image:           r.ModelLoaders.Llmman,
 				ImagePullPolicy: corev1.PullIfNotPresent,
-				Args:            []string{reference, "/model"},
+				SecurityContext: r.ModelServerPods.ModelContainerSecurityContext,
+				Args:            []string{url.ref, modelMountPath},
 				Env: []corev1.EnvVar{
 					{Name: "LLMMAN_HOST", Value: r.llmmanHost()},
+					{Name: "LLMMAN_MODELS", Value: storeMountPath + "/store"},
 				},
 				VolumeMounts: []corev1.VolumeMount{
-					{Name: volumeName, MountPath: "/model"},
+					{Name: modelVolumeName, MountPath: modelMountPath},
+					{Name: storeVolumeName, MountPath: storeMountPath},
 				},
 			},
 		},
-	}
+	}, nil
 }
 
-// llmmanHost is the daemon address the puller talks to, overridable so a
-// cluster can point every model pod at one shared daemon.
+// llmmanHost is the daemon address the puller talks to.
 func (r *ModelReconciler) llmmanHost() string {
 	if host := strings.TrimSpace(r.ModelLoaders.LlmmanHost); host != "" {
 		return host
@@ -303,6 +351,7 @@ func parseModelURL(urlStr string) (modelURL, error) {
 	var modelParam string
 	var insecure bool
 	var pull bool = true
+	var viaLlmman bool
 
 	if len(matches) == 4 { // check for query parameters
 		queryParams := strings.TrimPrefix(matches[3], "?")
@@ -326,6 +375,13 @@ func parseModelURL(urlStr string) (modelURL, error) {
 		if strings.ToLower(pullVal) == "false" {
 			pull = false
 		}
+		switch via := urlParser.Get("via"); via { // e.g. oci://registry/model:tag?via=llmman
+		case "":
+		case "llmman":
+			viaLlmman = true
+		default:
+			return modelURL{}, fmt.Errorf("invalid via parameter in URL: %s", via)
+		}
 	}
 
 	return modelURL{
@@ -337,6 +393,7 @@ func parseModelURL(urlStr string) (modelURL, error) {
 		modelParam: modelParam,
 		insecure:   insecure,
 		pull:       pull,
+		viaLlmman:  viaLlmman,
 	}, nil
 }
 
@@ -354,4 +411,7 @@ type modelURL struct {
 	insecure bool
 	// If false, the model will not be pulled and assumed to be already present.
 	pull bool
+	// e.g. true when ?via=llmman is part of an oci:// URL.
+	// Pulls through an llmman daemon instead of mounting an ImageVolume.
+	viaLlmman bool
 }

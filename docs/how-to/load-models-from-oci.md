@@ -1,29 +1,16 @@
 # Load Models from OCI Images
 
-You can package your models into OCI images or [CNCF ModelPack](https://github.com/modelpack/model-spec)
-artifacts and let KubeAI use them for serving.
+You can package your models into OCI images and let KubeAI use them for serving.
+KubeAI mounts the image contents directly into the model server Pod using a Kubernetes
+[image volume](https://kubernetes.io/docs/tasks/configure-pod-container/image-volumes/),
+so the model files are available without a separate download step.
 
-KubeAI pulls the reference through a running [`llmman serve`](https://github.com/llmmanorg/llmman)
-daemon in an init container, into a volume the model server Pod reads. llmman
-speaks both the registry v2 protocol and the ModelPack media types, so the same
-URL works for an image and for an artifact, on any container runtime.
-
-> **Note:** this used to mount a Kubernetes
-> [image volume](https://kubernetes.io/docs/tasks/configure-pod-container/image-volumes/),
-> which restricted OCI *artifacts* to CRI-O clusters (containerd can only mount
-> runnable images) and required the `ImageVolume` feature gate. Neither
-> restriction applies now.
-
-## Requirements
-
-An `llmman serve` daemon must be reachable from the model Pod. By default the
-init container uses llmman's own default address, `127.0.0.1:17434`. To point
-every model Pod at one shared daemon, set it in your Helm values:
-
-```yaml
-modelLoading:
-  llmmanHost: "llmman.kubeai.svc:17434"
-```
+> **Note:** The container runtime determines what kind of OCI references are supported:
+> - When **containerd** is used as the container runtime, only **OCI images** are supported.
+> - When **CRI-O** is used as the container runtime, both **OCI images** and **OCI artifacts** are supported.
+>
+> Image volumes also require a sufficiently recent Kubernetes version with the
+> `ImageVolume` feature enabled on the cluster.
 
 ## vLLM
 
@@ -48,12 +35,8 @@ so the model files must already be present in the image before creating the Mode
 
 ## Authentication for private registries
 
-Registry credentials are configured on the `llmman serve` daemon rather than on
-each Model, so one place covers every model pulled through it. See llmman's
-`llmman login` documentation.
-
-The previous image pull `Secret` mechanism no longer applies, since KubeAI is
-not asking the kubelet to pull the reference.
+When pulling from a private registry, create a Kubernetes image pull `Secret` and configure
+KubeAI to use it.
 
 1. Create the pull secret:
 
@@ -97,3 +80,40 @@ manually delete and allow KubeAI to recreate any failed Jobs/Pods that required 
      resourceProfile: cpu:1
      minReplicas: 1
    ```
+
+## Opt-in: pull through llmman
+
+By default the kubelet mounts the reference as an image volume (see the note
+above). To instead pull it through a running
+[`llmman serve`](https://github.com/llmmanorg/llmman) daemon, append
+`?via=llmman`:
+
+```yaml
+url: oci://$REGISTRY/$REPOSITORY:$TAG?via=llmman
+```
+
+An init container pulls the reference through the daemon and copies the files
+into a volume mounted at `/model`. This works for
+[CNCF ModelPack](https://github.com/modelpack/model-spec) artifacts (GGUF or
+safetensors) on any container runtime, without the `ImageVolume` feature gate.
+It does not handle runnable container images; keep the default for those.
+
+Requirements:
+
+- An `llmman serve` daemon reachable from the model Pods, using a
+  `ReadWriteMany` PVC for its store: mount it and set `LLMMAN_MODELS` to
+  `<mount>/store`.
+- An init container image built from `components/llmman-loader`, the PVC, and
+  optionally the daemon address, in your Helm values:
+
+  ```yaml
+  modelLoading:
+    llmman: "$YOUR_REGISTRY/kubeai-llmman-loader:$TAG"
+    llmmanStore: "llmman-store"
+    llmmanHost: "llmman.kubeai.svc:17434" # default 127.0.0.1:17434
+  ```
+
+See `test/e2e/oci-model-llmman/llmman.yaml` for an example daemon.
+
+Registry credentials for this path are configured on the daemon
+(`llmman login`); `secrets.oci` does not apply.

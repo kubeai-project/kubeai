@@ -4,11 +4,13 @@
 #
 # The daemon does the download; it deliberately exposes no local path, so
 # `llmman resolve --no-pull` is asked where the bytes landed. --no-pull
-# guarantees it only reports on what the pull already fetched.
+# guarantees it only reports on what the pull already fetched. It reads the
+# daemon's store, so LLMMAN_MODELS must point at the same store.
 set -euo pipefail
 
-reference="${1:?usage: pull <oci-reference> <destination>}"
-destination="${2:?usage: pull <oci-reference> <destination>}"
+usage="usage: pull <oci-reference> <destination>"
+reference="${1:?$usage}"
+destination="${2:?$usage}"
 
 host="${LLMMAN_HOST:-127.0.0.1:17434}"
 # A client cannot connect to "every interface".
@@ -30,6 +32,7 @@ echo "Pulling ${reference}"
 # The daemon streams NDJSON status objects and reports failures in-band at
 # HTTP 200, so the stream is inspected rather than trusting the status code.
 status_file="$(mktemp)"
+trap 'rm -f "$status_file"' EXIT
 curl -fsS -N -X POST "${base}/api/pull" \
   -H 'Content-Type: application/json' \
   -d "{\"model\":\"${reference}\"}" | tee "$status_file"
@@ -50,12 +53,9 @@ if [ -z "$resolved" ] || [ ! -e "$resolved" ]; then
 fi
 
 mkdir -p "$destination"
-if [ -d "$resolved" ]; then
-  # Hard-link where possible so a model shared with llmman's store costs its
-  # bytes once; -L falls back to copying across filesystems.
-  cp -aL "$resolved/." "$destination/"
-else
-  cp -aL "$resolved" "$destination/"
-fi
+# A directory is copied by contents. -L dereferences llmman's links into
+# regular files.
+[ -d "$resolved" ] && resolved="$resolved/."
+cp -aL "$resolved" "$destination/"
 
 echo "Placed ${reference} at ${destination}"

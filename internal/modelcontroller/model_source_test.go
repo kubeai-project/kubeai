@@ -137,6 +137,31 @@ func Test_parseModelURL(t *testing.T) {
 				pull:       true,
 			},
 		},
+		"valid-oci": {
+			input: "oci://ghcr.io/org/model:tag",
+			want: modelURL{
+				scheme: "oci",
+				ref:    "ghcr.io/org/model:tag",
+				name:   "ghcr.io",
+				path:   "org/model:tag",
+				pull:   true,
+			},
+		},
+		"valid-oci-via-llmman": {
+			input: "oci://ghcr.io/org/model:tag?via=llmman",
+			want: modelURL{
+				scheme:    "oci",
+				ref:       "ghcr.io/org/model:tag",
+				name:      "ghcr.io",
+				path:      "org/model:tag",
+				pull:      true,
+				viaLlmman: true,
+			},
+		},
+		"invalid-via": {
+			input:   "oci://ghcr.io/org/model:tag?via=other",
+			wantErr: true,
+		},
 		"valid-ollama-with-no-pull": {
 			input: "ollama://gemma2:2b?pull=false",
 			want: modelURL{
@@ -165,46 +190,74 @@ func Test_parseModelURL(t *testing.T) {
 	}
 }
 
-func Test_ociPodAdditions(t *testing.T) {
+func newOCIReconciler() *ModelReconciler {
+	r := &ModelReconciler{}
+	r.SecretNames.OCI = "oci-secret"
+	r.ModelLoaders.Llmman = "ghcr.io/kubeai-project/kubeai-llmman-loader:test"
+	r.ModelLoaders.LlmmanStore = "llmman-store"
+	return r
+}
+
+func Test_parseModelSourceOCI(t *testing.T) {
 	t.Parallel()
 
-	r := &ModelReconciler{}
-	r.ModelLoaders.Llmman = "ghcr.io/kubeai-project/kubeai-llmman-loader:test"
+	r := newOCIReconciler()
 
-	url, err := parseModelURL("oci://ghcr.io/org/model:tag")
+	// Default: a kubelet ImageVolume with the image pull secret.
+	src, err := r.parseModelSource("oci://ghcr.io/org/model:tag")
 	require.NoError(t, err)
-	additions := r.ociPodAdditions(url)
+	require.Len(t, src.volumes, 1)
+	require.NotNil(t, src.volumes[0].Image)
+	require.Equal(t, "ghcr.io/org/model:tag", src.volumes[0].Image.Reference)
+	require.Equal(t, []corev1.LocalObjectReference{{Name: "oci-secret"}}, src.imagePullSecrets)
+	require.Empty(t, src.initContainers)
+	require.Equal(t, modelMountPath, src.volumeMounts[0].MountPath)
+	require.False(t, src.volumeMounts[0].ReadOnly)
 
-	// An emptyDir, not an ImageVolume: containerd cannot mount a plain OCI
-	// artifact as an image volume, so the bytes are pulled into a volume the
-	// model container reads.
-	require.Len(t, additions.volumes, 1)
-	require.NotNil(t, additions.volumes[0].EmptyDir)
-	require.Nil(t, additions.volumes[0].Image)
+	// Opt-in: an init container pulls through llmman into an emptyDir.
+	src, err = r.parseModelSource("oci://ghcr.io/org/model:tag?via=llmman")
+	require.NoError(t, err)
+	require.Len(t, src.volumes, 2)
+	require.NotNil(t, src.volumes[0].EmptyDir)
+	require.Nil(t, src.volumes[0].Image)
+	require.Equal(t, "llmman-store", src.volumes[1].PersistentVolumeClaim.ClaimName)
+	require.Empty(t, src.imagePullSecrets)
+	require.Equal(t, modelMountPath, src.volumeMounts[0].MountPath)
+	require.True(t, src.volumeMounts[0].ReadOnly)
 
-	require.Len(t, additions.initContainers, 1)
-	puller := additions.initContainers[0]
-	require.Equal(t, "ghcr.io/kubeai-project/kubeai-llmman-loader:test", puller.Image)
-	// The whole reference is handed to the puller, and the mount path matches
-	// what the model container expects.
-	require.Equal(t, []string{"ghcr.io/org/model:tag", "/model"}, puller.Args)
-	require.Equal(t, "/model", puller.VolumeMounts[0].MountPath)
+	require.Len(t, src.initContainers, 1)
+	puller := src.initContainers[0]
+	require.Equal(t, r.ModelLoaders.Llmman, puller.Image)
+	// The opt-in marker is stripped from the reference.
+	require.Equal(t, []string{"ghcr.io/org/model:tag", modelMountPath}, puller.Args)
+	require.Equal(t, []corev1.EnvVar{
+		{Name: "LLMMAN_HOST", Value: defaultLlmmanHost},
+		{Name: "LLMMAN_MODELS", Value: "/llmman/store"},
+	}, puller.Env)
+	require.Equal(t, []corev1.VolumeMount{
+		{Name: modelVolumeName, MountPath: modelMountPath},
+		{Name: "llmman-store", MountPath: "/llmman"},
+	}, puller.VolumeMounts)
+}
 
-	require.Len(t, additions.volumeMounts, 1)
-	require.Equal(t, "/model", additions.volumeMounts[0].MountPath)
-	require.True(t, additions.volumeMounts[0].ReadOnly)
+func Test_parseModelSourceViaLlmmanNeedsConfig(t *testing.T) {
+	t.Parallel()
 
-	// The daemon address is passed through, defaulted when unset.
-	var host string
-	for _, env := range puller.Env {
-		if env.Name == "LLMMAN_HOST" {
-			host = env.Value
-		}
+	for name, mutate := range map[string]func(*ModelReconciler){
+		"no-image": func(r *ModelReconciler) { r.ModelLoaders.Llmman = "" },
+		"no-store": func(r *ModelReconciler) { r.ModelLoaders.LlmmanStore = "" },
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			r := newOCIReconciler()
+			mutate(r)
+			_, err := r.parseModelSource("oci://ghcr.io/org/model:tag?via=llmman")
+			require.Error(t, err)
+			// The default path needs neither.
+			_, err = r.parseModelSource("oci://ghcr.io/org/model:tag")
+			require.NoError(t, err)
+		})
 	}
-	require.Equal(t, defaultLlmmanHost, host)
-
-	// No image pull secret: registry credentials live on the llmman daemon.
-	require.Empty(t, additions.imagePullSecrets)
 }
 
 func Test_llmmanHost(t *testing.T) {
@@ -213,7 +266,6 @@ func Test_llmmanHost(t *testing.T) {
 	r := &ModelReconciler{}
 	require.Equal(t, defaultLlmmanHost, r.llmmanHost())
 
-	// A cluster can point every model pod at one shared daemon.
 	r.ModelLoaders.LlmmanHost = "llmman.kubeai.svc:17434"
 	require.Equal(t, "llmman.kubeai.svc:17434", r.llmmanHost())
 

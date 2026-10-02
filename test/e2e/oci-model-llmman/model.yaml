@@ -1,0 +1,12 @@
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: smollm2-135m-cpu
+spec:
+  features: [TextGeneration]
+  owner: huggingfacetb
+  url: oci://localhost:5000/smollm2-135m:modelpack?via=llmman
+  engine: VLLM
+  args: [--max-model-len=2048]
+  resourceProfile: cpu:1
+  minReplicas: 1

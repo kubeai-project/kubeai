@@ -1,0 +1,77 @@
+# An llmman daemon with a registry beside it (so the registry is localhost to
+# the daemon). The store volume is shared with the model pods' init container.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: llmman-store
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /mnt/llmman
+    type: DirectoryOrCreate
+  persistentVolumeReclaimPolicy: Retain
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: llmman-store
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: llmman-store
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llmman
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llmman
+  template:
+    metadata:
+      labels:
+        app: llmman
+    spec:
+      containers:
+        - name: registry
+          image: registry:2
+        - name: llmman
+          image: ghcr.io/kubeai-project/kubeai-llmman-loader:test
+          command: [llmman, serve]
+          env:
+            - {name: LLMMAN_HOST, value: "0.0.0.0:17434"}
+            - {name: LLMMAN_AUTH, value: "off"}
+            - {name: LLMMAN_RUNTIME, value: path}
+            - {name: LLMMAN_MODELS, value: /data/store}
+          ports:
+            - containerPort: 17434
+          readinessProbe:
+            httpGet:
+              path: /api/version
+              port: 17434
+          volumeMounts:
+            - {name: store, mountPath: /data}
+      volumes:
+        - name: store
+          persistentVolumeClaim:
+            claimName: llmman-store
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llmman
+spec:
+  selector:
+    app: llmman
+  ports:
+    - port: 17434
