@@ -32,7 +32,7 @@ spec:
   features: ["TextGeneration"]
   owner: alibaba
   image: $IMAGE # <-- The image with model built-in
-  url: "$MODEL_URL"
+  url: "$MODEL_URL?pull=false" # <-- ?pull=false to use pre-downloaded model (disable model pulling from Ollama)
   engine: OLlama
   resourceProfile: cpu:1
 EOF
