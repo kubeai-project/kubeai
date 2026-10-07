@@ -2084,7 +2084,7 @@
 
 <h1 id="backend-servers">Backend Servers<a class="headerlink" href="#backend-servers" title="Permanent link">&para;</a></h1>
 <p>KubeAI serves ML models by launching Pods on Kubernetes. The configuration and lifecycle of these Pods are managed by the KubeAI controller. Every model server Pod loads exactly one model on startup.</p>
-<p>In a Model manifest you can define what server to use for inference (<code>VLLM</code>, <code>OLlama</code>). Any model-specific settings can be passed to the server process via the <code>args</code> and <code>env</code> fields.</p>
+<p>In a Model manifest you can define what server to use for inference (<code>VLLM</code>, <code>SGLang</code>, <code>LlamaCpp</code>, <code>OLlama</code>, <code>FasterWhisper</code>, <code>Infinity</code>). Any model-specific settings can be passed to the server process via the <code>args</code> and <code>env</code> fields.</p>
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <p>Read about <a href="../../how-to/install-models/">how to install models</a>.</p>
 

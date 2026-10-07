@@ -943,6 +943,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#llamacpp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        llama.cpp
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="llama.cpp">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pvc-requirements_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PVC requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#ollama" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -955,7 +983,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#pvc-requirements_1" class="md-nav__link">
+  <a href="#pvc-requirements_2" class="md-nav__link">
     <span class="md-ellipsis">
       
         PVC Requirements
@@ -2136,6 +2164,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#llamacpp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        llama.cpp
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="llama.cpp">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pvc-requirements_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PVC requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#ollama" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2148,7 +2204,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#pvc-requirements_1" class="md-nav__link">
+  <a href="#pvc-requirements_2" class="md-nav__link">
     <span class="md-ellipsis">
       
         PVC Requirements
@@ -2210,12 +2266,38 @@ Alternatively you can use KubeAI's native caching mechanism which downloads the 
 </code></pre></div></p>
 <h3 id="pvc-requirements">PVC requirements<a class="headerlink" href="#pvc-requirements" title="Permanent link">&para;</a></h3>
 <p>vLLM supports both ReadWriteMany and ReadOnlyMany access modes. <code>Many</code> is used in order to support more than 1 vLLM replica.</p>
+<h2 id="llamacpp">llama.cpp<a class="headerlink" href="#llamacpp" title="Permanent link">&para;</a></h2>
+<p>The <code>LlamaCpp</code> engine needs a single GGUF file, not a directory. Point the URL at
+the directory that holds the model and name the file with the <code>model</code> query
+parameter:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubeai.org/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Model</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qwen2-500m-cpu</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">TextGeneration</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc://model-pvc/models?model=qwen2-0_5b-instruct-q5_k_m.gguf</span>
+<span class="w">  </span><span class="nt">engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LlamaCpp</span>
+<span class="w">  </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu:1</span>
+</code></pre></div>
+<p>For a model split across shards, name the first shard. llama.cpp derives the
+paths of the remaining shards from that file name, so all shards must sit in the
+same directory:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc://model-pvc/models?model=model-00001-of-00003.gguf</span>
+</code></pre></div>
+<p>A URL that names the file directly (<code>pvc://model-pvc/models/model.gguf</code>) also
+works, because kubelet bind-mounts a single file at <code>/model</code>. Use it only for
+unsharded models: the mount does not preserve the file name, so llama.cpp cannot
+find sibling shards.</p>
+<h3 id="pvc-requirements_1">PVC requirements<a class="headerlink" href="#pvc-requirements_1" title="Permanent link">&para;</a></h3>
+<p>The PVC must contain the GGUF file. The access mode must allow the Pod to mount
+it on the node the model is scheduled to.</p>
 <h2 id="ollama">Ollama<a class="headerlink" href="#ollama" title="Permanent link">&para;</a></h2>
 <p>For Ollama, use the following URL formats:
 <div class="highlight"><pre><span></span><code><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc://$PVC_NAME?model=$MODEL_NAME</span><span class="w">    </span><span class="c1"># Loads the model named $MODEL_NAME that's loaded on the disk</span>
 <span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc://$PVC_NAME/$PATH?model=$MODEL_NAME</span>
 </code></pre></div></p>
-<h3 id="pvc-requirements_1">PVC Requirements<a class="headerlink" href="#pvc-requirements_1" title="Permanent link">&para;</a></h3>
+<h3 id="pvc-requirements_2">PVC Requirements<a class="headerlink" href="#pvc-requirements_2" title="Permanent link">&para;</a></h3>
 <p>Ollama requires using ReadWriteMany access mode because the rename operation <code>ollama cp</code> needs to write to the PVC.</p>
 <h3 id="example-loading-qwen-05b-from-pvc">Example: Loading Qwen 0.5b from PVC<a class="headerlink" href="#example-loading-qwen-05b-from-pvc" title="Permanent link">&para;</a></h3>
 <ol>

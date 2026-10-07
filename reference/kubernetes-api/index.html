@@ -2575,7 +2575,7 @@
 <tbody>
 <tr>
 <td><code>url</code> <em>string</em></td>
-<td>URL of the model to be served.<br />Currently the following formats are supported:<br />For VLLM, FasterWhisper, Infinity engines:<br />"hf://<repo>/<model>"<br />"pvc://<pvcName>"<br />"pvc://<pvcName>/<pvcSubpath>"<br />"oci://<registry>/<repository>:<tag>"<br />"gs://<bucket>/<path>" (only with cacheProfile)<br />"oss://<bucket>/<path>" (only with cacheProfile)<br />"s3://<bucket>/<path>" (only with cacheProfile)<br />For OLlama engine:<br />"ollama://<model>"</td>
+<td>URL of the model to be served.<br />Currently the following formats are supported:<br />For VLLM, SGLang, FasterWhisper, Infinity engines:<br />"hf://<repo>/<model>"<br />"pvc://<pvcName>"<br />"pvc://<pvcName>/<pvcSubpath>"<br />"oci://<registry>/<repository>:<tag>"<br />"gs://<bucket>/<path>" (only with cacheProfile)<br />"oss://<bucket>/<path>" (only with cacheProfile)<br />"s3://<bucket>/<path>" (only with cacheProfile)<br />For the LlamaCpp engine:<br />"hf://<repo>/<model>"<br />"hf://<repo>/<model>:<quant>"<br />"pvc://<pvcName>/<pvcSubpath>?model=<file>.gguf"<br />"pvc://<pvcName>/<pvcSubpath>/<file>.gguf"<br />"oci://<registry>/<repository>:<tag>?model=<file>.gguf"<br />The "model" query parameter names the GGUF file inside the mounted<br />directory. It is required for "oci://" sources and for "pvc://" paths<br />that do not already name a .gguf file. A model split across shards has<br />to use it and keep every shard in the same directory, because llama.cpp<br />derives the sibling shard paths from the file name.<br />For OLlama engine:<br />"ollama://<model>"</td>
 <td></td>
 <td>Pattern: <code>^([a-z0-9]+):\/\/([a-zA-Z0-9._:/-]+)(\?.*)?$</code> <br />Required: {} <br /></td>
 </tr>
@@ -2595,7 +2595,7 @@
 <td><code>engine</code> <em>string</em></td>
 <td>Engine to be used for the server process.</td>
 <td></td>
-<td>Enum: [OLlama VLLM FasterWhisper Infinity] <br />Required: {} <br /></td>
+<td>Enum: [OLlama VLLM FasterWhisper Infinity SGLang LlamaCpp] <br />Required: {} <br /></td>
 </tr>
 <tr>
 <td><code>resourceProfile</code> <em>string</em></td>
