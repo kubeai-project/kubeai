@@ -942,6 +942,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#opt-in-pull-through-llmman" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opt-in: pull through llmman
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2152,6 +2163,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#opt-in-pull-through-llmman" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opt-in: pull through llmman
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2240,6 +2262,34 @@ manually delete and allow KubeAI to recreate any failed Jobs/Pods that required 
 <span class="w">  </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu:1</span>
 <span class="w">  </span><span class="nt">minReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 </code></pre></div>
+<h2 id="opt-in-pull-through-llmman">Opt-in: pull through llmman<a class="headerlink" href="#opt-in-pull-through-llmman" title="Permanent link">&para;</a></h2>
+<p>By default the kubelet mounts the reference as an image volume (see the note
+above). To instead pull it through a running
+<a href="https://github.com/llmmanorg/llmman"><code>llmman serve</code></a> daemon, append
+<code>?via=llmman</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oci://$REGISTRY/$REPOSITORY:$TAG?via=llmman</span>
+</code></pre></div>
+<p>An init container pulls the reference through the daemon and copies the files
+into a volume mounted at <code>/model</code>. This works for
+<a href="https://github.com/modelpack/model-spec">CNCF ModelPack</a> artifacts (GGUF or
+safetensors) on any container runtime, without the <code>ImageVolume</code> feature gate.
+It does not handle runnable container images; keep the default for those.</p>
+<p>Requirements:</p>
+<ul>
+<li>An <code>llmman serve</code> daemon reachable from the model Pods, using a
+  <code>ReadWriteMany</code> PVC for its store: mount it and set <code>LLMMAN_MODELS</code> to
+  <code>&lt;mount&gt;/store</code>.</li>
+<li>An init container image built from <code>components/llmman-loader</code>, the PVC, and
+  optionally the daemon address, in your Helm values:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">modelLoading</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">llmman</span><span class="p">:</span><span class="w"> </span><span class="s">"$YOUR_REGISTRY/kubeai-llmman-loader:$TAG"</span>
+<span class="w">  </span><span class="nt">llmmanStore</span><span class="p">:</span><span class="w"> </span><span class="s">"llmman-store"</span>
+<span class="w">  </span><span class="nt">llmmanHost</span><span class="p">:</span><span class="w"> </span><span class="s">"llmman.kubeai.svc:17434"</span><span class="w"> </span><span class="c1"># default 127.0.0.1:17434</span>
+</code></pre></div>
+<p>See <code>test/e2e/oci-model-llmman/llmman.yaml</code> for an example daemon.</p>
+<p>Registry credentials for this path are configured on the daemon
+(<code>llmman login</code>); <code>secrets.oci</code> does not apply.</p>
 
 
 
