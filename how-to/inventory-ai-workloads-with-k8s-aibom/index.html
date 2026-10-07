@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://www.kubeai.org/how-to/configure-reranking-models/">
+        <link rel="canonical" href="https://www.kubeai.org/how-to/inventory-ai-workloads-with-k8s-aibom/">
       
       
-        <link rel="prev" href="../configure-embedding-models/">
+        <link rel="prev" href="../install-models/">
       
       
-        <link rel="next" href="../configure-resource-profiles/">
+        <link rel="next" href="../load-models-from-oci/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Configure reranking models - KubeAI</title>
+        <title>Inventory AI workloads with k8s-aibom - KubeAI</title>
       
     
     
@@ -67,15 +67,15 @@
     
   
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Configure reranking models - KubeAI" />
-<meta property="og:image" content="https://www.kubeai.org/assets/images/social/how-to/configure-reranking-models.png" />
+<meta property="og:title" content="Inventory AI workloads with k8s-aibom - KubeAI" />
+<meta property="og:image" content="https://www.kubeai.org/assets/images/social/how-to/inventory-ai-workloads-with-k8s-aibom.png" />
 <meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:url" content="https://www.kubeai.org/how-to/configure-reranking-models/" />
+<meta property="og:url" content="https://www.kubeai.org/how-to/inventory-ai-workloads-with-k8s-aibom/" />
 <meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:title" content="Configure reranking models - KubeAI" />
-<meta property="twitter:image" content="https://www.kubeai.org/assets/images/social/how-to/configure-reranking-models.png" />
+<meta property="twitter:title" content="Inventory AI workloads with k8s-aibom - KubeAI" />
+<meta property="twitter:image" content="https://www.kubeai.org/assets/images/social/how-to/inventory-ai-workloads-with-k8s-aibom.png" />
 </head>
   
   
@@ -93,7 +93,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#configure-reranking-models" class="md-skip">
+        <a href="#inventory-ai-workloads-with-k8s-aibom" class="md-skip">
           Skip to content
         </a>
       
@@ -129,7 +129,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Configure reranking models
+              Inventory AI workloads with k8s-aibom
             
           </span>
         </div>
@@ -684,37 +684,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Configure reranking models
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../configure-reranking-models/" class="md-nav__link">
         
   
   
@@ -730,37 +703,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#install-baaibge-reranker-base-model-using-infinity" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install BAAI/bge-reranker-base model using Infinity
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -910,10 +852,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../inventory-ai-workloads-with-k8s-aibom/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inventory AI workloads with k8s-aibom
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -929,6 +898,59 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#enable-the-subchart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enable the subchart
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opt-in-the-namespace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opt in the namespace
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#read-the-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Read the inventory
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2108,10 +2130,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#install-baaibge-reranker-base-model-using-infinity" class="md-nav__link">
+  <a href="#enable-the-subchart" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install BAAI/bge-reranker-base model using Infinity
+        Enable the subchart
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opt-in-the-namespace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opt in the namespace
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#read-the-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Read the inventory
       
     </span>
   </a>
@@ -2138,37 +2182,37 @@
   
 
 
-<h1 id="configure-reranking-models">Configure reranking models<a class="headerlink" href="#configure-reranking-models" title="Permanent link">&para;</a></h1>
-<p>KubeAI supports reranking models via the Infinity and vLLM (Recommended for GPU) engine.</p>
-<h2 id="install-baaibge-reranker-base-model-using-infinity">Install BAAI/bge-reranker-base model using Infinity<a class="headerlink" href="#install-baaibge-reranker-base-model-using-infinity" title="Permanent link">&para;</a></h2>
-<p>Create a file named <code>kubeai-rerank-models.yaml</code> with the following content:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">catalog</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bge-rerank-base-cpu</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">    </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"Reranking"</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">baai</span>
-<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">"hf://BAAI/bge-reranker-base"</span>
-<span class="w">    </span><span class="nt">engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Infinity</span>
-<span class="w">    </span><span class="c1">#engine: VLLM</span>
-<span class="w">    </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu:1</span>
-<span class="w">    </span><span class="c1"># resourceProfile: nvidia-gpu-l4:1</span>
-<span class="w">    </span><span class="nt">minReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<h1 id="inventory-ai-workloads-with-k8s-aibom">Inventory AI workloads with k8s-aibom<a class="headerlink" href="#inventory-ai-workloads-with-k8s-aibom" title="Permanent link">&para;</a></h1>
+<p><a href="https://github.com/GoogleCloudPlatform/k8s-aibom">k8s-aibom</a> is an
+unprivileged Kubernetes controller that generates a
+<a href="https://cyclonedx.org/capabilities/mlbom/">CycloneDX 1.6 ML-BOM</a> for each
+AI workload actually running in a cluster — the served model, the runtime,
+and the container image digests, each attribute carrying an evidence locator
+and a confidence tier. KubeAI can install it as an optional subchart.</p>
+<p>It observes through the Kubernetes API only: no sidecars, no privileged
+DaemonSet, no changes to the model server pods KubeAI creates.</p>
+<h2 id="enable-the-subchart">Enable the subchart<a class="headerlink" href="#enable-the-subchart" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>kubeai<span class="w"> </span>kubeai/kubeai<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span>k8s-aibom.enabled<span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--reuse-values
 </code></pre></div>
-<p>Apply the kubeai-models helm chart:</p>
-<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>kubeai-models<span class="w"> </span>kubeai/models<span class="w"> </span>-f<span class="w"> </span>./kubeai-rerank-models.yaml.yaml
+<h2 id="opt-in-the-namespace">Opt in the namespace<a class="headerlink" href="#opt-in-the-namespace" title="Permanent link">&para;</a></h2>
+<p>Inventory is namespace-opt-in by design; nothing is recorded until a
+namespace is labeled:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>label<span class="w"> </span>namespace<span class="w"> </span>&lt;kubeai-namespace&gt;<span class="w"> </span>aibom.k8saibom.dev/enabled<span class="o">=</span><span class="nb">true</span>
 </code></pre></div>
-<p>Once the pod is ready, you can call the rerank endpoint:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
-<span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
-    <span class="s2">"http://localhost:8000/openai/v1/rerank"</span><span class="p">,</span>
-    <span class="n">json</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">"model"</span><span class="p">:</span> <span class="s2">"bge-rerank-base-cpu"</span><span class="p">,</span>
-        <span class="s2">"query"</span><span class="p">:</span> <span class="s2">"Which document talks about apples?"</span><span class="p">,</span>
-        <span class="s2">"documents"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"An apple a day keeps the doctor away"</span><span class="p">,</span> <span class="s2">"Oranges are tasty"</span><span class="p">],</span>
-    <span class="p">},</span>
-<span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+<h2 id="read-the-inventory">Read the inventory<a class="headerlink" href="#read-the-inventory" title="Permanent link">&para;</a></h2>
+<p>Each model server Deployment gets an <code>AIBOM</code> resource:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>aiboms<span class="w"> </span>-n<span class="w"> </span>&lt;kubeai-namespace&gt;
 </code></pre></div>
+<p>The <code>kubectl aibom</code> plugin (<code>kubectl krew install aibom</code>) summarizes them:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>aibom<span class="w"> </span>summary<span class="w"> </span>-n<span class="w"> </span>&lt;kubeai-namespace&gt;
+</code></pre></div>
+<p>KubeAI's vLLM and Ollama model servers are detected out of the box (runtime
+confidence <code>inferred</code>, from the image; model identity <code>declared</code>, from the
+server arguments). Documents can be shipped to external sinks (object
+storage, webhook) for audit retention — see the
+<a href="https://github.com/GoogleCloudPlatform/k8s-aibom#readme">k8s-aibom documentation</a>.</p>
 
 
 
