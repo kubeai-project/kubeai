@@ -769,6 +769,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../how-to/configure-systemone-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Route System One requests through KubeAI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../how-to/configure-text-generation-models/" class="md-nav__link">
         
   
@@ -1718,6 +1746,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#system-one-decisions-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System One decisions (extension)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2224,6 +2263,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#system-one-decisions-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System One decisions (extension)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2294,6 +2344,23 @@ POST /v1/completions
 </code></pre></div>
 <ul>
 <li>Supported for Models with <code>.spec.features: ["SpeechToText"]</code>.</li>
+</ul>
+<h3 id="system-one-decisions-extension">System One decisions (extension)<a class="headerlink" href="#system-one-decisions-extension" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>POST /v1/systemone
+</code></pre></div>
+<ul>
+<li>KubeAI URL: <code>/openai/v1/systemone</code>.</li>
+<li>Requires <code>.spec.features: ["SystemOne"]</code> and engine <code>OLlama</code>, <code>VLLM</code>,
+  <code>LlamaCpp</code> or <code>SGLang</code>.</li>
+<li>The engine image must already serve <code>/v1/systemone</code> at its inference port.</li>
+<li>Requires a non-empty <code>model</code> string naming a KubeAI Model. Adapter selection
+  is unsupported; other fields and responses are backend-defined.</li>
+<li>JSON and multipart bodies are preserved byte-for-byte. Multipart requests
+  carry the JSON envelope in exactly one text form field named <code>request</code>.</li>
+<li>The complete body limit is 32 MiB. The existing proxy handles load balancing,
+  scale-from-zero, retries and request accounting.</li>
+<li>See <a href="../../how-to/configure-systemone-models/">Route System One requests</a> for
+  configuration, discovery, examples, limitations and error behavior.</li>
 </ul>
 <h2 id="openai-client-libaries">OpenAI Client libaries<a class="headerlink" href="#openai-client-libaries" title="Permanent link">&para;</a></h2>
 <p>You can use the official OpenAI client libraries by setting the
