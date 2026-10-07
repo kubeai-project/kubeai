@@ -1,3 +1,12 @@
+## v0.24.0 - 2026-10-07
+
+- Feat/systemone api by @m4oc in https://github.com/kubeai-project/kubeai/pull/745
+- ci: fix gh-release-workflow by @ffais in https://github.com/kubeai-project/kubeai/pull/741
+- feat(chart): optional runtime AI inventory via k8s-aibom subchart (default off) by @glenmessenger in https://github.com/kubeai-project/kubeai/pull/739
+- feat: pull oci:// models through llmman serve by @ericcurtin in https://github.com/kubeai-project/kubeai/pull/728
+- add SGLang and llama.cpp inference engines by @krim404 in https://github.com/kubeai-project/kubeai/pull/727
+- Controller watch scope by @DavideRutigliano in https://github.com/kubeai-project/kubeai/pull/692
+
 ## v0.23.5 - 2026-09-30
 
 - Fix/otel autoscaling cardinality by @m4oc in https://github.com/kubeai-project/kubeai/pull/735
