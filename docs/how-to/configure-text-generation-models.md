@@ -68,12 +68,12 @@ spec:
 
 ## Small NVIDIA GPU examples
 
-The model catalog includes small Qwen2.5 0.5B Instruct examples for testing SGLang and llama.cpp:
+The model catalog includes small Qwen3 0.6B examples for testing SGLang and llama.cpp:
 
 | Engine | Catalog entry | Model format |
 | --- | --- | --- |
-| SGLang | [qwen2-500m-instruct-sglang-gpu](https://github.com/kubeai-project/kubeai/blob/main/manifests/models/qwen2-500m-instruct-sglang-gpu.yaml) | Hugging Face weights |
-| llama.cpp | [qwen2-500m-instruct-llamacpp-gpu](https://github.com/kubeai-project/kubeai/blob/main/manifests/models/qwen2-500m-instruct-llamacpp-gpu.yaml) | GGUF, Q4_K_M |
+| SGLang | [qwen3-600m-sglang-gpu](https://github.com/kubeai-project/kubeai/blob/main/manifests/models/qwen3-600m-sglang-gpu.yaml) | Hugging Face weights |
+| llama.cpp | [qwen3-600m-llamacpp-gpu](https://github.com/kubeai-project/kubeai/blob/main/manifests/models/qwen3-600m-llamacpp-gpu.yaml) | GGUF, Q8_0 |
 
 Both examples use `nvidia-gpu-t4:1`, which requests one NVIDIA GPU with the default KubeAI profile. This profile does not select a T4 specifically; it can also be used on another compatible NVIDIA GPU. Check any profile overrides configured for your cluster. The NVIDIA driver, container runtime and device plugin must be configured before applying the models.
 
@@ -82,13 +82,13 @@ Enable one example with Helm:
 ```bash
 helm upgrade --install --reuse-values kubeai-models kubeai/models -f - <<EOF
 catalog:
-  qwen2-500m-instruct-sglang-gpu:
+  qwen3-600m-sglang-gpu:
     enabled: true
     minReplicas: 1
 EOF
 ```
 
-For llama.cpp, replace the catalog entry with `qwen2-500m-instruct-llamacpp-gpu`. Alternatively, apply the corresponding raw manifest with `kubectl apply -f`. Raw manifests default to `minReplicas: 0`; the first inference request triggers model startup.
+For llama.cpp, replace the catalog entry with `qwen3-600m-llamacpp-gpu`. Alternatively, apply the corresponding raw manifest with `kubectl apply -f`. Raw manifests default to `minReplicas: 0`; the first inference request triggers model startup.
 
 On a node with one GPU, run one GPU model at a time. Delete the previous Model and wait for its Pod to terminate before starting the next example. For Helm-managed models, disable the previous catalog entry in the same Helm release instead.
 

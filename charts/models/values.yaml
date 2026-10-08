@@ -605,10 +605,10 @@ catalog:
     args:
     - --context-length=2048
     - --max-running-requests=1
-  qwen2-500m-instruct-sglang-gpu:
+  qwen3-600m-sglang-gpu:
     enabled: false
     features: ["TextGeneration"]
-    url: "hf://Qwen/Qwen2.5-0.5B-Instruct"
+    url: "hf://Qwen/Qwen3-0.6B"
     engine: SGLang
     resourceProfile: nvidia-gpu-t4:1
     args:
@@ -626,10 +626,10 @@ catalog:
     args:
     - --ctx-size
     - "4096"
-  qwen2-500m-instruct-llamacpp-gpu:
+  qwen3-600m-llamacpp-gpu:
     enabled: false
     features: ["TextGeneration"]
-    url: "hf://Qwen/Qwen2.5-0.5B-Instruct-GGUF:q4_k_m"
+    url: "hf://Qwen/Qwen3-0.6B-GGUF:Q8_0"
     engine: LlamaCpp
     resourceProfile: nvidia-gpu-t4:1
     args:

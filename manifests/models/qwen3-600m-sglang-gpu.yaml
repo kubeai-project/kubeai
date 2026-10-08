@@ -2,11 +2,11 @@
 apiVersion: kubeai.org/v1
 kind: Model
 metadata:
-  name: qwen2-500m-instruct-sglang-gpu
+  name: qwen3-600m-sglang-gpu
 spec:
   features:
     - TextGeneration
-  url: hf://Qwen/Qwen2.5-0.5B-Instruct
+  url: hf://Qwen/Qwen3-0.6B
   engine: SGLang
   args:
     - --dtype=half
