@@ -605,6 +605,16 @@ catalog:
     args:
     - --context-length=2048
     - --max-running-requests=1
+  qwen2-500m-instruct-sglang-gpu:
+    enabled: false
+    features: ["TextGeneration"]
+    url: "hf://Qwen/Qwen2.5-0.5B-Instruct"
+    engine: SGLang
+    resourceProfile: nvidia-gpu-t4:1
+    args:
+    - --dtype=half
+    - --context-length=2048
+    - --mem-fraction-static=0.3
   # llama.cpp #
   qwen2-500m-instruct-llamacpp-cpu:
     enabled: false
@@ -616,6 +626,17 @@ catalog:
     args:
     - --ctx-size
     - "4096"
+  qwen2-500m-instruct-llamacpp-gpu:
+    enabled: false
+    features: ["TextGeneration"]
+    url: "hf://Qwen/Qwen2.5-0.5B-Instruct-GGUF:q4_k_m"
+    engine: LlamaCpp
+    resourceProfile: nvidia-gpu-t4:1
+    args:
+    - --ctx-size
+    - "2048"
+    - --n-gpu-layers
+    - "99"
   stories15m-split-llamacpp-cpu:
     enabled: false
     features: ["TextGeneration"]

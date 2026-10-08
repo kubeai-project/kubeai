@@ -1,0 +1,17 @@
+# Source: models/templates/models.yaml
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: qwen2-500m-instruct-llamacpp-gpu
+spec:
+  features:
+    - TextGeneration
+  url: hf://Qwen/Qwen2.5-0.5B-Instruct-GGUF:q4_k_m
+  engine: LlamaCpp
+  args:
+    - --ctx-size
+    - "2048"
+    - --n-gpu-layers
+    - "99"
+  minReplicas: 0
+  resourceProfile: nvidia-gpu-t4:1
