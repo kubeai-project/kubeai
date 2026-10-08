@@ -1,3 +1,0 @@
-data/raw/*.json
-data/*.json
-/values-gke.yaml

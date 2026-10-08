@@ -1,6 +1,0 @@
-{
-    "model": "llama-3.1-8b-instruct-fp8-l4",
-    "max_tokens": 10,
-    "temperature": 0,
-    "messages": []
-}

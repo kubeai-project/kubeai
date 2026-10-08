@@ -1,7 +1,0 @@
-{
-    "request_model": "qwen2:0.5b",
-    "max_concurrent_threads": 2,
-    "thread_count": 4,
-    "max_completion_tokens": 10,
-    "request_timeout": "30s"
-}
