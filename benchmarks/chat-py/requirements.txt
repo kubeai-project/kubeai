@@ -1,6 +1,0 @@
-numpy
-huggingface_hub
-aiohttp
-transformers
-datasets
-pillow

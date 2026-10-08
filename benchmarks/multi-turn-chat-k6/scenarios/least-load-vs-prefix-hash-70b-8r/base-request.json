@@ -1,6 +1,0 @@
-{
-    "model": "llama-3.1-70b-instruct-fp8-h100",
-    "max_tokens": 10,
-    "temperature": 0,
-    "messages": []
-}

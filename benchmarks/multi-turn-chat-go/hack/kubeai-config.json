@@ -1,7 +1,0 @@
-{
-    "request_model": "deepseek-r1-1.5b-cpu",
-    "tokenizer_model": "deepseek-ai/DeepSeek-R1",
-    "max_concurrent_threads": 2,
-    "max_completion_tokens": 10,
-    "request_timeout": "180s"
-}
