@@ -915,6 +915,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#small-nvidia-gpu-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Small NVIDIA GPU examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configure-a-chat-template" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2298,6 +2309,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#small-nvidia-gpu-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Small NVIDIA GPU examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configure-a-chat-template" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2411,6 +2433,8 @@
 <ul>
 <li>vLLM (Recommended for GPU)</li>
 <li>Ollama (Recommended for CPU)</li>
+<li>SGLang</li>
+<li>llama.cpp (GGUF models)</li>
 <li>Need something else? Please file an issue on <a href="https://github.com/kubeai-project/kubeai">GitHub</a>.</li>
 </ul>
 <p>There are 2 ways to install a text generation model in KubeAI:
@@ -2456,6 +2480,43 @@ and are also published as raw manifests in the
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--disable-log-requests</span>
 <span class="w">  </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nvidia-gpu-l4:1</span>
 </code></pre></div></p>
+<h2 id="small-nvidia-gpu-examples">Small NVIDIA GPU examples<a class="headerlink" href="#small-nvidia-gpu-examples" title="Permanent link">&para;</a></h2>
+<p>The model catalog includes small Qwen3 0.6B examples for testing SGLang and llama.cpp:</p>
+<table>
+<thead>
+<tr>
+<th>Engine</th>
+<th>Catalog entry</th>
+<th>Model format</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SGLang</td>
+<td><a href="https://github.com/kubeai-project/kubeai/blob/main/manifests/models/qwen3-600m-sglang-gpu.yaml">qwen3-600m-sglang-gpu</a></td>
+<td>Hugging Face weights</td>
+</tr>
+<tr>
+<td>llama.cpp</td>
+<td><a href="https://github.com/kubeai-project/kubeai/blob/main/manifests/models/qwen3-600m-llamacpp-gpu.yaml">qwen3-600m-llamacpp-gpu</a></td>
+<td>GGUF, Q8_0</td>
+</tr>
+</tbody>
+</table>
+<p>Both examples use <code>nvidia-gpu-t4:1</code>, which requests one NVIDIA GPU with the default KubeAI profile. This profile does not select a T4 specifically; it can also be used on another compatible NVIDIA GPU. Check any profile overrides configured for your cluster. The NVIDIA driver, container runtime and device plugin must be configured before applying the models.</p>
+<p>Enable one example with Helm:</p>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>--reuse-values<span class="w"> </span>kubeai-models<span class="w"> </span>kubeai/models<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;EOF</span>
+<span class="s">catalog:</span>
+<span class="s">  qwen3-600m-sglang-gpu:</span>
+<span class="s">    enabled: true</span>
+<span class="s">    minReplicas: 1</span>
+<span class="s">EOF</span>
+</code></pre></div>
+<p>For llama.cpp, replace the catalog entry with <code>qwen3-600m-llamacpp-gpu</code>. Alternatively, apply the corresponding raw manifest with <code>kubectl apply -f</code>. Raw manifests default to <code>minReplicas: 0</code>; the first inference request triggers model startup.</p>
+<p>On a node with one GPU, run one GPU model at a time. Delete the previous Model and wait for its Pod to terminate before starting the next example. For Helm-managed models, disable the previous catalog entry in the same Helm release instead.</p>
+<p>Use the Model's <code>metadata.name</code> as the <code>model</code> field in the chat request described below. A ready Pod confirms startup; a successful chat request through KubeAI verifies inference and routing.</p>
+<p>These examples use the engine images configured in the KubeAI chart. To test a different image with a raw Model manifest, set <code>spec.image</code>; it takes precedence over the image selected by the resource profile.</p>
+<p>For llama.cpp, pass argument names and values as separate entries in <code>spec.args</code>, as shown in the generated manifest.</p>
 <h2 id="configure-a-chat-template">Configure a Chat Template<a class="headerlink" href="#configure-a-chat-template" title="Permanent link">&para;</a></h2>
 <p>Some models do not ship will chat templates and some engines such as vLLM do not provide a default one. In these cases, you can use <code>.spec.files</code> to inject a template at Pod runtime.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Model</span>
