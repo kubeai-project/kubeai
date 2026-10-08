@@ -6,18 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strconv"
 	"strings"
 
 	kubeaiv1 "github.com/kubeai-project/kubeai/api/k8s/v1"
 	"github.com/kubeai-project/kubeai/internal/k8sutils"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
-	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	apitypes "k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -188,146 +184,8 @@ func (lp *lwsPlan) execute(ctx context.Context, k8sClient client.Client, scheme 
 
 // buildLeaderWorkerSet constructs a complete LeaderWorkerSet manifest for a multi-node model.
 func (r *ModelReconciler) buildLeaderWorkerSet(model *kubeaiv1.Model, cfg ModelConfig) (*lwsv1.LeaderWorkerSet, error) {
-	if cfg.PodBuilder == nil {
-		return nil, fmt.Errorf("no pod builder configured for engine %q", model.Spec.Engine)
+	if cfg.LWSBuilder == nil {
+		return nil, fmt.Errorf("no LWS builder configured for engine %q", model.Spec.Engine)
 	}
-
-	podForModel := cfg.PodBuilder(model, cfg)
-	if err := applyJSONPatchToPod(r.ModelServerPods.JSONPatches, podForModel); err != nil {
-		return nil, err
-	}
-
-	lbs := labelsForModel(model)
-	ann := map[string]string{
-		"kubeai.org/tensor-parallel-size":   strconv.Itoa(cfg.LWSConfig.TensorParallelSize),
-		"kubeai.org/pipeline-parallel-size": strconv.Itoa(cfg.LWSConfig.PipelineParallelSize),
-	}
-
-	// --- Head pod ---
-	headPod := podForModel.DeepCopy()
-	headPod.ObjectMeta.Labels[LabelGroupRole] = GroupRoleHead
-
-	headPod.Spec.Containers[0].Ports = append(headPod.Spec.Containers[0].Ports, corev1.ContainerPort{
-		Name:          rayPortName,
-		ContainerPort: int32(rayPort),
-		Protocol:      corev1.ProtocolTCP,
-	})
-
-	headPod.Spec.Containers[0].Env = append(headPod.Spec.Containers[0].Env,
-		corev1.EnvVar{Name: "LWS_GROUP_SIZE", Value: strconv.Itoa(cfg.LWSConfig.PipelineParallelSize)},
-	)
-
-	const rayLeaderBootstrap = "bash /vllm-workspace/examples/online_serving/multi-node-serving.sh leader --ray_cluster_size=$(LWS_GROUP_SIZE)"
-	vllmEntrypoint := strings.Join(headPod.Spec.Containers[0].Command, " ")
-	headPod.Spec.Containers[0].Command = []string{
-		"bash", "-c",
-		fmt.Sprintf("%s && %s \"$@\"", rayLeaderBootstrap, vllmEntrypoint),
-	}
-
-	headPod.Spec.Containers[0].Args = append(headPod.Spec.Containers[0].Args,
-		fmt.Sprintf("--tensor-parallel-size=%d", cfg.LWSConfig.TensorParallelSize),
-		fmt.Sprintf("--pipeline-parallel-size=%d", cfg.LWSConfig.PipelineParallelSize),
-		"--distributed-executor-backend=ray",
-	)
-
-	// Head uses HTTP health probes on the vLLM server (already set by vLLMPodForModel).
-
-	// --- Worker pod ---
-	workerPod := podForModel.DeepCopy()
-	workerPod.ObjectMeta.Labels[LabelGroupRole] = GroupRoleWorker
-	// Remove the model label from workers — only head pods should receive traffic.
-	delete(workerPod.ObjectMeta.Labels, "model")
-	delete(workerPod.ObjectMeta.Labels, kubeaiv1.PodModelLabel)
-
-	// Workers don't serve the model API — they join the Ray cluster as workers.
-	// Replace the vLLM command with a ray worker start.
-	workerPod.Spec.Containers[0].Command = []string{
-		"bash", "-c",
-		"bash /vllm-workspace/examples/online_serving/multi-node-serving.sh worker --ray_address=$(LWS_LEADER_ADDRESS)",
-	}
-	workerPod.Spec.Containers[0].Args = nil
-
-	workerPod.Spec.Containers[0].Env = append(workerPod.Spec.Containers[0].Env,
-		corev1.EnvVar{
-			Name: "LWS_LEADER_ADDRESS",
-			ValueFrom: &corev1.EnvVarSource{
-				FieldRef: &corev1.ObjectFieldSelector{
-					FieldPath: fmt.Sprintf("metadata.annotations['%s']", lwsv1.LeaderPodNameAnnotationKey),
-				},
-			},
-		},
-	)
-
-	workerPod.Spec.Containers[0].Ports = []corev1.ContainerPort{{
-		Name:          rayPortName,
-		ContainerPort: int32(rayPort),
-		Protocol:      corev1.ProtocolTCP,
-	}}
-
-	rayProbe := &corev1.Probe{
-		ProbeHandler: corev1.ProbeHandler{
-			Exec: &corev1.ExecAction{
-				Command: []string{"ray", "status"},
-			},
-		},
-		InitialDelaySeconds: 30,
-		PeriodSeconds:       10,
-		TimeoutSeconds:      5,
-		FailureThreshold:    3,
-	}
-	workerStartupProbe := &corev1.Probe{
-		ProbeHandler: corev1.ProbeHandler{
-			Exec: &corev1.ExecAction{
-				Command: []string{"ray", "status"},
-			},
-		},
-		InitialDelaySeconds: 10,
-		PeriodSeconds:       5,
-		TimeoutSeconds:      5,
-		FailureThreshold:    20,
-	}
-	workerPod.Spec.Containers[0].LivenessProbe = rayProbe
-	workerPod.Spec.Containers[0].ReadinessProbe = rayProbe
-	workerPod.Spec.Containers[0].StartupProbe = workerStartupProbe
-
-	lws := &lwsv1.LeaderWorkerSet{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "leaderworkerset.x-k8s.io/v1",
-			Kind:       "LeaderWorkerSet",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        LwsName(model),
-			Namespace:   model.Namespace,
-			Labels:      lbs,
-			Annotations: ann,
-		},
-		Spec: lwsv1.LeaderWorkerSetSpec{
-			Replicas: model.Spec.Replicas,
-			RolloutStrategy: lwsv1.RolloutStrategy{
-				Type: lwsv1.RollingUpdateStrategyType,
-				RollingUpdateConfiguration: &lwsv1.RollingUpdateConfiguration{
-					MaxUnavailable: intstr.IntOrString{IntVal: 1},
-					MaxSurge:       intstr.IntOrString{IntVal: 0},
-				},
-			},
-			StartupPolicy: lwsv1.LeaderCreatedStartupPolicy,
-			NetworkConfig: &lwsv1.NetworkConfig{
-				SubdomainPolicy: ptr.To(lwsv1.SubdomainUniquePerReplica),
-			},
-			LeaderWorkerTemplate: lwsv1.LeaderWorkerTemplate{
-				RestartPolicy: lwsv1.NoneRestartPolicy,
-				Size:          ptr.To(int32(cfg.LWSConfig.PipelineParallelSize)),
-				LeaderTemplate: &corev1.PodTemplateSpec{
-					ObjectMeta: headPod.ObjectMeta,
-					Spec:       headPod.Spec,
-				},
-				WorkerTemplate: corev1.PodTemplateSpec{
-					ObjectMeta: workerPod.ObjectMeta,
-					Spec:       workerPod.Spec,
-				},
-			},
-		},
-	}
-
-	return lws, nil
+	return cfg.LWSBuilder(model, cfg)
 }

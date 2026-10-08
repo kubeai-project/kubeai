@@ -8,12 +8,15 @@ import (
 	kubeaiv1 "github.com/kubeai-project/kubeai/api/k8s/v1"
 	"github.com/kubeai-project/kubeai/internal/config"
 	corev1 "k8s.io/api/core/v1"
+	lwsv1 "sigs.k8s.io/lws/api/leaderworkerset/v1"
 )
 
 // enginePodBuilder constructs the base Pod spec for a given engine.
 // Each engine file (engine_vllm.go, engine_ollama.go, etc.) provides a
 // builder function matching this signature.
 type enginePodBuilder func(m *kubeaiv1.Model, c ModelConfig) *corev1.Pod
+
+type engineLWSBuilder func(m *kubeaiv1.Model, c ModelConfig) (*lwsv1.LeaderWorkerSet, error)
 
 // ModelConfig holds the resolved configuration for a Model, combining the
 // resource profile, cache profile, image, source, and optional multi-node config.
@@ -24,6 +27,7 @@ type ModelConfig struct {
 	Source     modelSource
 	LWSConfig  *LWSConfig
 	PodBuilder enginePodBuilder `json:"-"`
+	LWSBuilder engineLWSBuilder `json:"-"`
 }
 
 // LWSConfig holds multi-node group configuration for LeaderWorkerSet.
@@ -144,6 +148,7 @@ func (r *ModelReconciler) getModelConfig(model *kubeaiv1.Model) (ModelConfig, er
 
 	// Resolve engine pod builder.
 	result.PodBuilder = r.resolveEnginePodBuilder(model.Spec.Engine)
+	result.LWSBuilder = r.resolveEngineLWSBuilder(model.Spec.Engine)
 
 	return result, nil
 }
@@ -159,6 +164,15 @@ func (r *ModelReconciler) resolveEnginePodBuilder(engine string) enginePodBuilde
 		return r.infinityPodForModel
 	default:
 		return r.vLLMPodForModel
+	}
+}
+
+func (r *ModelReconciler) resolveEngineLWSBuilder(engine string) engineLWSBuilder {
+	switch engine {
+	case kubeaiv1.VLLMEngine:
+		return r.buildVLLMLeaderWorkerSet
+	default:
+		return nil
 	}
 }
 

@@ -67,6 +67,7 @@ func testLWSModelConfig(t *testing.T, r *ModelReconciler) ModelConfig {
 			PipelineParallelSize: 3,
 		},
 		PodBuilder: r.vLLMPodForModel,
+		LWSBuilder: r.buildVLLMLeaderWorkerSet,
 	}
 }
 
@@ -356,6 +357,17 @@ func TestBuildLeaderWorkerSet_NilPodBuilder(t *testing.T) {
 	assert.Contains(t, err.Error(), "no pod builder")
 }
 
+func TestBuildLeaderWorkerSet_NilLWSBuilder(t *testing.T) {
+	r := testLWSReconciler(t)
+	model := testLWSModel(t)
+	cfg := testLWSModelConfig(t, r)
+	cfg.LWSBuilder = nil
+
+	_, err := r.buildLeaderWorkerSet(model, cfg)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "no LWS builder")
+}
+
 func TestLWSPlan_Execute(t *testing.T) {
 	scheme := testScheme(t)
 
@@ -536,6 +548,7 @@ func TestGetModelConfig_MultiNode(t *testing.T) {
 
 			if tt.expectLWS {
 				require.NotNil(t, cfg.LWSConfig)
+				require.NotNil(t, cfg.LWSBuilder)
 				assert.Equal(t, tt.expectTP, cfg.LWSConfig.TensorParallelSize)
 				assert.Equal(t, tt.expectPP, cfg.LWSConfig.PipelineParallelSize)
 			} else {
