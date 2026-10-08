@@ -1,0 +1,17 @@
+# Source: models/templates/models.yaml
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: qwen3-600m-llamacpp-gpu
+spec:
+  features:
+    - TextGeneration
+  url: hf://Qwen/Qwen3-0.6B-GGUF:Q8_0
+  engine: LlamaCpp
+  args:
+    - --ctx-size
+    - "2048"
+    - --n-gpu-layers
+    - "99"
+  minReplicas: 0
+  resourceProfile: nvidia-gpu-t4:1

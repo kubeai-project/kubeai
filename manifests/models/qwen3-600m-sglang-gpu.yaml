@@ -1,0 +1,16 @@
+# Source: models/templates/models.yaml
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: qwen3-600m-sglang-gpu
+spec:
+  features:
+    - TextGeneration
+  url: hf://Qwen/Qwen3-0.6B
+  engine: SGLang
+  args:
+    - --dtype=half
+    - --context-length=2048
+    - --mem-fraction-static=0.3
+  minReplicas: 0
+  resourceProfile: nvidia-gpu-t4:1

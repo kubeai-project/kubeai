@@ -4,6 +4,8 @@ KubeAI supports the following engines for text generation models (LLMs, VLMs, ..
 
 - vLLM (Recommended for GPU)
 - Ollama (Recommended for CPU)
+- SGLang
+- llama.cpp (GGUF models)
 - Need something else? Please file an issue on [GitHub](https://github.com/kubeai-project/kubeai).
 
 There are 2 ways to install a text generation model in KubeAI:
@@ -63,6 +65,38 @@ spec:
     - --disable-log-requests
   resourceProfile: nvidia-gpu-l4:1
 ```
+
+## Small NVIDIA GPU examples
+
+The model catalog includes small Qwen3 0.6B examples for testing SGLang and llama.cpp:
+
+| Engine | Catalog entry | Model format |
+| --- | --- | --- |
+| SGLang | [qwen3-600m-sglang-gpu](https://github.com/kubeai-project/kubeai/blob/main/manifests/models/qwen3-600m-sglang-gpu.yaml) | Hugging Face weights |
+| llama.cpp | [qwen3-600m-llamacpp-gpu](https://github.com/kubeai-project/kubeai/blob/main/manifests/models/qwen3-600m-llamacpp-gpu.yaml) | GGUF, Q8_0 |
+
+Both examples use `nvidia-gpu-t4:1`, which requests one NVIDIA GPU with the default KubeAI profile. This profile does not select a T4 specifically; it can also be used on another compatible NVIDIA GPU. Check any profile overrides configured for your cluster. The NVIDIA driver, container runtime and device plugin must be configured before applying the models.
+
+Enable one example with Helm:
+
+```bash
+helm upgrade --install --reuse-values kubeai-models kubeai/models -f - <<EOF
+catalog:
+  qwen3-600m-sglang-gpu:
+    enabled: true
+    minReplicas: 1
+EOF
+```
+
+For llama.cpp, replace the catalog entry with `qwen3-600m-llamacpp-gpu`. Alternatively, apply the corresponding raw manifest with `kubectl apply -f`. Raw manifests default to `minReplicas: 0`; the first inference request triggers model startup.
+
+On a node with one GPU, run one GPU model at a time. Delete the previous Model and wait for its Pod to terminate before starting the next example. For Helm-managed models, disable the previous catalog entry in the same Helm release instead.
+
+Use the Model's `metadata.name` as the `model` field in the chat request described below. A ready Pod confirms startup; a successful chat request through KubeAI verifies inference and routing.
+
+These examples use the engine images configured in the KubeAI chart. To test a different image with a raw Model manifest, set `spec.image`; it takes precedence over the image selected by the resource profile.
+
+For llama.cpp, pass argument names and values as separate entries in `spec.args`, as shown in the generated manifest.
 
 ## Configure a Chat Template
 Some models do not ship will chat templates and some engines such as vLLM do not provide a default one. In these cases, you can use `.spec.files` to inject a template at Pod runtime.
