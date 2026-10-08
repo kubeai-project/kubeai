@@ -1,16 +1,24 @@
 # OpenAI API Compatibility
 
-KubeAI provides an OpenAI API compatiblity layer.
+KubeAI provides an OpenAI API compatibility layer under `/openai/v1`.
+The paths below are public KubeAI URLs. See the
+[API routes and migration](api-route-migration.md) for the complete route table,
+the explicit list of deprecated URLs and the compatibility policy.
 
 ## General:
 
 ### Models
 
 ```
+GET /openai/v1/models
 GET /v1/models
 ```
 
-* Lists all `kind: Model` object installed in teh Kubernetes API Server.
+* Both routes list all installed `kind: Model` objects and their adapters,
+  including embedding, reranking, speech and System One models, and Models
+  scaled to zero. `/openai/v1/models` is not deprecated.
+* Use `?feature=TextGeneration` for chat-only discovery. Repeated `feature`
+  parameters form a union; `X-Label-Selector` restricts results.
 
 
 ## Inference
@@ -18,8 +26,8 @@ GET /v1/models
 ### Text Generation
 
 ```
-POST /v1/chat/completions
-POST /v1/completions
+POST /openai/v1/chat/completions
+POST /openai/v1/completions
 ```
 
 * Supported for Models with `.spec.features: ["TextGeneration"]`.
@@ -27,7 +35,7 @@ POST /v1/completions
 ### Embeddings
 
 ```
-POST /v1/embeddings
+POST /openai/v1/embeddings
 ```
 
 * Supported for  Models with `.spec.features: ["TextEmbedding"]`.
@@ -35,15 +43,17 @@ POST /v1/embeddings
 ### Reranking
 
 ```
-POST /v1/vllm/rerank
+POST /v1/rerank
 ```
 
 * Supported for  Models with `.spec.features: ["Reranking"]`.
+* `/openai/v1/rerank` remains operational but is deprecated; migrate to
+  `/v1/rerank` before the following release.
 
 ### Speech-to-Text
 
 ```
-POST /v1/audio/transcriptions
+POST /openai/v1/audio/transcriptions
 ```
 
 * Supported for Models with `.spec.features: ["SpeechToText"]`.
@@ -54,7 +64,8 @@ POST /v1/audio/transcriptions
 POST /v1/systemone
 ```
 
-* KubeAI URL: `/openai/v1/systemone`.
+* `/openai/v1/systemone` remains operational but is deprecated; migrate to
+  `/v1/systemone` before the following release.
 * Requires `.spec.features: ["SystemOne"]` and engine `OLlama`, `VLLM`,
   `LlamaCpp` or `SGLang`.
 * The engine image must already serve `/v1/systemone` at its inference port.
@@ -67,7 +78,26 @@ POST /v1/systemone
 * See [Route System One requests](../how-to/configure-systemone-models.md) for
   configuration, discovery, examples, limitations and error behavior.
 
-## OpenAI Client libaries
+### Responses
+
+```text
+POST /openai/v1/responses
+```
+
+The existing route remains unchanged.
+
+## Anthropic Messages
+
+```text
+POST /v1/messages
+```
+
+Requires `TextGeneration` and a backend implementing the native Messages API.
+KubeAI preserves the Anthropic payload and streaming response; it does not
+convert Messages to OpenAI chat. See
+[Use the Anthropic Messages API](../how-to/use-anthropic-messages.md).
+
+## OpenAI Client libraries
 You can use the official OpenAI client libraries by setting the
 `base_url` to the KubeAI endpoint.
 

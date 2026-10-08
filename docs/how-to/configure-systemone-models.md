@@ -1,6 +1,6 @@
 # Route System One requests through KubeAI
 
-KubeAI exposes `POST /openai/v1/systemone` and forwards it to
+KubeAI exposes `POST /v1/systemone` and forwards it to
 `POST /v1/systemone` on a selected model server. This endpoint is an inference
 extension alongside chat, embeddings and reranking.
 
@@ -9,6 +9,11 @@ integration assumes the selected server image already implements
 `/v1/systemone`. KubeAI adds routing and access to its existing inference
 lifecycle; it does not install an endpoint into the engine, add a wrapper,
 change the model server launcher or translate between engine payload formats.
+
+`POST /openai/v1/systemone` remains available during the migration and serves
+the same backend endpoint. It is deprecated and planned for removal in the
+release following the one that introduces `/v1/systemone`. See the
+[API route migration](../reference/api-route-migration.md) before upgrading clients.
 
 ## Enable the feature on a Model
 
@@ -71,10 +76,13 @@ List Models that advertise the feature:
 
 ```bash
 curl --fail-with-body \
-  'http://localhost:8000/openai/v1/models?feature=SystemOne'
+  'http://localhost:8000/v1/models?feature=SystemOne'
 ```
 
-Without a feature query, model discovery defaults to `TextGeneration`.
+Without a feature query, both `/v1/models` and `/openai/v1/models` list all
+installed Models and their adapters. Use `?feature=TextGeneration` for chat-only
+discovery. Discovery includes Models scaled to zero; it does not probe backend
+endpoint availability.
 In the request, `model` must be the Model's Kubernetes `metadata.name`, such as
 `ticket-decisions`. It is not a Hugging Face repository, an Ollama model tag or
 an SDK's default model name. KubeAI forwards this value unchanged; the server's
@@ -95,7 +103,7 @@ are backend-defined. The example below illustrates a decision payload; confirm
 its field names and question types against your selected engine implementation.
 
 ```bash
-curl --fail-with-body http://localhost:8000/openai/v1/systemone \
+curl --fail-with-body http://localhost:8000/v1/systemone \
   -H 'Content-Type: application/json' \
   -H 'X-Label-Selector: team=support' \
   --data-binary '{
@@ -130,7 +138,7 @@ routing envelope. Put `model` inside that JSON field. A separate `model` form
 field does not select the destination.
 
 ```bash
-curl --fail-with-body http://localhost:8000/openai/v1/systemone \
+curl --fail-with-body http://localhost:8000/v1/systemone \
   -F 'request={"model":"ticket-decisions","state":"Inspect this image","questions":{"damaged":{"type":"noul","instructions":"Is the item damaged?"}}}' \
   -F 'image=@photo.png;type=image/png'
 ```

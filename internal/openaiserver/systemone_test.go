@@ -90,56 +90,58 @@ func TestSystemOneProxy(t *testing.T) {
 			}
 		}
 	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			metricstest.Init(t)
-			var requests atomic.Int32
-			upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				attempt := requests.Add(1)
-				body, err := io.ReadAll(r.Body)
-				if err != nil || string(body) != tc.body || r.URL.Path != apiutils.SystemOnePath || r.Header.Get("Content-Type") != tc.contentType || r.Header.Get("Authorization") != "Bearer test" || r.ContentLength != int64(len(tc.body)) || len(r.TransferEncoding) != 0 {
-					t.Error("proxy changed the backend request", err)
+	for _, path := range []string{"/v1/systemone", "/openai/v1/systemone"} {
+		for _, tc := range cases {
+			t.Run(path+"/"+tc.name, func(t *testing.T) {
+				metricstest.Init(t)
+				var requests atomic.Int32
+				upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					attempt := requests.Add(1)
+					body, err := io.ReadAll(r.Body)
+					if err != nil || string(body) != tc.body || r.URL.Path != apiutils.SystemOnePath || r.Header.Get("Content-Type") != tc.contentType || r.Header.Get("Authorization") != "Bearer test" || r.ContentLength != int64(len(tc.body)) || len(r.TransferEncoding) != 0 {
+						t.Error("proxy changed the backend request", err)
+					}
+					w.Header().Set("Content-Type", "application/json")
+					w.Header().Set("X-Backend", tc.engine)
+					status := tc.backendStatus
+					if status == 503 && attempt > 1 && !strings.Contains(tc.name, "exhausted") {
+						status = 200
+					}
+					w.WriteHeader(status)
+					fmt.Fprint(w, `{"answers":{"urgent":{"noul":0.8}},"diagnostics":{"extra":true}}`)
+				}))
+				defer upstream.Close()
+				backend := &systemOneBackend{model: &k8sv1.Model{Spec: k8sv1.ModelSpec{Engine: tc.engine, Features: []k8sv1.ModelFeature{k8sv1.ModelFeatureSystemOne}}}, address: strings.TrimPrefix(upstream.URL, "http://")}
+				if tc.noFeature {
+					backend.model.Spec.Features = nil
 				}
-				w.Header().Set("Content-Type", "application/json")
-				w.Header().Set("X-Backend", tc.engine)
-				status := tc.backendStatus
-				if status == 503 && attempt > 1 && !strings.Contains(tc.name, "exhausted") {
-					status = 200
+				h := NewHandler(nil, modelproxy.NewHandler(backend, backend, 1, nil))
+				req := httptest.NewRequest(tc.method, path, strings.NewReader(tc.body))
+				req.Header.Set("Content-Type", tc.contentType)
+				req.Header.Set("Authorization", "Bearer test")
+				if strings.HasPrefix(tc.name, "chunked") {
+					// A real HTTP/1.1 request without a known body length arrives this way.
+					req.ContentLength = -1
+					req.TransferEncoding = []string{"chunked"}
 				}
-				w.WriteHeader(status)
-				fmt.Fprint(w, `{"answers":{"urgent":{"noul":0.8}},"diagnostics":{"extra":true}}`)
-			}))
-			defer upstream.Close()
-			backend := &systemOneBackend{model: &k8sv1.Model{Spec: k8sv1.ModelSpec{Engine: tc.engine, Features: []k8sv1.ModelFeature{k8sv1.ModelFeatureSystemOne}}}, address: strings.TrimPrefix(upstream.URL, "http://")}
-			if tc.noFeature {
-				backend.model.Spec.Features = nil
-			}
-			h := NewHandler(nil, modelproxy.NewHandler(backend, backend, 1, nil))
-			req := httptest.NewRequest(tc.method, "/openai/v1/systemone", strings.NewReader(tc.body))
-			req.Header.Set("Content-Type", tc.contentType)
-			req.Header.Set("Authorization", "Bearer test")
-			if strings.HasPrefix(tc.name, "chunked") {
-				// A real HTTP/1.1 request without a known body length arrives this way.
-				req.ContentLength = -1
-				req.TransferEncoding = []string{"chunked"}
-			}
-			response := httptest.NewRecorder()
-			h.ServeHTTP(response, req)
-			require.Equal(t, tc.wantStatus, response.Code, response.Body.String())
-			require.EqualValues(t, tc.attempts, requests.Load())
-			require.Equal(t, backend.acquired.Load(), backend.released.Load())
-			if tc.attempts == 0 {
-				require.Zero(t, backend.scaled.Load(), "invalid requests must not scale models")
-			} else {
-				require.EqualValues(t, 1, backend.scaled.Load())
-				require.Equal(t, tc.engine, response.Header().Get("X-Backend"))
-				require.Equal(t, `{"answers":{"urgent":{"noul":0.8}},"diagnostics":{"extra":true}}`, response.Body.String())
-				metricstest.RequireActiveRequestsMetric(t, metricstest.Collect(t), "decision", 0)
-			}
-			if tc.wantStatus == 405 {
-				require.Equal(t, "POST", response.Header().Get("Allow"))
-			}
-		})
+				response := httptest.NewRecorder()
+				h.ServeHTTP(response, req)
+				require.Equal(t, tc.wantStatus, response.Code, response.Body.String())
+				require.EqualValues(t, tc.attempts, requests.Load())
+				require.Equal(t, backend.acquired.Load(), backend.released.Load())
+				if tc.attempts == 0 {
+					require.Zero(t, backend.scaled.Load(), "invalid requests must not scale models")
+				} else {
+					require.EqualValues(t, 1, backend.scaled.Load())
+					require.Equal(t, tc.engine, response.Header().Get("X-Backend"))
+					require.Equal(t, `{"answers":{"urgent":{"noul":0.8}},"diagnostics":{"extra":true}}`, response.Body.String())
+					metricstest.RequireActiveRequestsMetric(t, metricstest.Collect(t), "decision", 0)
+				}
+				if tc.wantStatus == 405 {
+					require.Equal(t, "POST", response.Header().Get("Allow"))
+				}
+			})
+		}
 	}
 }
 

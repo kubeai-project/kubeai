@@ -296,12 +296,11 @@ func Run(ctx context.Context, k8sCfg *rest.Config, cfg config.System) error {
 
 		modelProxy := modelproxy.NewHandler(modelClient, loadBalancer, 3, nil)
 		openaiHandler := openaiserver.NewHandler(mgr.GetClient(), modelProxy)
-		mux := http.NewServeMux()
-		mux.Handle("/openai/", openaiHandler)
 		apiServer = &http.Server{
 			BaseContext: func(_ net.Listener) context.Context { return ctx },
 			Addr:        ":8000",
-			Handler:     mux,
+			// The API handler allowlists both /openai/ and /v1/ routes.
+			Handler: openaiHandler,
 		}
 
 		for i, stream := range cfg.Messaging.Streams {

@@ -45,12 +45,31 @@ func (h *Handler) parseProxyRequest(r *http.Request) (*proxyRequest, error) {
 func (pr *proxyRequest) sendErrorResponse(w http.ResponseWriter, status int, format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
 	log.Printf("sending error response: %v: %v", status, msg)
+	if pr.http.URL.Path == apiutils.MessagesPath {
+		w.Header().Set("Content-Type", "application/json")
+	}
 
 	pr.setStatus(w, status)
 
 	if status >= 500 {
 		// Don't leak internal error messages to the client.
 		msg = http.StatusText(status)
+	}
+
+	if pr.http.URL.Path == apiutils.MessagesPath {
+		response := struct {
+			Type  string `json:"type"`
+			Error struct {
+				Type    string `json:"type"`
+				Message string `json:"message"`
+			} `json:"error"`
+		}{Type: "error"}
+		response.Error.Type = anthropicErrorType(status)
+		response.Error.Message = msg
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			log.Printf("error encoding messages error response: %v", err)
+		}
+		return
 	}
 
 	if err := json.NewEncoder(w).Encode(struct {
@@ -65,6 +84,20 @@ func (pr *proxyRequest) sendErrorResponse(w http.ResponseWriter, status int, for
 func (pr *proxyRequest) setStatus(w http.ResponseWriter, code int) {
 	pr.status = code
 	w.WriteHeader(code)
+}
+
+func anthropicErrorType(status int) string {
+	switch status {
+	case http.StatusNotFound:
+		return "not_found_error"
+	case http.StatusRequestEntityTooLarge:
+		return "request_too_large"
+	default:
+		if status >= 500 {
+			return "api_error"
+		}
+		return "invalid_request_error"
+	}
 }
 
 // httpRequest returns a new http.Request that is a clone of the original

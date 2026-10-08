@@ -2,6 +2,12 @@
 
 KubeAI supports reranking models via the Infinity and vLLM (Recommended for GPU) engine.
 
+Use `POST /v1/rerank` for new integrations. The existing
+`POST /openai/v1/rerank` remains operational during the migration, with
+deprecation headers, and is planned for removal in the following release.
+Both routes forward to the same `/v1/rerank` backend endpoint. See the
+[API route migration](../reference/api-route-migration.md).
+
 ## Install BAAI/bge-reranker-base model using Infinity
 
 Create a file named `kubeai-rerank-models.yaml` with the following content:
@@ -31,7 +37,7 @@ Once the pod is ready, you can call the rerank endpoint:
 ```python
 import requests
 resp = requests.post(
-    "http://localhost:8000/openai/v1/rerank",
+    "http://localhost:8000/v1/rerank",
     json={
         "model": "bge-rerank-base-cpu",
         "query": "Which document talks about apples?",

@@ -55,6 +55,12 @@ var defaultRetryCodes = map[int]struct{}{
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == apiutils.MessagesPath && r.Method != http.MethodPost {
+		w.Header().Set("Allow", http.MethodPost)
+		pr := &proxyRequest{http: r}
+		pr.sendErrorResponse(w, http.StatusMethodNotAllowed, "messages requires POST")
+		return
+	}
 	if r.URL.Path == apiutils.SystemOnePath && r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 		http.Error(w, "systemone requires POST", http.StatusMethodNotAllowed)

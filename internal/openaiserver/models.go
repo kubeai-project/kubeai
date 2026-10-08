@@ -18,11 +18,6 @@ func (h *Handler) getModels(w http.ResponseWriter, r *http.Request) {
 	// Example (single):   /v1/models?feature=TextEmbedding
 	// Example (multiple): /v1/models?feature=TextGeneration&feature=TextEmbedding
 	features := r.URL.Query()["feature"]
-	if len(features) == 0 {
-		// Default to listing text generation models.
-		// Do this to play nicely with chat UIs like OpenWebUI.
-		features = []string{kubeaiv1.ModelFeatureTextGeneration}
-	}
 
 	var listOpts []client.ListOption
 	headerSelectors := r.Header.Values("X-Label-Selector")
@@ -37,6 +32,14 @@ func (h *Handler) getModels(w http.ResponseWriter, r *http.Request) {
 
 	var k8sModels []kubeaiv1.Model
 	k8sModelNames := map[string]struct{}{}
+	if len(features) == 0 {
+		list := &kubeaiv1.ModelList{}
+		if err := h.K8sClient.List(r.Context(), list, listOpts...); err != nil {
+			sendErrorResponse(w, http.StatusInternalServerError, "failed to list models: %v", err)
+			return
+		}
+		k8sModels = list.Items
+	}
 	for _, feature := range features {
 		// NOTE: At time of writing an OR query is not supported with the
 		// Kubernetes API server

@@ -9,12 +9,14 @@ import (
 	"mime/multipart"
 	"net/http"
 	"slices"
+	"strings"
 
 	"github.com/go-json-experiment/json"
 
 	"context"
 
 	"github.com/google/uuid"
+	anthropicv1 "github.com/kubeai-project/kubeai/api/anthropic/v1"
 	k8sv1 "github.com/kubeai-project/kubeai/api/k8s/v1"
 	openaiv1 "github.com/kubeai-project/kubeai/api/openai/v1"
 )
@@ -23,6 +25,12 @@ var (
 	ErrBadRequest    = fmt.Errorf("bad request")
 	ErrModelNotFound = fmt.Errorf("model not found")
 )
+
+// MessagesPath is the native Anthropic Messages endpoint on model servers.
+const MessagesPath = "/v1/messages"
+
+// MaxMessagesBodyBytes bounds routing and retry buffering for Messages requests.
+const MaxMessagesBodyBytes int64 = 32 << 20
 
 // modelRequest represents a request that will be made to a given model.
 type modelRequest interface {
@@ -86,6 +94,9 @@ func ParseRequest(ctx context.Context, client ModelClient, body io.Reader, path 
 		}
 	}
 
+	if path == MessagesPath && mediaType != "application/json" {
+		return nil, fmt.Errorf("%w: messages requires application/json", ErrBadRequest)
+	}
 	if path == SystemOnePath {
 		if err := r.readSystemOneBody(body, mediaType, mediaParams); err != nil {
 			return nil, err
@@ -183,20 +194,28 @@ func (r *Request) readJSONBody(body io.Reader, path string) error {
 		r.modelRequest = &openaiv1.RerankRequest{}
 	case "/v1/responses":
 		r.modelRequest = &openaiv1.ResponsesRequest{}
+	case MessagesPath:
+		r.modelRequest = &anthropicv1.MessagesRequest{}
 	default:
 		return fmt.Errorf("unknown path: %q", path)
 	}
 
+	if path == MessagesPath {
+		body = io.LimitReader(body, MaxMessagesBodyBytes+1)
+	}
 	raw, err := io.ReadAll(body)
 	if err != nil {
 		return fmt.Errorf("reading: %w", err)
+	}
+	if path == MessagesPath && int64(len(raw)) > MaxMessagesBodyBytes {
+		return ErrRequestTooLarge
 	}
 
 	if err := json.Unmarshal(raw, r.modelRequest); err != nil {
 		return fmt.Errorf("decoding: %w", err)
 	}
 
-	if r.modelRequest.GetModel() == "" {
+	if r.modelRequest.GetModel() == "" || (path == MessagesPath && strings.TrimSpace(r.modelRequest.GetModel()) == "") {
 		return errors.New("missing 'model' field")
 	}
 
@@ -231,6 +250,9 @@ func (r *Request) lookupModel(ctx context.Context, client ModelClient, path stri
 	}
 	if model == nil {
 		return fmt.Errorf("%w: %q", ErrModelNotFound, r.RequestedModel)
+	}
+	if path == MessagesPath && !slices.Contains(model.Spec.Features, k8sv1.ModelFeatureTextGeneration) {
+		return fmt.Errorf("%w: model does not declare the TextGeneration feature", ErrBadRequest)
 	}
 	if path == SystemOnePath {
 		switch model.Spec.Engine {

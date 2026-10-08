@@ -32,16 +32,30 @@ func NewHandler(k8sClient client.Client, modelProxy *modelproxy.Handler) *Handle
 	mux.Handle("/openai/v1/chat/completions", http.StripPrefix("/openai", modelProxy))
 	mux.Handle("/openai/v1/completions", http.StripPrefix("/openai", modelProxy))
 	mux.Handle("/openai/v1/embeddings", http.StripPrefix("/openai", modelProxy))
-	mux.Handle("/openai/v1/rerank", http.StripPrefix("/openai", modelProxy))
-	mux.Handle("/openai/v1/systemone", http.StripPrefix("/openai", modelProxy))
+	mux.Handle("/v1/rerank", modelProxy)
+	mux.Handle("/v1/systemone", modelProxy)
+	mux.Handle("/v1/messages", modelProxy)
+	mux.Handle("/openai/v1/rerank", deprecatedRoute("/v1/rerank", http.StripPrefix("/openai", modelProxy)))
+	mux.Handle("/openai/v1/systemone", deprecatedRoute("/v1/systemone", http.StripPrefix("/openai", modelProxy)))
 	mux.Handle("/openai/v1/audio/transcriptions", http.StripPrefix("/openai", modelProxy))
 	mux.Handle("/openai/v1/responses", http.StripPrefix("/openai", modelProxy))
 	mux.Handle("/openai/v1/models", http.HandlerFunc(h.getModels))
+	mux.Handle("/v1/models", http.HandlerFunc(h.getModels))
 
 	// Add HTTP instrumentation for the whole server.
 	h.Handler = otelhttp.NewHandler(mux, "/")
 
 	return h
+}
+
+// Keep legacy clients working during the migration. Removal is planned for the
+// next release; do not redirect POST requests or invent a calendar sunset date.
+func deprecatedRoute(successor string, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Deprecation", "@1791417600") // 2026-10-08T00:00:00Z (RFC 9745).
+		w.Header().Add("Link", "<"+successor+">; rel=\"successor-version\"")
+		next.ServeHTTP(w, r)
+	})
 }
 
 func sendErrorResponse(w http.ResponseWriter, status int, format string, args ...interface{}) {
