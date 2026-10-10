@@ -615,6 +615,36 @@ catalog:
     - --dtype=half
     - --context-length=2048
     - --mem-fraction-static=0.3
+  # Spark #
+  # T4 BF16 note: Spark-X2.5-4B ships with torch_dtype: bfloat16. T4 (CC 7.5) doesn't support BF16, so we force FP16.
+  # With 8.2GB weights + 16GB T4, context is limited to ~8K. For longer context, use quantized weights or larger GPU.
+  # SGLang: mem-fraction-static=0.7 (below 0.8 default) leaves headroom for prefill activation spikes on T4.
+  # VLLM: gpu-memory-utilization=0.85 (below catalog-standard 0.9) provides safety margin for T4's tighter memory constraints.
+  spark-x2.5-4b-sglang-gpu:
+    enabled: false
+    features: ["TextGeneration"]
+    url: "hf://XHToken/Spark-X2.5-4B"
+    engine: SGLang
+    resourceProfile: nvidia-gpu-t4:1
+    args:
+    - --dtype=half
+    - --tool-call-parser=spark25
+    - --reasoning-parser=qwen3
+    - --mem-fraction-static=0.7
+    - --context-length=8192
+  spark-x2.5-4b-vllm-gpu:
+    enabled: false
+    features: ["TextGeneration"]
+    url: "hf://XHToken/Spark-X2.5-4B"
+    engine: VLLM
+    resourceProfile: nvidia-gpu-t4:1
+    args:
+    - --dtype=half
+    - --trust-remote-code
+    - --gpu-memory-utilization=0.85
+    - --enable-prefix-caching
+    - --disable-log-requests
+    - --max-model-len=8192
   # llama.cpp #
   qwen2-500m-instruct-llamacpp-cpu:
     enabled: false

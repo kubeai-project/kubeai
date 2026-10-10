@@ -1,0 +1,19 @@
+# Source: models/templates/models.yaml
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: spark-x2.5-4b-vllm-gpu
+spec:
+  features:
+    - TextGeneration
+  url: hf://XHToken/Spark-X2.5-4B
+  engine: VLLM
+  args:
+    - --dtype=half
+    - --trust-remote-code
+    - --gpu-memory-utilization=0.85
+    - --enable-prefix-caching
+    - --disable-log-requests
+    - --max-model-len=8192
+  minReplicas: 0
+  resourceProfile: nvidia-gpu-t4:1
