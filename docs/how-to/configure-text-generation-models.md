@@ -68,14 +68,16 @@ spec:
 
 ## Small NVIDIA GPU examples
 
-The model catalog includes small Qwen3 0.6B examples for testing SGLang and llama.cpp:
+The model catalog includes small examples for testing SGLang, llama.cpp, and vLLM:
 
 | Engine | Catalog entry | Model format |
 | --- | --- | --- |
 | SGLang | [qwen3-600m-sglang-gpu](https://github.com/kubeai-project/kubeai/blob/main/manifests/models/qwen3-600m-sglang-gpu.yaml) | Hugging Face weights |
 | llama.cpp | [qwen3-600m-llamacpp-gpu](https://github.com/kubeai-project/kubeai/blob/main/manifests/models/qwen3-600m-llamacpp-gpu.yaml) | GGUF, Q8_0 |
+| SGLang | [spark-x2.5-4b-sglang-gpu](https://github.com/kubeai-project/kubeai/blob/main/manifests/models/spark-x2.5-4b-sglang-gpu.yaml) | Spark-X2.5-4B |
+| vLLM | [spark-x2.5-4b-vllm-gpu](https://github.com/kubeai-project/kubeai/blob/main/manifests/models/spark-x2.5-4b-vllm-gpu.yaml) | Spark-X2.5-4B |
 
-Both examples use `nvidia-gpu-t4:1`, which requests one NVIDIA GPU with the default KubeAI profile. This profile does not select a T4 specifically; it can also be used on another compatible NVIDIA GPU. Check any profile overrides configured for your cluster. The NVIDIA driver, container runtime and device plugin must be configured before applying the models.
+All examples use `nvidia-gpu-t4:1`, which requests one NVIDIA GPU with the default KubeAI profile. This profile does not select a T4 specifically; it can also be used on another compatible NVIDIA GPU. Check any profile overrides configured for your cluster. The NVIDIA driver, container runtime and device plugin must be configured before applying the models.
 
 Enable one example with Helm:
 
@@ -88,7 +90,7 @@ catalog:
 EOF
 ```
 
-For llama.cpp, replace the catalog entry with `qwen3-600m-llamacpp-gpu`. Alternatively, apply the corresponding raw manifest with `kubectl apply -f`. Raw manifests default to `minReplicas: 0`; the first inference request triggers model startup.
+For llama.cpp, replace the catalog entry with `qwen3-600m-llamacpp-gpu`. For Spark-X2.5-4B, use `spark-x2.5-4b-sglang-gpu` or `spark-x2.5-4b-vllm-gpu`. Alternatively, apply the corresponding raw manifest with `kubectl apply -f`. Raw manifests default to `minReplicas: 0`; the first inference request triggers model startup.
 
 On a node with one GPU, run one GPU model at a time. Delete the previous Model and wait for its Pod to terminate before starting the next example. For Helm-managed models, disable the previous catalog entry in the same Helm release instead.
 
@@ -97,6 +99,31 @@ Use the Model's `metadata.name` as the `model` field in the chat request describ
 These examples use the engine images configured in the KubeAI chart. To test a different image with a raw Model manifest, set `spec.image`; it takes precedence over the image selected by the resource profile.
 
 For llama.cpp, pass argument names and values as separate entries in `spec.args`, as shown in the generated manifest.
+
+### Spark-X2.5 Special Configuration
+
+Spark-X2.5-4B uses specialized parsers for tool calling and reasoning:
+
+**SGLang configuration:**
+- `--dtype=half` — Forces FP16 for T4 compatibility (T4 doesn't support BF16)
+- `--tool-call-parser=spark25` — Enables Spark's tool calling format
+- `--reasoning-parser=qwen3` — Enables reasoning mode with thinking/content separation
+- `--mem-fraction-static=0.7` — Reserves 70% of GPU memory for KV cache (below 0.8 default to leave headroom for prefill spikes on T4)
+- `--context-length=8192` — Limits context to 8K tokens on T4
+
+**vLLM configuration:**
+- `--dtype=half` — Forces FP16 for T4 compatibility
+- `--trust-remote-code` — Allows custom model code execution
+- `--gpu-memory-utilization=0.85` — Uses 85% of GPU memory (below catalog-standard 0.9 for T4 safety margin)
+- `--enable-prefix-caching` — Optimizes multi-turn conversations with shared prefixes
+- `--disable-log-requests` — Suppresses per-request logging for production use
+- `--max-model-len=8192` — Limits context to 8K tokens on T4
+
+**T4 GPU considerations**: Spark-X2.5-4B ships with BF16 weights (~8.2GB), but T4 GPUs (compute capability 7.5) don't support BF16. The catalog entries force FP16 and limit context to 8K tokens. For longer context or better performance, consider:
+- Using quantized weights (AWQ/GPTQ int4, ~2GB) which reduce memory footprint by 4×
+- Upgrading to A10/L4/A100 GPUs which support BF16 natively
+
+All these parameters are pre-configured in the catalog entries.
 
 ## Configure a Chat Template
 Some models do not ship will chat templates and some engines such as vLLM do not provide a default one. In these cases, you can use `.spec.files` to inject a template at Pod runtime.
