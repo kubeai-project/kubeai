@@ -29,7 +29,15 @@ kubectl label namespace <kubeai-namespace> aibom.k8saibom.dev/enabled=true
 
 ## Read the inventory
 
-Each model server Deployment gets an `AIBOM` resource:
+Each supported workload gets an `AIBOM` resource. Today that covers
+Deployments, StatefulSets and the operator CRDs listed in the
+[k8s-aibom README](https://github.com/GoogleCloudPlatform/k8s-aibom#what-it-observes).
+KubeAI's own `Model` resources, whose Pods KubeAI creates directly, are
+not yet covered: that is tracked in
+[GoogleCloudPlatform/k8s-aibom#172](https://github.com/GoogleCloudPlatform/k8s-aibom/issues/172)
+and arrives with k8s-aibom v1.7. Until then, enabling the subchart
+inventories the other AI workloads in the opted-in namespace, not
+KubeAI-managed models.
 
 ```bash
 kubectl get aiboms -n <kubeai-namespace>
@@ -41,8 +49,8 @@ The `kubectl aibom` plugin (`kubectl krew install aibom`) summarizes them:
 kubectl aibom summary -n <kubeai-namespace>
 ```
 
-KubeAI's vLLM and Ollama model servers are detected out of the box (runtime
-confidence `inferred`, from the image; model identity `declared`, from the
-server arguments). Documents can be shipped to external sinks (object
+Once `Model` support lands, KubeAI's vLLM and Ollama model servers will be
+reported with the runtime and model identity `declared` from the `Model`
+spec and image digests from the running Pods. Documents can be shipped to external sinks (object
 storage, webhook) for audit retention — see the
 [k8s-aibom documentation](https://github.com/GoogleCloudPlatform/k8s-aibom#readme).
