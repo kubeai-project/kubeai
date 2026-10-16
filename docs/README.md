@@ -17,7 +17,7 @@ Built for LLMs, embeddings, reranking and speech-to-text.
 What is it for?
 
 🚀 **LLM Inferencing** - Operate vLLM and Ollama servers  
-🎙️ **Speech Processing** - Transcribe audio with FasterWhisper  
+🎙️ **Speech Processing** - Transcribe audio with [Whisper on vLLM](how-to/configure-speech-to-text.md) or FasterWhisper<br>
 🔢 **Vector Embeddings** - Generate embeddings with Infinity  
 📚 **Reranking** - Reorder search results with cross-encoder models  
 
