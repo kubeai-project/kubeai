@@ -1,6 +1,6 @@
 module github.com/kubeai-project/kubeai
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/cespare/xxhash v1.1.0
