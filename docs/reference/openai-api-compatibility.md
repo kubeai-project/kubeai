@@ -50,6 +50,18 @@ POST /v1/rerank
 * `/openai/v1/rerank` remains operational but is deprecated; migrate to
   `/v1/rerank` before the following release.
 
+### Classification (extension)
+
+```text
+POST /v1/classify
+```
+
+* Supported for Models with `.spec.features: ["TextClassification"]`.
+* The engine must serve `/v1/classify` at its inference port; Infinity does.
+* Requires a `model` string naming a KubeAI Model; other fields and responses
+  are backend-defined. See
+  [Configure classification models](../how-to/configure-classification-models.md).
+
 ### Speech-to-Text
 
 ```

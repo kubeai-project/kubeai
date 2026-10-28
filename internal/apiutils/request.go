@@ -190,6 +190,8 @@ func (r *Request) readJSONBody(body io.Reader, path string) error {
 		r.modelRequest = &openaiv1.EmbeddingRequest{}
 	case "/v1/rerank":
 		r.modelRequest = &openaiv1.RerankRequest{}
+	case "/v1/classify":
+		r.modelRequest = &openaiv1.ClassifyRequest{}
 	case "/v1/responses":
 		r.modelRequest = &openaiv1.ResponsesRequest{}
 	case MessagesPath:

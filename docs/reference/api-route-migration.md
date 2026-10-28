@@ -11,6 +11,7 @@ inference engines receive the corresponding `/v1/...` path.
 | Completions | `POST /openai/v1/completions` | — | Unchanged |
 | Embeddings | `POST /openai/v1/embeddings` | — | Unchanged |
 | Reranking | `POST /v1/rerank` | `POST /openai/v1/rerank` | Compatibility route deprecated |
+| Classification | `POST /v1/classify` | — | New |
 | System One | `POST /v1/systemone` | `POST /openai/v1/systemone` | Compatibility route deprecated |
 | Model discovery | `GET /v1/models` | `GET /openai/v1/models` | Both supported |
 | Transcriptions | `POST /openai/v1/audio/transcriptions` | — | Unchanged |
@@ -62,7 +63,7 @@ implements the compatibility phase; it does not remove the old routes.
 
 1. Deploy the release supporting both route forms before changing clients.
 2. If an ingress or API gateway currently allows only `/openai/`, also allow
-   the four public `/v1/` routes in the table. Preserve the full path. Apply the
+   the five public `/v1/` routes in the table. Preserve the full path. Apply the
    same authentication, TLS, timeout and request-size policy to the new paths.
 3. Change rerank clients from `/openai/v1/rerank` to `/v1/rerank`, and System One
    clients from `/openai/v1/systemone` to `/v1/systemone`. Keep their request

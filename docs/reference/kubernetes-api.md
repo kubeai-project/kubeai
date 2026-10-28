@@ -108,7 +108,7 @@ _Underlying type:_ _string_
 
 
 _Validation:_
-- Enum: [TextGeneration TextEmbedding Reranking SpeechToText SystemOne]
+- Enum: [TextGeneration TextEmbedding Reranking SpeechToText SystemOne TextClassification]
 
 _Appears in:_
 - [ModelSpec](#modelspec)
@@ -130,7 +130,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `url` _string_ | URL of the model to be served.<br />Currently the following formats are supported:<br />For VLLM, SGLang, FasterWhisper, Infinity engines:<br />"hf://<repo>/<model>"<br />"pvc://<pvcName>"<br />"pvc://<pvcName>/<pvcSubpath>"<br />"oci://<registry>/<repository>:<tag>"<br />"gs://<bucket>/<path>" (only with cacheProfile)<br />"oss://<bucket>/<path>" (only with cacheProfile)<br />"s3://<bucket>/<path>" (only with cacheProfile)<br />For the LlamaCpp engine:<br />"hf://<repo>/<model>"<br />"hf://<repo>/<model>:<quant>"<br />"pvc://<pvcName>/<pvcSubpath>?model=<file>.gguf"<br />"pvc://<pvcName>/<pvcSubpath>/<file>.gguf"<br />"oci://<registry>/<repository>:<tag>?model=<file>.gguf"<br />The "model" query parameter names the GGUF file inside the mounted<br />directory. It is required for "oci://" sources and for "pvc://" paths<br />that do not already name a .gguf file. A model split across shards has<br />to use it and keep every shard in the same directory, because llama.cpp<br />derives the sibling shard paths from the file name.<br />For OLlama engine:<br />"ollama://<model>" |  | Pattern: `^([a-z0-9]+):\/\/([a-zA-Z0-9._:/-]+)(\?.*)?$` <br />Required: \{\} <br /> |
 | `adapters` _[Adapter](#adapter) array_ |  |  |  |
-| `features` _[ModelFeature](#modelfeature) array_ | Features that the model supports.<br />Dictates the APIs that are available for the model. |  | Enum: [TextGeneration TextEmbedding Reranking SpeechToText SystemOne] <br /> |
+| `features` _[ModelFeature](#modelfeature) array_ | Features that the model supports.<br />Dictates the APIs that are available for the model. |  | Enum: [TextGeneration TextEmbedding Reranking SpeechToText SystemOne TextClassification] <br /> |
 | `engine` _string_ | Engine to be used for the server process. |  | Enum: [OLlama VLLM FasterWhisper Infinity SGLang LlamaCpp] <br />Required: \{\} <br /> |
 | `resourceProfile` _string_ | ResourceProfile required to serve the model.<br />Use the format "<resource-profile-name>:<count>".<br />Example: "nvidia-gpu-l4:2" - 2x NVIDIA L4 GPUs.<br />Must be a valid ResourceProfile defined in the system config. |  |  |
 | `cacheProfile` _string_ | CacheProfile to be used for caching model artifacts.<br />Must be a valid CacheProfile defined in the system config. |  |  |
