@@ -23,10 +23,16 @@ catalog:
 Apply the kubeai-models helm chart:
 
 ```bash
-helm install kubeai-models kubeai/models -f ./kubeai-classification-models.yaml
+helm upgrade --install --reuse-values kubeai-models kubeai/models -f ./kubeai-classification-models.yaml
 ```
 
-Once the pod is ready, you can call the classify endpoint:
+Once the pod is ready, forward the KubeAI service to `localhost:8000`:
+
+```bash
+kubectl port-forward svc/kubeai 8000:80
+```
+
+Then call the classify endpoint:
 
 ```python
 import requests
