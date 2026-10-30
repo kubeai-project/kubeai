@@ -1,0 +1,16 @@
+catalog:
+  whisper-large-v3-turbo-vllm:
+    enabled: true
+    features: [SpeechToText]
+    owner: openai
+    url: hf://openai/whisper-large-v3-turbo
+    engine: VLLM
+    # Build the adjacent Dockerfile and replace this with your published image.
+    image: registry.example.com/kubeai/vllm-whisper:v0.31.0
+    resourceProfile: nvidia-gpu-l4:1
+    minReplicas: 1
+    args:
+      - --max-model-len=448
+      - --max-num-seqs=16
+      - --gpu-memory-utilization=0.5
+      - --enforce-eager
