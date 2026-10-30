@@ -1,3 +1,18 @@
+## v0.25.0 - 2026-10-30
+
+- docs: fix dead OpenAI OpenAPI spec and benchmark script links by @sarankumar1325 in https://github.com/kubeai-project/kubeai/pull/785
+- feat: route /v1/classify to model servers by @namrastanov in https://github.com/kubeai-project/kubeai/pull/783
+- build(deps): bump golang from 1.27.2 to 1.27.3 by @app/dependabot in https://github.com/kubeai-project/kubeai/pull/781
+- Enhance SECURITY.md with detailed security policy by @m4oc in https://github.com/kubeai-project/kubeai/pull/773
+- feat: support Kubernetes 1.37 with aligned client libraries by @m4oc in https://github.com/kubeai-project/kubeai/pull/772
+- fix: refresh endpoint addresses by @spicysharkco in https://github.com/kubeai-project/kubeai/pull/766
+- fix: update Grafana dashboard for vLLM V1 metrics by @m4oc in https://github.com/kubeai-project/kubeai/pull/760
+- docs: add vLLM Whisper transcription example by @m4oc in https://github.com/kubeai-project/kubeai/pull/759
+- build: upgrade Go to 1.27.2 and migrate to standard JSON v2 by @m4oc in https://github.com/kubeai-project/kubeai/pull/758
+- feat(models): add Spark-X2.5-4B model configs for SGLang and vLLM engines by @dongjiang1989 in https://github.com/kubeai-project/kubeai/pull/755
+- docs: add SGLang and llama.cpp NVIDIA GPU examples by @Andreh7777 in https://github.com/kubeai-project/kubeai/pull/754
+- Feat/api endpoint migration by @m4oc in https://github.com/kubeai-project/kubeai/pull/753
+
 ## v0.24.0 - 2026-10-07
 
 - Feat/systemone api by @m4oc in https://github.com/kubeai-project/kubeai/pull/745
