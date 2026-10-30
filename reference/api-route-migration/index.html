@@ -657,6 +657,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../how-to/configure-classification-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configure classification models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../how-to/configure-embedding-models/" class="md-nav__link">
         
   
@@ -2306,6 +2334,12 @@ inference engines receive the corresponding <code>/v1/...</code> path.</p>
 <td>Compatibility route deprecated</td>
 </tr>
 <tr>
+<td>Classification</td>
+<td><code>POST /v1/classify</code></td>
+<td>—</td>
+<td>New</td>
+</tr>
+<tr>
 <td>System One</td>
 <td><code>POST /v1/systemone</code></td>
 <td><code>POST /openai/v1/systemone</code></td>
@@ -2372,7 +2406,7 @@ implements the compatibility phase; it does not remove the old routes.
 <ol>
 <li>Deploy the release supporting both route forms before changing clients.</li>
 <li>If an ingress or API gateway currently allows only <code>/openai/</code>, also allow
-   the four public <code>/v1/</code> routes in the table. Preserve the full path. Apply the
+   the five public <code>/v1/</code> routes in the table. Preserve the full path. Apply the
    same authentication, TLS, timeout and request-size policy to the new paths.</li>
 <li>Change rerank clients from <code>/openai/v1/rerank</code> to <code>/v1/rerank</code>, and System One
    clients from <code>/openai/v1/systemone</code> to <code>/v1/systemone</code>. Keep their request

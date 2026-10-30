@@ -657,6 +657,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../how-to/configure-classification-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configure classification models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../how-to/configure-embedding-models/" class="md-nav__link">
         
   
@@ -1848,6 +1876,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#classification-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Classification (extension)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#speech-to-text" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2387,6 +2426,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#classification-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Classification (extension)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#speech-to-text" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2504,6 +2554,16 @@ POST /openai/v1/completions
 <li>Supported for  Models with <code>.spec.features: ["Reranking"]</code>.</li>
 <li><code>/openai/v1/rerank</code> remains operational but is deprecated; migrate to
   <code>/v1/rerank</code> before the following release.</li>
+</ul>
+<h3 id="classification-extension">Classification (extension)<a class="headerlink" href="#classification-extension" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>POST /v1/classify
+</code></pre></div>
+<ul>
+<li>Supported for Models with <code>.spec.features: ["TextClassification"]</code>.</li>
+<li>The engine must serve <code>/v1/classify</code> at its inference port; Infinity does.</li>
+<li>Requires a <code>model</code> string naming a KubeAI Model; other fields and responses
+  are backend-defined. See
+  <a href="../../how-to/configure-classification-models/">Configure classification models</a>.</li>
 </ul>
 <h3 id="speech-to-text">Speech-to-Text<a class="headerlink" href="#speech-to-text" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>POST /openai/v1/audio/transcriptions
