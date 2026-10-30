@@ -66,6 +66,12 @@ func TestParseRequest(t *testing.T) {
 			expModel: "test-model",
 		},
 		{
+			name:     "classify request",
+			body:     `{"model": "test-model", "input": ["t1", "t2"], "raw_scores": true}`,
+			path:     "/v1/classify",
+			expModel: "test-model",
+		},
+		{
 			name:      "chat completion with tool schema",
 			body:      `{"model": "test-model", "messages": [{"role": "user", "content": "test"}], "tools": [{"type": "function", "function": {"name": "get_weather", "description": "Get current weather", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "City name"}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}}, "required": ["location"]}}}, {"type": "function", "function": {"name": "get_time", "description": "Get current time", "parameters": {"type": "object", "properties": {"timezone": {"type": "string", "description": "IANA tz"}, "format": {"type": "string", "enum": ["12h", "24h"]}}, "required": ["timezone"]}}}]}`,
 			path:      "/v1/chat/completions",

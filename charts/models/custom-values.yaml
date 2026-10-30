@@ -15,7 +15,7 @@ catalog:
       team: ml-platform
       env: prod
 
-    # CRD expects an array of enum values: TextGeneration, TextEmbedding, Reranking, SpeechToText, SystemOne
+    # CRD expects an array of enum values: TextGeneration, TextEmbedding, Reranking, SpeechToText, SystemOne, TextClassification
     features:
       - TextGeneration
       - TextEmbedding

@@ -25,7 +25,7 @@ func TestModelDiscovery(t *testing.T) {
 	scheme := runtime.NewScheme()
 	require.NoError(t, k8sv1.AddToScheme(scheme))
 	var objects []client.Object
-	for _, feature := range []string{k8sv1.ModelFeatureTextGeneration, k8sv1.ModelFeatureTextEmbedding, k8sv1.ModelFeatureReranking, k8sv1.ModelFeatureSpeechToText, k8sv1.ModelFeatureSystemOne} {
+	for _, feature := range []string{k8sv1.ModelFeatureTextGeneration, k8sv1.ModelFeatureTextEmbedding, k8sv1.ModelFeatureReranking, k8sv1.ModelFeatureSpeechToText, k8sv1.ModelFeatureSystemOne, k8sv1.ModelFeatureTextClassification} {
 		objects = append(objects, &k8sv1.Model{
 			ObjectMeta: metav1.ObjectMeta{Name: feature, Namespace: "default", Labels: map[string]string{k8sv1.ModelFeatureLabelDomain + "/" + feature: "true", "team": "support"}},
 			Spec:       k8sv1.ModelSpec{Features: []k8sv1.ModelFeature{k8sv1.ModelFeature(feature)}},
@@ -41,10 +41,11 @@ func TestModelDiscovery(t *testing.T) {
 			status                int
 			failing               bool
 		}{
-			{"all", "", "", []string{"TextGeneration", "TextEmbedding", "Reranking", "SpeechToText", "SystemOne", "unlabelled", "unlabelled_tuned"}, 200, false},
+			{"all", "", "", []string{"TextGeneration", "TextEmbedding", "Reranking", "SpeechToText", "SystemOne", "TextClassification", "unlabelled", "unlabelled_tuned"}, 200, false},
+			{"classification", "?feature=TextClassification", "", []string{"TextClassification"}, 200, false},
 			{"chat", "?feature=TextGeneration", "", []string{"TextGeneration"}, 200, false},
 			{"union deduplicated", "?feature=TextGeneration&feature=TextEmbedding&feature=TextGeneration", "", []string{"TextGeneration", "TextEmbedding"}, 200, false},
-			{"labels without feature", "", "team=support", []string{"TextGeneration", "TextEmbedding", "Reranking", "SpeechToText", "SystemOne"}, 200, false},
+			{"labels without feature", "", "team=support", []string{"TextGeneration", "TextEmbedding", "Reranking", "SpeechToText", "SystemOne", "TextClassification"}, 200, false},
 			{"empty", "", "team=missing", []string{}, 200, false},
 			{"unknown feature", "?feature=Unknown", "", []string{}, 200, false},
 			{"bad selector", "", "team in (", nil, 400, false},

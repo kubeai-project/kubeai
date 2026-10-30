@@ -151,6 +151,7 @@ spec:
                   - Reranking
                   - SpeechToText
                   - SystemOne
+                  - TextClassification
                   type: string
                 type: array
               files:

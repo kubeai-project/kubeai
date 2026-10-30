@@ -33,6 +33,7 @@ func NewHandler(k8sClient client.Client, modelProxy *modelproxy.Handler) *Handle
 	mux.Handle("/openai/v1/completions", http.StripPrefix("/openai", modelProxy))
 	mux.Handle("/openai/v1/embeddings", http.StripPrefix("/openai", modelProxy))
 	mux.Handle("/v1/rerank", modelProxy)
+	mux.Handle("/v1/classify", modelProxy)
 	mux.Handle("/v1/systemone", modelProxy)
 	mux.Handle("/v1/messages", modelProxy)
 	mux.Handle("/openai/v1/rerank", deprecatedRoute("/v1/rerank", http.StripPrefix("/openai", modelProxy)))

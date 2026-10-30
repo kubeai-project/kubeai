@@ -66,6 +66,7 @@ No need to change your client libraries, KubeAI supports the following endpoints
 /v1/completions
 /v1/embeddings
 /v1/rerank
+/v1/classify
 /v1/systemone
 /v1/models
 /v1/audio/transcriptions

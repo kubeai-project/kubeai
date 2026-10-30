@@ -37,7 +37,7 @@ func (b *messagesBackend) LookupModel(_ context.Context, name, adapter string, s
 
 func TestInferenceRoutes(t *testing.T) {
 	for _, path := range []string{
-		"/v1/rerank", "/openai/v1/rerank", "/v1/systemone", "/openai/v1/systemone",
+		"/v1/rerank", "/openai/v1/rerank", "/v1/classify", "/v1/systemone", "/openai/v1/systemone",
 		"/v1/messages", "/openai/v1/chat/completions", "/openai/v1/completions",
 		"/openai/v1/embeddings", "/openai/v1/responses",
 	} {
@@ -290,7 +290,7 @@ func TestMessagesStreamingFlush(t *testing.T) {
 
 func TestAPIRouteAllowlist(t *testing.T) {
 	h := NewHandler(nil, nil)
-	for _, path := range []string{"/v1/load_lora_adapter", "/v1/messages/count_tokens", "/v1/messages/admin", "/v1/systemone/admin", "/v1/rerank/admin", "/v1/chat/completions", "/openai/v1/messages"} {
+	for _, path := range []string{"/v1/load_lora_adapter", "/v1/messages/count_tokens", "/v1/messages/admin", "/v1/systemone/admin", "/v1/rerank/admin", "/v1/classify/admin", "/openai/v1/classify", "/v1/chat/completions", "/openai/v1/messages"} {
 		response := httptest.NewRecorder()
 		h.ServeHTTP(response, httptest.NewRequest("POST", path, nil))
 		require.Equal(t, 404, response.Code, path)
