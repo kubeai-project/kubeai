@@ -109,6 +109,7 @@ func (g *group) reconcileEndpoints(observed map[string]endpoint) {
 	g.mtx.Lock()
 	for name, observedEp := range observed {
 		if currentEp, ok := g.endpoints[name]; ok {
+			currentEp.address = observedEp.address
 			currentEp.adapters = observedEp.adapters
 			g.endpoints[name] = currentEp
 		} else {

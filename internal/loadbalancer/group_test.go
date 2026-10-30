@@ -127,3 +127,26 @@ func TestAbortOnCtxCancel(t *testing.T) {
 
 	doneWg.Wait()
 }
+
+func TestReconcileUpdatesEndpointAddress(t *testing.T) {
+	lb := v1.LoadBalancing{Strategy: v1.LeastLoadStrategy}
+	g := newEndpointGroup(lb)
+	g.reconcileEndpoints(map[string]endpoint{"pod": {address: "old.example:8000"}})
+	req := &apiutils.Request{LoadBalancing: lb}
+	_, finishOld, err := g.getBestAddr(context.Background(), req, false)
+	require.NoError(t, err)
+	inFlight := g.endpoints["pod"].inFlight
+
+	g.reconcileEndpoints(map[string]endpoint{"pod": {address: "new.example:8000"}})
+	address, finishNew, err := g.getBestAddr(context.Background(), req, false)
+	require.NoError(t, err)
+	assert.Equal(t, "new.example:8000", address)
+	assert.Equal(t, []string{"new.example:8000"}, g.getAllAddrs())
+	assert.Same(t, inFlight, g.endpoints["pod"].inFlight)
+	assert.EqualValues(t, 2, inFlight.Load())
+	assert.EqualValues(t, 2, g.totalInFlight.Load())
+	finishNew()
+	finishOld()
+	assert.Zero(t, inFlight.Load())
+	assert.Zero(t, g.totalInFlight.Load())
+}
