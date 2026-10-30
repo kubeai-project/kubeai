@@ -831,22 +831,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#enable-speech-to-text-model" class="md-nav__link">
+  <a href="#whisper-with-vllm" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Enable Speech to Text model
+        Whisper with vLLM
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Enable Speech to Text model">
+    <nav class="md-nav" aria-label="Whisper with vLLM">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#enable-from-model-catalog" class="md-nav__link">
+  <a href="#build-the-audio-image" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Enable from model catalog
+        Build the audio image
       
     </span>
   </a>
@@ -854,10 +854,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#enable-by-creating-model" class="md-nav__link">
+  <a href="#create-a-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Enable by creating Model
+        Create a Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-through-helm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install through Helm
       
     </span>
   </a>
@@ -870,10 +881,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
+  <a href="#transcribe-audio" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Usage
+        Transcribe audio
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#existing-fasterwhisper-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Existing FasterWhisper deployments
       
     </span>
   </a>
@@ -2259,22 +2281,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#enable-speech-to-text-model" class="md-nav__link">
+  <a href="#whisper-with-vllm" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Enable Speech to Text model
+        Whisper with vLLM
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Enable Speech to Text model">
+    <nav class="md-nav" aria-label="Whisper with vLLM">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#enable-from-model-catalog" class="md-nav__link">
+  <a href="#build-the-audio-image" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Enable from model catalog
+        Build the audio image
       
     </span>
   </a>
@@ -2282,10 +2304,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#enable-by-creating-model" class="md-nav__link">
+  <a href="#create-a-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Enable by creating Model
+        Create a Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-through-helm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install through Helm
       
     </span>
   </a>
@@ -2298,10 +2331,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
+  <a href="#transcribe-audio" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Usage
+        Transcribe audio
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#existing-fasterwhisper-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Existing FasterWhisper deployments
       
     </span>
   </a>
@@ -2329,39 +2373,110 @@
 
 
 <h1 id="configure-speech-to-text">Configure speech-to-text<a class="headerlink" href="#configure-speech-to-text" title="Permanent link">&para;</a></h1>
-<p>KubeAI provides a Speech to Text endpoint that can be used to transcribe audio files. This guide will walk you through the steps to enable this feature.</p>
-<h2 id="enable-speech-to-text-model">Enable Speech to Text model<a class="headerlink" href="#enable-speech-to-text-model" title="Permanent link">&para;</a></h2>
-<p>You can create new models by creating a Model CRD object or by enabling a model from the model catalog.</p>
-<h3 id="enable-from-model-catalog">Enable from model catalog<a class="headerlink" href="#enable-from-model-catalog" title="Permanent link">&para;</a></h3>
-<p>KubeAI provides predefined models in the <code>kubeai/models</code> Helm chart. To enable the Speech to Text model, you can set the <code>enabled</code> flag to <code>true</code> in your values file.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># models-helm-values.yaml</span>
-<span class="nt">catalog</span><span class="p">:</span>
+<p>KubeAI exposes <code>POST /openai/v1/audio/transcriptions</code> for Models with
+<code>features: [SpeechToText]</code>. You can serve native Whisper checkpoints with
+vLLM as an alternative to the archived
+<a href="https://github.com/fedirz/faster-whisper-server">fedirz/faster-whisper-server</a>
+backend reported in <a href="https://github.com/kubeai-project/kubeai/issues/561">issue #561</a>.</p>
+<h2 id="whisper-with-vllm">Whisper with vLLM<a class="headerlink" href="#whisper-with-vllm" title="Permanent link">&para;</a></h2>
+<p>The <a href="https://github.com/kubeai-project/kubeai/tree/main/examples/vllm-speech-to-text">complete example</a>
+includes a Dockerfile, a Model manifest, and values for the models Helm chart.
+It uses <code>openai/whisper-large-v3-turbo</code>, vLLM v0.31.0, and one NVIDIA L4 GPU.
+KubeAI and the Model CRD must already be installed. Deploy the Model in the
+same namespace as KubeAI, and adapt the resource profile to your GPU nodes.
+The image uses CUDA 13.0; your NVIDIA driver must support that runtime.</p>
+<h3 id="build-the-audio-image">Build the audio image<a class="headerlink" href="#build-the-audio-image" title="Permanent link">&para;</a></h3>
+<p>vLLM requires its optional audio dependencies for transcription. The example
+Dockerfile adds <code>vllm[audio]</code> to the pinned upstream image and preserves the
+installed CUDA stack through package constraints.</p>
+<p>Run these commands from the repository root, replacing the registry with one
+your cluster can pull from:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">IMAGE</span><span class="o">=</span>registry.example.com/kubeai/vllm-whisper:v0.31.0
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span><span class="s2">"</span><span class="nv">$IMAGE</span><span class="s2">"</span><span class="w"> </span>examples/vllm-speech-to-text
+docker<span class="w"> </span>push<span class="w"> </span><span class="s2">"</span><span class="nv">$IMAGE</span><span class="s2">"</span>
+</code></pre></div>
+<h3 id="create-a-model">Create a Model<a class="headerlink" href="#create-a-model" title="Permanent link">&para;</a></h3>
+<p>Replace the image reference with the image you published, then apply this
+manifest in your KubeAI namespace:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubeai.org/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Model</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">whisper-large-v3-turbo-vllm</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">SpeechToText</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openai</span>
+<span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hf://openai/whisper-large-v3-turbo</span>
+<span class="w">  </span><span class="nt">engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VLLM</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">registry.example.com/kubeai/vllm-whisper:v0.31.0</span>
+<span class="w">  </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nvidia-gpu-l4:1</span>
+<span class="w">  </span><span class="nt">minReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">args</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-model-len=448</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-num-seqs=16</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--gpu-memory-utilization=0.5</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--enforce-eager</span>
+</code></pre></div>
+<p>The manifest is also available at <code>examples/vllm-speech-to-text/model.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>examples/vllm-speech-to-text/model.yaml
+</code></pre></div>
+<p><code>minReplicas: 1</code> keeps the model loaded for this example. Setting it to <code>0</code>
+allows KubeAI to scale to zero; the first request then waits for the model to
+download and start. vLLM loads the Hugging Face checkpoint at startup, so a
+separate model-loading API call is unnecessary.</p>
+<h3 id="install-through-helm">Install through Helm<a class="headerlink" href="#install-through-helm" title="Permanent link">&para;</a></h3>
+<p>As an alternative to applying the Model directly, replace the image reference
+in <code>examples/vllm-speech-to-text/models-helm-values.yaml</code> and run:</p>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>kubeai-models<span class="w"> </span>./charts/models<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-f<span class="w"> </span>examples/vllm-speech-to-text/models-helm-values.yaml
+</code></pre></div>
+<p>Use the same namespace as KubeAI (<code>-n &lt;namespace&gt;</code> for Helm and kubectl).</p>
+<h2 id="transcribe-audio">Transcribe audio<a class="headerlink" href="#transcribe-audio" title="Permanent link">&para;</a></h2>
+<p>Wait for the Model's pod to become ready:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-l<span class="w"> </span><span class="nv">model</span><span class="o">=</span>whisper-large-v3-turbo-vllm<span class="w"> </span>-w
+</code></pre></div>
+<p>Expose KubeAI locally in another terminal (adjust the service name if needed):</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>port-forward<span class="w"> </span>service/kubeai<span class="w"> </span><span class="m">8000</span>:80
+</code></pre></div>
+<p>Use the KubeAI Model name in the multipart <code>model</code> field. For a local WAV file:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>--fail-with-body<span class="w"> </span>http://localhost:8000/openai/v1/audio/transcriptions<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-F<span class="w"> </span><span class="s1">'file=@audio.wav'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-F<span class="w"> </span><span class="s1">'language=en'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-F<span class="w"> </span><span class="s1">'response_format=json'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-F<span class="w"> </span><span class="s1">'model=whisper-large-v3-turbo-vllm'</span>
+</code></pre></div>
+<p>The response contains the transcript in its <code>text</code> field. You can also use the
+OpenAI Python SDK with KubeAI's public base URL:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAI</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="s2">"ignored"</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="s2">"http://localhost:8000/openai/v1"</span><span class="p">)</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"audio.wav"</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">audio</span><span class="p">:</span>
+    <span class="n">transcript</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">audio</span><span class="o">.</span><span class="n">transcriptions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="s2">"whisper-large-v3-turbo-vllm"</span><span class="p">,</span>
+        <span class="n">file</span><span class="o">=</span><span class="n">audio</span><span class="p">,</span>
+        <span class="n">language</span><span class="o">=</span><span class="s2">"en"</span><span class="p">,</span>
+        <span class="n">response_format</span><span class="o">=</span><span class="s2">"json"</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">transcript</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+</code></pre></div>
+<p>vLLM's default upload limit is 25 MB. The <code>language</code> field describes the input
+audio; omit it for automatic detection. Supported parameters and formats depend
+on the backend version; see
+<a href="https://docs.vllm.ai/en/v0.31.0/serving/online_serving/speech_to_text/">vLLM's speech API documentation</a>.</p>
+<h2 id="existing-fasterwhisper-deployments">Existing FasterWhisper deployments<a class="headerlink" href="#existing-fasterwhisper-deployments" title="Permanent link">&para;</a></h2>
+<p>The legacy CPU catalog entry remains available for existing installations:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">catalog</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">faster-whisper-medium-en-cpu</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">minReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 </code></pre></div>
-<h3 id="enable-by-creating-model">Enable by creating Model<a class="headerlink" href="#enable-by-creating-model" title="Permanent link">&para;</a></h3>
-<p>You can also create a Model object to enable the Speech to Text model. For example:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubeai.org/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Model</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">faster-whisper-medium-en-cpu</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">SpeechToText</span><span class="p p-Indicator">]</span>
-<span class="w">  </span><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Systran</span>
-<span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hf://Systran/faster-whisper-medium.en</span>
-<span class="w">  </span><span class="nt">engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FasterWhisper</span>
-<span class="w">  </span><span class="nt">resourceProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu:1</span>
-</code></pre></div>
-<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
-<p>The Speech to Text endpoint is available at <code>/openai/v1/transcriptions</code>.</p>
-<p>Example usage using curl:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-L<span class="w"> </span>-o<span class="w"> </span>kubeai.mp4<span class="w"> </span>https://github.com/user-attachments/assets/711d1279-6af9-4c6c-a052-e59e7730b757
-curl<span class="w"> </span>http://localhost:8000/openai/v1/audio/transcriptions<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-F<span class="w"> </span><span class="s2">"file=@kubeai.mp4"</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-F<span class="w"> </span><span class="s2">"language=en"</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-F<span class="w"> </span><span class="s2">"model=faster-whisper-medium-en-cpu"</span>
-</code></pre></div>
+<p>That entry uses <code>engine: FasterWhisper</code> and
+<code>hf://Systran/faster-whisper-medium.en</code>, a CTranslate2 checkpoint. The vLLM
+example uses a native Hugging Face Whisper checkpoint and a GPU resource
+profile, so migrating requires changing the engine, checkpoint URL, image,
+and resource profile together. Update clients to use the new Model name.</p>
+<p>Changing only the FasterWhisper image to a Speaches image is insufficient:
+Speaches has its own startup, model-loading, and user configuration. The vLLM
+example provides a separate supported engine configuration for transcription.</p>
 
 
 
