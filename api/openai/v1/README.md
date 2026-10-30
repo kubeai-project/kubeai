@@ -13,7 +13,7 @@ The goal of these API structs is to define a standard API for interfacing with m
 API References (useful for AI generation) were generated using:
 
 ```bash
-wget https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/master/openapi.yaml -O ./tmp/openaiapi.yaml
+wget https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/main/openapi.yaml -O ./tmp/openaiapi.yaml
 
 # Filter down to only the relevant components.
 # This allows you to focus an AI coding assistant on

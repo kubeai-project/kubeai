@@ -45,7 +45,7 @@ The vLLM benchmark_serving.py script was used for this but with a few  modificat
 * Create multiple prompts from a single conversation. E.g. prompt 1 would include message (1) of conversation x and prompt 2 would include message  (1, 2, 3) of conversation x. This resembles multi-round conversation of ChatGPT.
 * added `--max-conversations` parameter which limits of unique conversations to use.
 
-The script can be found under the dedicated repo `https://github.com/kubeai-project/kubeai-benchmarks/chat-py/benchmark_serving.py`.
+The script can be found in the dedicated repo: [kubeai-benchmarks/chat-py/benchmark_serving.py](https://github.com/kubeai-project/kubeai-benchmarks/blob/main/chat-py/benchmark_serving.py).
 
 The image that was used: `substratusai/benchmark_serving:v0.0.1`
 
