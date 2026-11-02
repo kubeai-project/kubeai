@@ -19,7 +19,7 @@ require (
 	gocloud.dev v0.47.0
 	gocloud.dev/pubsub/kafkapubsub v0.40.0
 	gocloud.dev/pubsub/natspubsub v0.47.0
-	gocloud.dev/pubsub/rabbitpubsub v0.46.0
+	gocloud.dev/pubsub/rabbitpubsub v0.47.0
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
 	gopkg.in/evanphx/json-patch.v4 v4.13.0
 	k8s.io/api v0.37.1
