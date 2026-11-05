@@ -361,6 +361,9 @@ func (r *ModelReconciler) getModelConfig(model *kubeaiv1.Model) (ModelConfig, er
 	if err != nil {
 		return result, fmt.Errorf("invalid multiple in resource profile multiple: %q: %w", split[1], err)
 	}
+	if multiple < 1 {
+		return result, fmt.Errorf("invalid multiple in resource profile: %q, must be at least 1", split[1])
+	}
 
 	profile, ok := r.ResourceProfiles[name]
 	if !ok {
