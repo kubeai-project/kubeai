@@ -1,3 +1,7 @@
+## v0.25.1 - 2026-11-10
+
+- No merged PRs were assigned to the `v0.25.1` milestone.
+
 ## v0.25.0 - 2026-10-30
 
 - docs: fix dead OpenAI OpenAPI spec and benchmark script links by @sarankumar1325 in https://github.com/kubeai-project/kubeai/pull/785
