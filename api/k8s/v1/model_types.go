@@ -190,6 +190,7 @@ type Adapter struct {
 	// +kubebuilder:validation:MaxLength=63
 	Name string `json:"name"`
 	// +kubebuilder:validation:XValidation:rule="self.startsWith(\"hf://\") || self.startsWith(\"s3://\") || self.startsWith(\"gs://\") || self.startsWith(\"oss://\")", message="adapter url must start with \"hf://\", \"s3://\", \"gs://\", or \"oss://\"."
+	// +kubebuilder:validation:Pattern=`^(hf|s3|gs|oss)://[a-zA-Z0-9][a-zA-Z0-9._:/-]*$`
 	URL string `json:"url"`
 }
 

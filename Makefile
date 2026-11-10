@@ -78,6 +78,7 @@ vet: ## Run go vet against code.
 test-unit: fmt vet
 	go test -v ./internal/... ./api/... $(if $(RUN),-run $(RUN),) -coverprofile cover.unit.out
 	./components/llmman-loader/pull_test.sh
+	bash ./components/model-loader/load_test.sh
 
 # Use RUN=TestName to run specific integration tests.
 .PHONY: test-integration

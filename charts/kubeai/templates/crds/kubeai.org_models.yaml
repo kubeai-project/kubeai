@@ -49,6 +49,7 @@ spec:
                       pattern: ^[a-z0-9-]+$
                       type: string
                     url:
+                      pattern: ^(hf|s3|gs|oss)://[a-zA-Z0-9][a-zA-Z0-9._:/-]*$
                       type: string
                       x-kubernetes-validations:
                       - message: adapter url must start with "hf://", "s3://", "gs://",

@@ -606,6 +606,43 @@ func TestModelValidation(t *testing.T) {
 			expErrContain: "spec.url",
 		})
 	}
+	// Adapter URLs are checked on both create and update. In particular, hf
+	// drops the scheme before invoking its CLI, so a leading dash is unsafe.
+	for i, url := range []string{
+		"hf://org/adapter", "s3://bucket/path/to/adapter",
+		"gs://bucket/adapter-v1.0", "oss://bucket/adapter_v1",
+		"s3://b --endpoint-url http://evil.example",
+		"gs://b\t--configuration=evil", "oss://b\n--config-file=evil",
+		"hf://org/adapter --local-dir /tmp/evil",
+		"hf://--help", "hf://--local-dir=/tmp/evil",
+		"hf://", "s3://", "gs://", "oss://",
+		"hf://org/adapter?x=1 --local-dir /tmp/evil",
+		"s3://bucket/model*", "s3://bucket/model%20--endpoint-url",
+	} {
+		valid := i < 4
+		for _, update := range []bool{false, true} {
+			c := testCase{
+				model: v1.Model{
+					ObjectMeta: metadata(fmt.Sprintf("adapter-url-%d-update-%t", i, update)),
+					Spec: v1.ModelSpec{
+						URL:      "hf://org/model",
+						Engine:   v1.VLLMEngine,
+						Features: []v1.ModelFeature{},
+						Adapters: []v1.Adapter{{Name: "adapter", URL: url}},
+					},
+				},
+				expValid: valid,
+			}
+			if !valid {
+				c.expErrContain = "spec.adapters[0].url"
+			}
+			if update {
+				c.model.Spec.Adapters[0].URL = "hf://org/original"
+				c.update = func(m *v1.Model) { m.Spec.Adapters[0].URL = url }
+			}
+			cases = append(cases, c)
+		}
+	}
 	for _, c := range cases {
 		t.Run(c.model.Name, func(t *testing.T) {
 			t.Parallel()
