@@ -147,6 +147,38 @@ func Test_getModelConfig(t *testing.T) {
 	}
 }
 
+func Test_getModelConfigRejectsNonPositiveMultiple(t *testing.T) {
+	r := ModelReconciler{
+		ResourceProfiles: map[string]config.ResourceProfile{
+			"my-gpu": {
+				Limits: corev1.ResourceList{
+					"nvidia.com/gpu": resource.MustParse("1"),
+				},
+			},
+		},
+		ModelServers: config.ModelServers{
+			VLLM: config.ModelServer{
+				Images: map[string]string{
+					"default": "default-vllm-image",
+				},
+			},
+		},
+	}
+
+	for _, profile := range []string{"my-gpu:0", "my-gpu:-1"} {
+		t.Run(profile, func(t *testing.T) {
+			_, err := r.getModelConfig(&v1.Model{
+				Spec: v1.ModelSpec{
+					Engine:          v1.VLLMEngine,
+					ResourceProfile: profile,
+					URL:             "hf://some-repo/some-model",
+				},
+			})
+			require.ErrorContains(t, err, "must be at least 1")
+		})
+	}
+}
+
 func requireEqualJSON(t *testing.T, a, b interface{}) {
 	jsonA, err := json.Marshal(a)
 	require.NoError(t, err)
