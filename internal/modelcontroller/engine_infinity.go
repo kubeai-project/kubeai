@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+// infinityPodForModel constructs the Infinity model server Pod from the resolved model configuration.
 func (r *ModelReconciler) infinityPodForModel(m *kubeaiv1.Model, c ModelConfig) *corev1.Pod {
 	lbs := labelsForModel(m)
 	ann := r.annotationsForModel(m)
