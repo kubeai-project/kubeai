@@ -83,10 +83,11 @@ func (r *ModelReconciler) infinityPodForModel(m *kubeaiv1.Model, c ModelConfig) 
 			ImagePullSecrets:   r.ModelServerPods.ImagePullSecrets,
 			Containers: []corev1.Container{
 				{
-					Name:  serverContainerName,
-					Image: c.Image,
-					Args:  args,
-					Env:   env,
+					Name:            serverContainerName,
+					Image:           c.Image,
+					Args:            args,
+					Env:             env,
+					SecurityContext: r.ModelServerPods.ModelContainerSecurityContext,
 					Resources: corev1.ResourceRequirements{
 						Requests: c.Requests,
 						Limits:   c.Limits,
