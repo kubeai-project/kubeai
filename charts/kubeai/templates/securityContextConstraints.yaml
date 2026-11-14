@@ -18,5 +18,7 @@ seccompProfiles:
 requiredDropCapabilities:
   - ALL
 users:
-  - system:serviceaccount:{{ .Release.Namespace }}:{{ include "models.serviceAccountName" . }}
+  {{- range splitList "," (include "models.namespaces" .) }}
+  - system:serviceaccount:{{ . }}:{{ include "models.serviceAccountName" $ }}
+  {{- end }}
 {{- end }}

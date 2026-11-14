@@ -135,6 +135,10 @@ proxy:
 #   - ["a", "b"]:   watch the listed namespaces. Emits one RoleBinding per namespace
 #                   plus the release namespace (which is always watched so that
 #                   leader election and autoscaler state remain functional).
+# Model pods run in their Model's namespace under modelServiceAccount, which the
+# chart creates in the release namespace and in every listed namespace. With ["*"],
+# create it in each namespace that holds Models, or set modelServiceAccount.create
+# to false to use a service account that already exists there ("default" if unnamed).
 watchNamespaces: []
 
 metrics:
