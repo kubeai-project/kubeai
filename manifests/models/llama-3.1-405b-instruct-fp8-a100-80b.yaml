@@ -17,8 +17,7 @@ spec:
     - --max-num-seqs=128
     - --kv-cache-dtype=fp8
     - --enforce-eager
-    - --enable-chunked-prefill=false
-    - --num-scheduler-steps=8
+    - --no-enable-chunked-prefill
   env:
     VLLM_ATTENTION_BACKEND: FLASHINFER
   minReplicas: 0
