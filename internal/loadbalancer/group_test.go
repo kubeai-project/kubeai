@@ -5,6 +5,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	v1 "github.com/kubeai-project/kubeai/api/k8s/v1"
 	"github.com/kubeai-project/kubeai/internal/apiutils"
@@ -149,4 +150,59 @@ func TestReconcileUpdatesEndpointAddress(t *testing.T) {
 	finishOld()
 	assert.Zero(t, inFlight.Load())
 	assert.Zero(t, g.totalInFlight.Load())
+}
+
+// TestGetBestAddrRetriesAfterAdapterLoads ensures that a request which finds
+// no suitable endpoint (e.g. the requested adapter is not loaded yet) is
+// re-evaluated once the endpoint set changes, instead of blocking on endpoint
+// broadcasts until the context is cancelled.
+func TestGetBestAddrRetriesAfterAdapterLoads(t *testing.T) {
+	lb := v1.LoadBalancing{Strategy: v1.LeastLoadStrategy}
+	g := newEndpointGroup(lb)
+	// A single ready endpoint that does not yet serve the requested adapter.
+	g.reconcileEndpoints(map[string]endpoint{
+		"pod": {address: "10.0.0.1:8000", adapters: map[string]struct{}{}},
+	})
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	req := &apiutils.Request{Adapter: "adapter-1", LoadBalancing: lb}
+
+	type result struct {
+		addr string
+		err  error
+	}
+	resCh := make(chan result, 1)
+	go func() {
+		addr, done, err := g.getBestAddr(ctx, req, false)
+		if done != nil {
+			done()
+		}
+		resCh <- result{addr: addr, err: err}
+	}()
+
+	// Keep broadcasting endpoint changes while the adapter is now present.
+	// A correct implementation re-selects on the first change and returns the
+	// endpoint; the buggy one keeps waiting for further broadcasts forever.
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+			g.reconcileEndpoints(map[string]endpoint{
+				"pod": {address: "10.0.0.1:8000", adapters: map[string]struct{}{"adapter-1": {}}},
+			})
+			time.Sleep(5 * time.Millisecond)
+		}
+	}()
+
+	select {
+	case res := <-resCh:
+		require.NoError(t, res.err)
+		assert.Equal(t, "10.0.0.1:8000", res.addr)
+	case <-time.After(3 * time.Second):
+		t.Fatal("getBestAddr never returned after the adapter became available")
+	}
 }

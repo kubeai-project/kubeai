@@ -60,6 +60,10 @@ func (g *group) getBestAddr(ctx context.Context, req *apiutils.Request, awaitCha
 		case <-ctx.Done():
 			return "", func() {}, ctx.Err()
 		}
+		// We have observed one endpoint change. Clear the flag so that, once
+		// endpoints exist, the loop exits and a new selection is attempted
+		// rather than blocking on further broadcasts indefinitely.
+		awaitChangeEndpoints = false
 		g.mtx.RLock()
 	}
 
