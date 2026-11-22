@@ -73,6 +73,20 @@ Create the name of the service account to use for model pods
 {{- end }}
 
 {{/*
+Comma-separated namespaces that model pods can run in and that the chart knows of:
+the release namespace plus each namespace listed in watchNamespaces. "*" adds none.
+*/}}
+{{- define "models.namespaces" -}}
+{{- $ns := list .Release.Namespace -}}
+{{- range .Values.watchNamespaces -}}
+{{- if and (ne . "*") (ne . $.Release.Namespace) -}}
+{{- $ns = append $ns . -}}
+{{- end -}}
+{{- end -}}
+{{- join "," $ns -}}
+{{- end }}
+
+{{/*
 Create the name of the alibaba secret to use
 */}}
 {{- define "kubeai.alibabaSecretName" -}}
