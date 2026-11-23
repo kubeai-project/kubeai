@@ -214,6 +214,9 @@ func (r *ModelReconciler) patchServerAdapterLoader(podSpec *corev1.PodSpec, m *v
 			},
 		},
 	}
+	// The loader gets the Model's files as well as its env, so an env var can
+	// point at one of them, such as a CA bundle for an S3 endpoint.
+	loaderContainer.VolumeMounts = append(loaderContainer.VolumeMounts, modelFileVolumeMounts(m)...)
 	podSpec.Containers = append(podSpec.Containers, loaderContainer)
 	r.modelAuthCredentialsForAllSources().applyToPodSpec(podSpec, len(podSpec.Containers)-1)
 	r.modelEnvFrom(m).applyToPodSpec(podSpec, len(podSpec.Containers)-1)

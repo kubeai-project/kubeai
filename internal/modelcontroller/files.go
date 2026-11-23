@@ -99,17 +99,24 @@ func patchFileVolumes(spec *corev1.PodSpec, model *kubeaiv1.Model) {
 	})
 	for i := range spec.Containers {
 		if spec.Containers[i].Name == serverContainerName {
-			// Add volume mounts for each file
-			for _, file := range model.Spec.Files {
-				spec.Containers[i].VolumeMounts = append(spec.Containers[i].VolumeMounts, corev1.VolumeMount{
-					Name:      modelFilesVolumeName,
-					MountPath: file.Path,
-					SubPath:   fileConfigMapKey(file.Path),
-					ReadOnly:  true,
-				})
-			}
+			spec.Containers[i].VolumeMounts = append(spec.Containers[i].VolumeMounts, modelFileVolumeMounts(model)...)
 		}
 	}
+}
+
+// modelFileVolumeMounts returns a read-only mount of the model files volume for
+// each file in the model spec. patchFileVolumes adds the volume itself.
+func modelFileVolumeMounts(model *kubeaiv1.Model) []corev1.VolumeMount {
+	mounts := make([]corev1.VolumeMount, 0, len(model.Spec.Files))
+	for _, file := range model.Spec.Files {
+		mounts = append(mounts, corev1.VolumeMount{
+			Name:      modelFilesVolumeName,
+			MountPath: file.Path,
+			SubPath:   fileConfigMapKey(file.Path),
+			ReadOnly:  true,
+		})
+	}
+	return mounts
 }
 
 // fileConfigMapKey replaces illegal "/" characters in ConfigMap keys.

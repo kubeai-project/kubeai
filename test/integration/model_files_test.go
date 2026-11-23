@@ -176,3 +176,48 @@ func TestModelFiles(t *testing.T) {
 		assert.True(t, apierrors.IsNotFound(err), "ConfigMap should be deleted when files is empty")
 	}, 5*time.Second, time.Second/10, "ConfigMap should be deleted when files is empty")
 }
+
+// TestModelFilesInAdapterLoader tests that model files are also mounted in the
+// adapter loader container, which receives the Model's env and can be pointed at
+// one of the files, for example a CA bundle for a private S3 endpoint (#801).
+func TestModelFilesInAdapterLoader(t *testing.T) {
+	sysCfg := baseSysCfg(t)
+	initTest(t, sysCfg)
+
+	const caPath = "/etc/kubeai/s3-ca/bundle.pem"
+	m := modelForTest(t)
+	m.Spec.MinReplicas = 1
+	m.Spec.Env = map[string]string{"AWS_CA_BUNDLE": caPath}
+	m.Spec.Files = []kubeaiv1.File{
+		{
+			Path:    caPath,
+			Content: "-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----\n",
+		},
+	}
+	m.Spec.Adapters = []kubeaiv1.Adapter{
+		{Name: "s3-adapter", URL: "s3://test-bucket/test-adapter"},
+	}
+	require.NoError(t, testK8sClient.Create(testCtx, m))
+
+	require.EventuallyWithT(t, func(t *assert.CollectT) {
+		podList := &corev1.PodList{}
+		err := testK8sClient.List(testCtx, podList, client.InNamespace(testNS), client.MatchingLabels{"model": m.Name})
+		if !assert.NoError(t, err) {
+			return
+		}
+		if !assert.Len(t, podList.Items, 1) {
+			return
+		}
+		pod := &podList.Items[0]
+
+		for _, name := range []string{"server", "loader"} {
+			container := mustFindPodContainerByName(t, pod, name)
+			assert.Contains(t, container.VolumeMounts, corev1.VolumeMount{
+				Name:      "model-files",
+				MountPath: caPath,
+				SubPath:   "_etc_kubeai_s3-ca_bundle.pem",
+				ReadOnly:  true,
+			}, "%s container should mount the model file", name)
+		}
+	}, 5*time.Second, time.Second/10, "Pod should mount the model files in the server and loader containers")
+}
