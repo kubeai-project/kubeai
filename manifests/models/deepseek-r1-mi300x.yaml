@@ -12,12 +12,10 @@ spec:
     - --max-model-len=32768
     - --max-num-batched-token=32768
     - --max-num-seqs=1024
-    - --num-scheduler-steps=10
     - --tensor-parallel-size=8
     - --gpu-memory-utilization=0.90
     - --disable-log-requests
-    - --enable-chunked-prefill=false
-    - --max-seq-len-to-capture=16384
+    - --no-enable-chunked-prefill
     - --kv-cache-dtype=fp8
   env:
     HIP_FORCE_DEV_KERNARG: "1"

@@ -203,7 +203,7 @@ catalog:
       # We use 8 GPUs so parallelism strategy of 4 x 2 works well.
       - --tensor-parallel-size=2
       - --enable-prefix-caching
-      - --enable-chunked-prefill=false
+      - --no-enable-chunked-prefill
       - --disable-log-requests
       - --kv-cache-dtype=fp8
       # Enforce eager wasn't supported with FLASHINFER.
@@ -241,12 +241,10 @@ catalog:
       - --max-model-len=120000
       - --max-num-batched-token=120000
       - --max-num-seqs=1024
-      - --num-scheduler-steps=15
       - --gpu-memory-utilization=0.9
       - --disable-log-requests
       - --kv-cache-dtype=fp8
-      - --enable-chunked-prefill=false
-      - --max-seq-len-to-capture=16384
+      - --no-enable-chunked-prefill
     resourceProfile: amd-gpu-mi300x:1
     targetRequests: 1024
   llama-3.1-70b-instruct-fp8-gh200:
@@ -262,7 +260,7 @@ catalog:
       - --max-num-seqs=1024
       - --gpu-memory-utilization=0.9
       - --enable-prefix-caching
-      - --enable-chunked-prefill=false
+      - --no-enable-chunked-prefill
       - --disable-log-requests
       - --kv-cache-dtype=fp8
       - --enforce-eager
@@ -297,8 +295,7 @@ catalog:
       - --max-num-seqs=128
       - --kv-cache-dtype=fp8
       - --enforce-eager
-      - --enable-chunked-prefill=false
-      - --num-scheduler-steps=8
+      - --no-enable-chunked-prefill
     targetRequests: 128
     resourceProfile: nvidia-gpu-a100-80gb:8
   llama-3.1-405b-instruct-fp8-mi300x:
@@ -315,13 +312,11 @@ catalog:
       - --max-model-len=120000
       - --max-num-batched-token=120000
       - --max-num-seqs=1024
-      - --num-scheduler-steps=15
       - --tensor-parallel-size=8
       - --gpu-memory-utilization=0.90
       - --disable-log-requests
       - --kv-cache-dtype=fp8
-      - --enable-chunked-prefill=false
-      - --max-seq-len-to-capture=16384
+      - --no-enable-chunked-prefill
     resourceProfile: amd-gpu-mi300x:8
     targetRequests: 1024
   llama-3.3-70b-ollama-l4:
@@ -568,12 +563,10 @@ catalog:
       - --max-model-len=32768
       - --max-num-batched-token=32768
       - --max-num-seqs=1024
-      - --num-scheduler-steps=10
       - --tensor-parallel-size=8
       - --gpu-memory-utilization=0.90
       - --disable-log-requests
-      - --enable-chunked-prefill=false
-      - --max-seq-len-to-capture=16384
+      - --no-enable-chunked-prefill
       - --kv-cache-dtype=fp8
     resourceProfile: amd-gpu-mi300x:8
     targetRequests: 1024
