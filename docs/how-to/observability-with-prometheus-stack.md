@@ -50,6 +50,8 @@ helm upgrade --reuse-values --install kubeai kubeai/kubeai \
   --set metrics.prometheusOperator.vLLMPodMonitor.enabled=true
 ```
 
+The PodMonitor is created in the KubeAI release namespace. If you set `watchNamespaces`, it also selects the model Pods in the watched namespaces, or in all namespaces with `"*"`. Prometheus then needs permission to discover Pods in those namespaces.
+
 ## Importing the vLLM Grafana Dashboard
 
 Now you can configure a port forward to the Grafana service:

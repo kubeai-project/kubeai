@@ -9,6 +9,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  {{- with include "kubeai.podMonitorNamespaceSelector" . }}
+  {{- . | nindent 2 }}
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: sglang
