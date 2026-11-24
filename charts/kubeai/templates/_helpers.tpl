@@ -87,6 +87,27 @@ the release namespace plus each namespace listed in watchNamespaces. "*" adds no
 {{- end }}
 
 {{/*
+namespaceSelector for the model PodMonitors. A PodMonitor without one selects
+pods in its own namespace only, but model pods run in their Model's namespace:
+any namespace with "*" in watchNamespaces, otherwise the namespaces in
+"models.namespaces". Empty when watchNamespaces is empty, since the release
+namespace is then the only one.
+*/}}
+{{- define "kubeai.podMonitorNamespaceSelector" -}}
+{{- if .Values.watchNamespaces -}}
+namespaceSelector:
+{{- if has "*" .Values.watchNamespaces }}
+  any: true
+{{- else }}
+  matchNames:
+{{- range splitList "," (include "models.namespaces" .) }}
+  - {{ . | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
 Create the name of the alibaba secret to use
 */}}
 {{- define "kubeai.alibabaSecretName" -}}

@@ -143,6 +143,9 @@ watchNamespaces: []
 
 metrics:
   prometheusOperator:
+    # The PodMonitors are created in the release namespace. With watchNamespaces
+    # set, they also select model pods in the watched namespaces (all namespaces
+    # with "*").
     vLLMPodMonitor:
       # Enable creation of PodMonitor resource that scrapes vLLM metrics endpoint.
       enabled: false
